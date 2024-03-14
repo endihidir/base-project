@@ -17,12 +17,16 @@ MonoBehaviour:
   - reference:
       asset: {fileID: 102900000, guid: 2a759520d04d51f4d8e8b3c0d83688ac, type: 3}
       guid: 2a759520d04d51f4d8e8b3c0d83688ac
+    subSceneType: 0
   - reference:
       asset: {fileID: 102900000, guid: 7ab23c49c80baac43a42ff2a5d43ba0d, type: 3}
       guid: 7ab23c49c80baac43a42ff2a5d43ba0d
+    subSceneType: 1
   - reference:
       asset: {fileID: 102900000, guid: 3fc94776a9afd0847bacf8ee78c64298, type: 3}
       guid: 3fc94776a9afd0847bacf8ee78c64298
+    subSceneType: 2
   - reference:
       asset: {fileID: 102900000, guid: 10aa95bdc8b3e2349ae8fdfedcdab838, type: 3}
       guid: 10aa95bdc8b3e2349ae8fdfedcdab838
+    subSceneType: 3
