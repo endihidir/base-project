@@ -17,7 +17,7 @@ public class RestartLevelButton : ButtonBehaviour
     private readonly IGameDataService _gameDataService;
     
     [Inject] 
-    private readonly ISceneDataService _sceneDataService;
+    private readonly ISceneGroupLoadService _sceneGroupLoadService;
 
     [Inject] 
     protected readonly IPopUpDataService _popUpDataService;
@@ -50,7 +50,7 @@ public class RestartLevelButton : ButtonBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(_stateChangeDelay), DelayType.DeltaTime, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
         
-        _sceneDataService.LoadSceneAsync(SceneType.Gameplay, true, 5f);
+        _sceneGroupLoadService.LoadSceneAsync(SceneType.Gameplay, true, 5f);
     }
 
     protected override void OnDestroy()

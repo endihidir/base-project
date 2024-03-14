@@ -15,7 +15,7 @@ public class NextLevelButton : ButtonBehaviour
     private readonly IGameDataService _gameDataService;
     
     [Inject] 
-    private readonly ISceneDataService _sceneDataService;
+    private readonly ISceneGroupLoadService _sceneGroupLoadService;
     
     private CancellationTokenSource _cancellationTokenSource;
 
@@ -27,7 +27,7 @@ public class NextLevelButton : ButtonBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(_stateChangeDelay), DelayType.DeltaTime, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
         
-        _sceneDataService.LoadSceneAsync(SceneType.Gameplay, false, 20f);
+        _sceneGroupLoadService.LoadSceneAsync(SceneType.Gameplay, false, 20f);
     }
     
     protected override void OnDestroy()

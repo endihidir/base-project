@@ -11,16 +11,16 @@ public class LoadingBarUI : BaseUIElements
     [SerializeField] private TextMeshProUGUI _sliderTxt;
 
     [Inject] 
-    private readonly ISceneDataService _sceneDataService;
+    private readonly ISceneGroupLoadService _sceneGroupLoadService;
 
     protected override void OnEnable()
     {
-        _sceneDataService.OnLoadUpdate += SetProgressValue;
+        _sceneGroupLoadService.OnLoadUpdate += SetProgressValue;
     }
 
     protected override void OnDisable()
     {
-        _sceneDataService.OnLoadUpdate -= SetProgressValue;
+        _sceneGroupLoadService.OnLoadUpdate -= SetProgressValue;
     }
 
     private void SetProgressValue(float val)

@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace UnityBase.SceneManagement
 {
-    public class SceneGroupManager : ISceneDataService
+    public class SceneGroupManager : ISceneGroupLoadService
     { 
         public event Action<float> OnLoadUpdate;
 
@@ -142,7 +142,7 @@ namespace UnityBase.SceneManagement
         {
             var scenes = new List<string>();
             var activeScene = SceneManager.GetActiveScene().name;
-            
+
             int sceneCount = SceneManager.sceneCount;
 
             for (var i = sceneCount - 1; i > 0; i--) 

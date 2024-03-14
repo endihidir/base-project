@@ -15,7 +15,7 @@ public class RetryButton : ButtonBehaviour
     private readonly IGameDataService _gameDataService;
     
     [Inject] 
-    private readonly ISceneDataService _sceneDataService;
+    private readonly ISceneGroupLoadService _sceneGroupLoadService;
 
     private CancellationTokenSource _cancellationTokenSource;
 
@@ -27,7 +27,7 @@ public class RetryButton : ButtonBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(_stateChangeDelay), DelayType.DeltaTime, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
         
-        _sceneDataService.LoadSceneAsync(SceneType.Gameplay, false, 2f);
+        _sceneGroupLoadService.LoadSceneAsync(SceneType.Gameplay, false, 2f);
     }
     
     protected override void OnDestroy()

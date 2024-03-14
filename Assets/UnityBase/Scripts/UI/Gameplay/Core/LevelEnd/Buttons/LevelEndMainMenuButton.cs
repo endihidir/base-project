@@ -14,7 +14,7 @@ public class LevelEndMainMenuButton : ButtonBehaviour
     private readonly IGameDataService _gameDataService;
     
     [Inject] 
-    private readonly ISceneDataService _sceneDataService;
+    private readonly ISceneGroupLoadService _sceneGroupLoadService;
     
     private CancellationTokenSource _cancellationTokenSource;
 
@@ -26,7 +26,7 @@ public class LevelEndMainMenuButton : ButtonBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(_stateChangeDelay), DelayType.DeltaTime, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
             
-        _sceneDataService.LoadSceneAsync(SceneType.MainMenu, true, 5f);
+        _sceneGroupLoadService.LoadSceneAsync(SceneType.MainMenu, true, 5f);
     }
     
     protected override void OnDestroy()
