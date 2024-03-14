@@ -15,18 +15,18 @@ namespace UnityBase.ManagerSO
         
         public bool isLazy;
         
+        [System.NonSerialized]
         private bool _isUnique;
-
-#if UNITY_EDITOR
-        private void OnValidate()
+        
+        private void OnEnable()
         {
+            if(!poolObject) return;
+            
             var poolable = poolObject.GetComponentInChildren<IPoolable>(true);
 
             _isUnique = poolable?.IsUnique ?? false;
 
             poolSize = _isUnique ? 1 : poolSize;
         }
-#endif
-        
     }
 }
