@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfb7dc01320c3400e985f1103876539c, type: 3}
+  m_Name: _ManagerDataHolder
+  m_EditorClassIdentifier: 
+  gameManagerSo: {fileID: 11400000, guid: 7795c723d463b43c79e4a3f30a3d368c, type: 2}
+  sceneManagerSo: {fileID: 11400000, guid: a949fd7bca39842c89dd4eb279775781, type: 2}
+  levelManagerSo: {fileID: 11400000, guid: 66abcfa2e352949e29cae87afe7253c1, type: 2}
+  currencyManagerSo: {fileID: 11400000, guid: 98ded9551a6dd4da5b30086a168eaa78, type: 2}
+  cinemachineManagerSo: {fileID: 11400000, guid: d99c9831e8021432f8e39b658ae27b04,
+    type: 2}
+  poolManagerSo: {fileID: 11400000, guid: d2d027dde4865fe4197db57cb287ac31, type: 2}
+  popUpManagerSo: {fileID: 11400000, guid: 11fde58f4053c56449db1a7cc847c41c, type: 2}
+  tutorialManagerSo: {fileID: 11400000, guid: d0c4a8d144fdc304aba1d0bbac087fe6, type: 2}
+  tutorialMaskManagerSo: {fileID: 11400000, guid: 49882a341bcd6534baa1d59ac6daaeae,
+    type: 2}
+  tutorialStepManagerSo: {fileID: 11400000, guid: ef442872ba08a0b47a7355097b258152,
+    type: 2}

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72256a29f9089487ea32dcca50648d40, type: 3}
+  m_Name: Level 1
+  m_EditorClassIdentifier: 
+  index: 0
+  hexLevelPrefab: {fileID: 5219173098685425850, guid: 8dc68c3b73923aa40b5b544aecf8a750,
+    type: 3}
+  deckList:
+  - {fileID: 11400000, guid: 57cdae480cb884153b669e279ca0ced8, type: 2}
+  - {fileID: 11400000, guid: ed0cc578f071a49a3b9ac55c0ed4fde7, type: 2}
+  - {fileID: 11400000, guid: 27d919cc837354023a9477a8327bab83, type: 2}
+  - {fileID: 11400000, guid: 4eedab4574c7848b3a7df7ec8696077f, type: 2}
+  - {fileID: 11400000, guid: 0c2195c7d78b0c94fada1713b627b490, type: 2}

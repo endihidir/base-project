@@ -1,0 +1,20 @@
+{
+    "name": "Architecture",
+    "rootNamespace": "",
+    "references": [
+        "Unity.InputSystem",
+        "UniTask.TextMeshPro",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
