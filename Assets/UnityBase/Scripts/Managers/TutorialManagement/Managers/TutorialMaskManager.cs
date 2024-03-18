@@ -45,9 +45,9 @@ namespace UnityBase.Manager
         public void Dispose() => DisposeToken();
 
         // Note : If masks spawn on the same position, they don't appear !!!
-        public MaskUI GetMask(Vector3 position, MaskUIData maskUIData)
+        public MaskUI GetMask(Vector3 position, MaskUIData maskUIData, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default)
         {
-            var selectedMask = _poolDataService.GetObject<MaskUI>(0f, 0f);
+            var selectedMask = _poolDataService.GetObject<MaskUI>(show, duration, delay, onComplete);
 
             PrepareMask(selectedMask, position, maskUIData);
 
@@ -56,7 +56,7 @@ namespace UnityBase.Manager
             return selectedMask;
         }
 
-        public bool TryGetMask(Vector3 position, MaskUIData maskUIData, out MaskUI maskUI, bool readLogs = false)
+        public bool TryGetMask(Vector3 position, MaskUIData maskUIData, out MaskUI maskUI, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default, bool readLogs = false)
         {
             maskUI = default;
 
@@ -64,7 +64,7 @@ namespace UnityBase.Manager
 
             if (poolCount < 1) return false;
 
-            maskUI = _poolDataService.GetObject<MaskUI>(0f, 0f);
+            maskUI = _poolDataService.GetObject<MaskUI>(show, duration, delay, onComplete);
 
             PrepareMask(maskUI, position, maskUIData);
 
@@ -73,13 +73,13 @@ namespace UnityBase.Manager
             return true;
         }
 
-        public MaskUI[] GetMasks(Vector3[] positions, MaskUIData maskUIData)
+        public MaskUI[] GetMasks(Vector3[] positions, MaskUIData maskUIData, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default)
         {
             var masks = new MaskUI[positions.Length];
 
             for (int i = 0; i < positions.Length; i++)
             {
-                var selectedMask = _poolDataService.GetObject<MaskUI>(0f, 0f);
+                var selectedMask = _poolDataService.GetObject<MaskUI>(show, duration, delay, onComplete);
 
                 PrepareMask(selectedMask, positions[i], maskUIData);
 
@@ -91,7 +91,7 @@ namespace UnityBase.Manager
             return masks;
         }
 
-        public bool TryGetMasks(Vector3[] positions, MaskUIData maskUIData, out MaskUI[] masks, bool readLogs = false)
+        public bool TryGetMasks(Vector3[] positions, MaskUIData maskUIData, out MaskUI[] masks, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default, bool readLogs = false)
         {
             masks = new MaskUI[positions.Length];
 
@@ -101,7 +101,7 @@ namespace UnityBase.Manager
 
             for (int i = 0; i < positions.Length; i++)
             {
-                var selectedMask = _poolDataService.GetObject<MaskUI>(0f, 0f);
+                var selectedMask = _poolDataService.GetObject<MaskUI>(show, duration, delay, onComplete);
 
                 var position = positions[i];
 
@@ -137,8 +137,7 @@ namespace UnityBase.Manager
 
             await DeactivateFadePanelAsync(killDuration, delay);
         }
-
-        public void RemoveMask(MaskUI maskUI, bool readLogs = false) => _poolDataService.Remove(maskUI, readLogs);
+        
         public void RemoveMaskPool<T>(bool readLogs = false) where T : MaskUI => _poolDataService.RemovePool<T>(readLogs);
 
         //---------------------------------------------------------------------------------------------------------------
@@ -202,11 +201,11 @@ namespace UnityBase.Manager
 
         private void SetFadePanelsOpacity()
         {
-            var allClones = _poolDataService.GetClones<MaskUI>();
+            var activePoolables = _poolDataService.GetActivePoolables<MaskUI>();
 
-            for (int i = 0; i < allClones.Count; i++)
+            foreach (var activePoolable in activePoolables)
             {
-                allClones[i].SetMaskPanelStartColor(_maskFadePanel.color);
+                activePoolable.SetMaskPanelStartColor(_maskFadePanel.color);
             }
         }
 

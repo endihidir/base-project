@@ -129,8 +129,6 @@ namespace UnityBase.TutorialCore
         protected virtual void OnDestroy()
         {
             KillFadeTweens();
-
-            _tutorialDataService.RemoveTutorial(this);
         }
 
         protected abstract void SetDefaultTransformData();

@@ -44,20 +44,20 @@ namespace UnityBase.Manager
             _objectResolver = null;
         }
 
-        public T GetObject<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
+        public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : IPoolable
         {
             var key = typeof(T);
 
             if (_cachedPools.TryGetValue(key, out var poolableObjectGroup))
             {
-                var poolable = poolableObjectGroup.ShowObject(duration, delay, onComplete);
-                return (T)poolable;
+                var poolable = poolableObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+                return poolable;
             }
             else
             {
                 poolableObjectGroup = Create<T>();
-                var poolable = poolableObjectGroup.ShowObject(duration, delay, onComplete);
-                return (T)poolable;
+                var poolable = poolableObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+                return poolable;
             }
         }
 
@@ -88,7 +88,7 @@ namespace UnityBase.Manager
                 return;
             }
 
-            poolableObjectGroup.HideAllObjects(duration, delay, onComplete);
+            poolableObjectGroup.HideAllObjects<T>(duration, delay, onComplete);
         }
         
         public void HideAllTypeOf<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
@@ -97,7 +97,7 @@ namespace UnityBase.Manager
             {
                 if (poolableObject.Value.GetType() == typeof(T))
                 {
-                    poolableObject.Value.HideAllObjects(duration, delay, onComplete);
+                    poolableObject.Value.HideAllObjects<T>(duration, delay, onComplete);
                 }
             }
         }
@@ -106,25 +106,8 @@ namespace UnityBase.Manager
         {
             foreach (var poolableObject in _cachedPools)
             {
-                poolableObject.Value.HideAllObjects(duration, delay, onComplete);
+                poolableObject.Value.HideAllObjects<IPoolable>(duration, delay, onComplete);
             }
-        }
-        
-        public void Remove<T>(T poolable, bool readLogs = false) where T : IPoolable
-        {
-            if(_isDisposed) return;
-            
-            var key = poolable.PoolableObject.GetType();
-
-            if (!_cachedPools.TryGetValue(key, out var poolableObjectGroup))
-            {
-                if(readLogs)
-                    Debug.LogError($"You can not remove object because {key} is not exist in the list of prefabs.");
-                
-                return;
-            }
-
-            poolableObjectGroup.Remove(poolable);
         }
 
         public void RemovePool<T>(bool readLogs = false) where T : IPoolable
@@ -141,7 +124,7 @@ namespace UnityBase.Manager
                 return;
             }
 
-            poolableObjectGroup.Clear();
+            poolableObjectGroup.ClearAll<T>();
             
             _cachedPools.Remove(key);
         }
@@ -157,18 +140,20 @@ namespace UnityBase.Manager
                 
                 return 0;
             }
-                
+
             return poolableObjectGroup.Pool.Count;
         }
 
-        public List<T> GetClones<T>() where T : Component, IPoolable
+        public IEnumerable<T> GetActivePoolables<T>() where T : Component, IPoolable
         {
             var key = typeof(T);
-            
-            var newList = new List<T>();
+
+            var newList = Enumerable.Empty<T>();
 
             if (_cachedPools.TryGetValue(key, out var poolableObjectGroup))
-                newList.AddRange(poolableObjectGroup.Pool.Select(poolable => (T)poolable.PoolableObject));
+            {
+                newList = poolableObjectGroup.FindActivePoolables<T>();
+            }
 
             return newList;
         }

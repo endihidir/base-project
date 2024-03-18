@@ -261,7 +261,5 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
     private void OnDestroy()
     {
         _maskFadeTween.Kill();
-        
-        _tutorialMaskDataService.RemoveMask(this);
     }
 }

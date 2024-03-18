@@ -52,6 +52,6 @@ namespace UnityBase.PopUpCore
             _canvasGroup.blocksRaycasts = raycastTarget;
         }
 
-        protected virtual void OnDestroy() => _popUpDataService.RemovePopUp(this);
+        protected virtual void OnDestroy() { }
     }
 }

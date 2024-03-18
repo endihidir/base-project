@@ -23,11 +23,11 @@ namespace UnityBase.Manager
         public void Start() { }
         public void Dispose() { }
         
-        public T GetPopUp<T>(float duration = 0.2f, float delay = 0f) where T : PopUp
+        public T GetPopUp<T>(bool show = true, float duration = 0.2f, float delay = 0f) where T : PopUp
         {
             var pos = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f);
 
-            var popUp = _poolDataService.GetObject<T>(duration, delay);
+            var popUp = _poolDataService.GetObject<T>(show, duration, delay);
 
             popUp.transform.position = pos;
 
@@ -54,8 +54,7 @@ namespace UnityBase.Manager
         {
             _poolDataService.HideAllTypeOf<PopUp>(duration, delay);
         }
-
-        public void RemovePopUp(PopUp popUp, bool readLogs = false) => _poolDataService.Remove(popUp, readLogs);
+        
         public void RemovePopUpPool<T>(bool readLogs = false) where T : PopUp => _poolDataService.RemovePool<T>(readLogs);
     }
 }

@@ -25,7 +25,7 @@ public class BulletSpawnerTest : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    var bullet = _poolDataService.GetObject<BulletTest>(0f,0f);
+                    var bullet = _poolDataService.GetObject<BulletTest>(true,0f,0f);
 
                     bullet.transform.SetParent(transform);
                

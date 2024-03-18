@@ -64,7 +64,5 @@ public class BulletTest : MonoBehaviour, IPoolable
     private void OnDestroy()
     {
         _scaleTween.Kill();
-        
-        _poolDataService.Remove(this);
     }
 }

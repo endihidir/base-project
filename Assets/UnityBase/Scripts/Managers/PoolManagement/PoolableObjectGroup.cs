@@ -18,9 +18,9 @@ namespace UnityBase.Pool
         
         private GameObject _poolParent;
         private IObjectResolver _objectResolver;
-        private IList<IPoolable> _pool = new List<IPoolable>();
-        
-        public IList<IPoolable> Pool => _pool;
+        private Queue<IPoolable> _pool = new Queue<IPoolable>();
+
+        public Queue<IPoolable> Pool => _pool;
         public bool IsLazy => _isLazy;
 
         public void Initialize(IPoolable poolable, Transform rootParent, int poolCount, bool isLazy, IObjectResolver objectResolver)
@@ -39,63 +39,78 @@ namespace UnityBase.Pool
                 CreateNewObject(true);
         }
 
-        public IPoolable ShowObject(float duration, float delay, Action onComplete)
+        public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : IPoolable
         {
             if (!_poolParent) CreatePoolParent();
+            
+            if (IsAnyPoolableMissing()) ClearPool();
+            
+            IPoolable poolable;
+            
+            if (_poolable.IsUnique)
+            {
+                if (!_pool.TryPeek(out poolable)) 
+                    poolable = GetNewPoolable();
+            }
+            else
+            {
+                if (!_pool.TryDequeue(out poolable)) 
+                    poolable = GetNewPoolable();
+            }
 
-            var poolable = _pool.FirstOrDefault(IsShowable) ?? CreateNewObject(false);
+            if (show) 
+                poolable?.Show(duration, delay, onComplete);
 
-            poolable?.Show(duration, delay, onComplete);
-
-            return poolable;
+            return (T)poolable;
         }
-
-        private bool IsShowable(IPoolable poolable) => !poolable.IsActive || poolable.IsUnique;
 
         public void HideObject(IPoolable poolable, float duration, float delay, Action onComplete)
         {
             if (!IsHidable(poolable)) return;
+
+            poolable.Hide(duration, delay, ()=> SetPoolableObjectParent(poolable, onComplete));
+        }
+
+        public void HideAllObjects<T>(float duration, float delay, Action onComplete) where T : IPoolable
+        {
+            var allPoolables = FindActivePoolables<T>();
             
-            poolable.Hide(duration, delay, ()=>
-            {
-                SetPoolableObjectParent(poolable);
-                onComplete?.Invoke();
-            });
+            allPoolables?.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
         }
 
-        private bool IsHidable(IPoolable poolable) => poolable.IsActive || poolable.IsUnique;
-
-        public void HideAllObjects(float duration, float delay, Action onComplete)
+        private void ClearPool()
         {
-            _pool.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
-        }
-
-        public void Remove(IPoolable poolable)
-        {
-            if (!_pool.Contains(poolable)) return;
-
-            if (poolable.PoolableObject) 
-                UnityEngine.Object.Destroy(poolable.PoolableObject.gameObject);
-
-            _pool.Remove(poolable);
-        }
-
-        public void Clear()
-        {
-            _pool.Where(poolable => poolable.PoolableObject)
-                 .ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
+            _pool?.Where(poolable => poolable.PoolableObject)
+                  .ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
 
             _pool?.Clear();
 
-            Object.Destroy(_poolParent);
+            if (_poolParent)
+            {
+                Object.Destroy(_poolParent);
+            }
+        }
+
+        public void ClearAll<T>() where T : IPoolable
+        {
+            ClearPool();
+            
+            FindActivePoolables<T>().ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
         }
 
         public void UpdateObjectResolver(IObjectResolver objectResolver)
         {
             _objectResolver = objectResolver;
         }
+        
+        private IPoolable GetNewPoolable()
+        {
+            CreateNewObject(false);
+            
+            return _pool.Dequeue();
+        }
 
-        private IPoolable CreateNewObject(bool onInitialize)
+        private void CreateNewObject(bool onInitialize)
         {
             var poolableObject = Object.Instantiate(_poolable.PoolableObject, _poolParent.transform);
             
@@ -110,20 +125,27 @@ namespace UnityBase.Pool
                 poolable.Hide(0f, 0f, default);
             }
 
-            _pool.Add(poolable);
-
-            return poolable;
+            _pool.Enqueue(poolable);
         }
 
-        private void SetPoolableObjectParent(IPoolable poolable)
+        private void SetPoolableObjectParent(IPoolable poolable, Action onComplete)
         {
             if(!_poolParent) CreatePoolParent();
-            
-            poolable.PoolableObject.transform.SetParent(_poolParent.transform);
-            
-            poolable.PoolableObject.transform.localPosition = Vector3.zero;
+            var poolableT = poolable.PoolableObject.transform;
+            poolableT.SetParent(_poolParent.transform);
+            poolableT.localPosition = Vector3.zero;
+            _pool.Enqueue(poolable);
+            onComplete?.Invoke();
         }
         
+        public IEnumerable<T> FindActivePoolables<T>() where T : IPoolable
+        {
+            return Object.FindObjectsOfType<MonoBehaviour>().OfType<T>().Where(IsHidable);
+        }
+        
+        private bool IsHidable<T>(T poolable) where T : IPoolable => poolable.IsActive || poolable.IsUnique;
+        private bool IsAnyPoolableMissing() => _pool.Any(poolable => !poolable.PoolableObject);
+
         private void CreatePoolParent()
         {
             _poolParent = new GameObject("Pool_" + _poolable.PoolableObject.name);
@@ -132,7 +154,7 @@ namespace UnityBase.Pool
 
         public void Dispose()
         {
-            Clear();
+            ClearPool();
             _poolable = default;
             _rootParent = null;
             _poolParent = null;

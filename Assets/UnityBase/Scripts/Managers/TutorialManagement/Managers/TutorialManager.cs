@@ -28,9 +28,9 @@ namespace UnityBase.Manager
         public void Start() { }
         public void Dispose() { }
 
-        public T GetTutorial<T>(PositionSpace spawnSpace) where T : Tutorial
+        public T GetTutorial<T>(PositionSpace spawnSpace, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : Tutorial
         {
-            var selectedTutorial = _poolDataService.GetObject<T>(0f, 0f);
+            var selectedTutorial = _poolDataService.GetObject<T>(show,duration, delay, onComplete);
 
             selectedTutorial.transform.SetParent(_tutorialsParent);
 
@@ -39,7 +39,7 @@ namespace UnityBase.Manager
             return selectedTutorial;
         }
 
-        public bool TryGetTutorial<T>(PositionSpace spawnSpace, out T tutorial, bool readLogs = false) where T : Tutorial
+        public bool TryGetTutorial<T>(PositionSpace spawnSpace, out T tutorial, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default, bool readLogs = false) where T : Tutorial
         {
             tutorial = default;
 
@@ -47,7 +47,7 @@ namespace UnityBase.Manager
 
             if (poolCount < 1) return false;
 
-            tutorial = _poolDataService.GetObject<T>(0f, 0f);
+            tutorial = _poolDataService.GetObject<T>(show, duration, delay, onComplete);
 
             tutorial.transform.SetParent(_tutorialsParent);
 
@@ -70,8 +70,6 @@ namespace UnityBase.Manager
         {
             _poolDataService.HideAllTypeOf<Tutorial>(duration, delay);
         }
-
-        public void RemoveTutorial(Tutorial tutorial, bool readLogs = false) => _poolDataService.Remove(tutorial, readLogs);
         
         public void RemoveTutorialPool<T>(bool readLogs = false) where T : Tutorial => _poolDataService.RemovePool<T>(readLogs);
     }
