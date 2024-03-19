@@ -68,7 +68,7 @@ namespace UnityBase.Pool
 
         public void HideObject<T>(T poolable, float duration, float delay, Action onComplete) where T : IPoolable
         {
-            if (!(poolable.IsActive || poolable.IsUnique)) return;
+            if (!poolable.IsActive) return;
 
             poolable.Hide(duration, delay, ()=> OnHideComplete(poolable, onComplete));
         }
@@ -88,7 +88,7 @@ namespace UnityBase.Pool
         {
             ClearPool();
             
-            FindDequeuedPoolables<T>().ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
+            FindDequeuedPoolables<T>()?.ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
         }
 
         private IPoolable GetNewPoolable()
@@ -129,7 +129,7 @@ namespace UnityBase.Pool
         public static IEnumerable<T> FindDequeuedPoolables<T>(bool inculedInactive = false) where T : IPoolable
         {
             return Object.FindObjectsOfType<MonoBehaviour>(inculedInactive).OfType<T>()
-                         .Where(poolable => poolable.IsActive || poolable.IsUnique);
+                         .Where(poolable => poolable.IsActive);
         }
         
         private bool IsAnyPoolableMissing() => _pool.Any(poolable => !poolable.PoolableObject);
