@@ -45,9 +45,9 @@ namespace UnityBase.Manager
             _poolDataService.HideObject(popUp, duration, delay, onComplete, readLogs);
         }
         
-        public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default, bool readLogs = false) where T : PopUp
+        public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default) where T : PopUp
         {
-            _poolDataService.HideAllObjectsOfGroup<T>(duration, delay, onComplete, readLogs);
+            _poolDataService.HideAllObjectsOfType<T>(duration, delay, onComplete);
         }
         
         public void HideAllPopUp(float duration = 0.2f, float delay = 0f)

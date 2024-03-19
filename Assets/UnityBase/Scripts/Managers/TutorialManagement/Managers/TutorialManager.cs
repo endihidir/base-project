@@ -43,7 +43,7 @@ namespace UnityBase.Manager
         {
             tutorial = default;
 
-            var poolCount = _poolDataService.GetClonesCount<T>(readLogs);
+            var poolCount = _poolDataService.GetPoolCount<T>(readLogs);
 
             if (poolCount < 1) return false;
 
@@ -61,9 +61,9 @@ namespace UnityBase.Manager
             _poolDataService.HideObject(tutorial, duration, delay, onComplete, readLogs);
         }
 
-        public void HideAllTutorialOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = default, bool readLogs = false) where T : Tutorial
+        public void HideAllTutorialOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = default) where T : Tutorial
         {
-            _poolDataService.HideAllObjectsOfGroup<T>(duration, delay, onComplete, readLogs);
+            _poolDataService.HideAllObjectsOfType<T>(duration, delay, onComplete);
         }
 
         public void HideAllTutorials(float duration = 0f, float delay = 0f)

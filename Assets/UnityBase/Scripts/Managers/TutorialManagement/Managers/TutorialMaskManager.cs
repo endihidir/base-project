@@ -5,6 +5,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityBase.Extensions;
 using UnityBase.ManagerSO;
+using UnityBase.Pool;
 using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +61,7 @@ namespace UnityBase.Manager
         {
             maskUI = default;
 
-            var poolCount = _poolDataService.GetClonesCount<MaskUI>(readLogs);
+            var poolCount = _poolDataService.GetPoolCount<MaskUI>(readLogs);
 
             if (poolCount < 1) return false;
 
@@ -95,7 +96,7 @@ namespace UnityBase.Manager
         {
             masks = new MaskUI[positions.Length];
 
-            var poolCount = _poolDataService.GetClonesCount<MaskUI>(readLogs);
+            var poolCount = _poolDataService.GetPoolCount<MaskUI>(readLogs);
 
             if (poolCount < positions.Length) return false;
 
@@ -131,7 +132,7 @@ namespace UnityBase.Manager
 
         public async void HideAllMasks(float killDuration = 0f, float delay = 0f)
         {
-            _poolDataService.HideAllObjectsOfGroup<MaskUI>(killDuration, delay);
+            _poolDataService.HideAllObjectsOfType<MaskUI>(killDuration, delay);
 
             _maskRaycastFilters.ForEach(x => x.TargetMaskUI = null);
 
@@ -201,7 +202,7 @@ namespace UnityBase.Manager
 
         private void SetFadePanelsOpacity()
         {
-            var activePoolables = _poolDataService.GetActivePoolables<MaskUI>();
+            var activePoolables = PoolableObjectGroup.FindDequeuedPoolables<MaskUI>();
 
             foreach (var activePoolable in activePoolables)
             {
