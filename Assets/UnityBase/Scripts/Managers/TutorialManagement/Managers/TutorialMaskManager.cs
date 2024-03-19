@@ -131,7 +131,7 @@ namespace UnityBase.Manager
 
         public async void HideAllMasks(float killDuration = 0f, float delay = 0f)
         {
-            _poolDataService.HideAllObjectsOfType<MaskUI>(killDuration, delay);
+            _poolDataService.HideAllObjectsOfGroup<MaskUI>(killDuration, delay);
 
             _maskRaycastFilters.ForEach(x => x.TargetMaskUI = null);
 

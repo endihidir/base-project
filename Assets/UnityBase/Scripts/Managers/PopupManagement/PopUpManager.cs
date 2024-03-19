@@ -47,12 +47,12 @@ namespace UnityBase.Manager
         
         public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default, bool readLogs = false) where T : PopUp
         {
-            _poolDataService.HideAllObjectsOfType<T>(duration, delay, onComplete, readLogs);
+            _poolDataService.HideAllObjectsOfGroup<T>(duration, delay, onComplete, readLogs);
         }
         
         public void HideAllPopUp(float duration = 0.2f, float delay = 0f)
         {
-            _poolDataService.HideAllTypeOf<PopUp>(duration, delay);
+            _poolDataService.HideAllObjectsOfType<PopUp>(duration, delay);
         }
         
         public void RemovePopUpPool<T>(bool readLogs = false) where T : PopUp => _poolDataService.RemovePool<T>(readLogs);

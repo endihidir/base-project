@@ -63,12 +63,12 @@ namespace UnityBase.Manager
 
         public void HideAllTutorialOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = default, bool readLogs = false) where T : Tutorial
         {
-            _poolDataService.HideAllObjectsOfType<T>(duration, delay, onComplete, readLogs);
+            _poolDataService.HideAllObjectsOfGroup<T>(duration, delay, onComplete, readLogs);
         }
 
         public void HideAllTutorials(float duration = 0f, float delay = 0f)
         {
-            _poolDataService.HideAllTypeOf<Tutorial>(duration, delay);
+            _poolDataService.HideAllObjectsOfType<Tutorial>(duration, delay);
         }
         
         public void RemoveTutorialPool<T>(bool readLogs = false) where T : Tutorial => _poolDataService.RemovePool<T>(readLogs);

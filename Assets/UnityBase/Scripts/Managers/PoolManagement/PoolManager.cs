@@ -76,7 +76,7 @@ namespace UnityBase.Manager
             poolableObject.HideObject(poolable, duration, delay, onComplete);
         }
 
-        public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = default, bool readLogs = false) where T : IPoolable
+        public void HideAllObjectsOfGroup<T>(float duration, float delay, Action onComplete = default, bool readLogs = false) where T : IPoolable
         {
             var key = typeof(T);
 
@@ -91,14 +91,11 @@ namespace UnityBase.Manager
             poolableObjectGroup.HideAllObjects<T>(duration, delay, onComplete);
         }
         
-        public void HideAllTypeOf<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
+        public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
         {
-            foreach (var poolableGroup in _poolabeGroups)
+            foreach (var poolableGroup in _poolabeGroups.Values)
             {
-                if (poolableGroup.Value.GetType() == typeof(T))
-                {
-                    poolableGroup.Value.HideAllObjects<T>(duration, delay, onComplete);
-                }
+                poolableGroup.HideAllObjects<T>(duration, delay, onComplete);
             }
         }
 
