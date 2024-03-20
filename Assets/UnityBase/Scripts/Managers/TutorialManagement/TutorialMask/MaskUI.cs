@@ -2,21 +2,15 @@
 using DG.Tweening;
 using UnityBase.Extensions;
 using UnityBase.Pool;
-using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using VContainer;
-
 
 [ExecuteInEditMode]
 [AddComponentMenu("UI/Unmask/Unmask", 1)]
 public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
 {
-    [Inject] 
-    private readonly ITutorialMaskDataService _tutorialMaskDataService;
-
     private static readonly Vector2 s_Center = new Vector2(0.5f, 0.5f);
     
     [SerializeField] private RectTransform m_FitTarget;

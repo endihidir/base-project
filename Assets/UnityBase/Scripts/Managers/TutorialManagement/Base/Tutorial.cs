@@ -2,10 +2,8 @@ using System;
 using DG.Tweening;
 using UnityBase.Extensions;
 using UnityBase.Pool;
-using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.UI;
-using VContainer;
 
 namespace UnityBase.TutorialCore
 {
@@ -29,9 +27,6 @@ namespace UnityBase.TutorialCore
         public bool IsActive => isActiveAndEnabled;
         public bool IsUnique => false;
         public PositionSpace SpawnSpace => _spawnSpace;
-
-        [Inject] 
-        private readonly ITutorialDataService _tutorialDataService;
 
         #endregion
 

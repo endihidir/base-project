@@ -1,8 +1,6 @@
 ﻿using System;
 using UnityBase.Pool;
-using UnityBase.Service;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.PopUpCore
 {
@@ -21,9 +19,6 @@ namespace UnityBase.PopUpCore
         public Component PoolableObject => this;
         public virtual bool IsActive => isActiveAndEnabled;
         public virtual bool IsUnique => true;
-
-        [Inject] 
-        private readonly IPopUpDataService _popUpDataService;
 
         private Vector2 _defaultSizeDelta;
 
