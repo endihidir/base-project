@@ -15,13 +15,13 @@ namespace UnityBase.Pool
         private Transform _poolableRoot;
         private int _poolCount;
         private bool _isLazy;
-        
         private GameObject _poolParent;
         private IObjectResolver _objectResolver;
-        private Queue<IPoolable> _pool = new Queue<IPoolable>();
-
+        private readonly Queue<IPoolable> _pool;
         public Queue<IPoolable> Pool => _pool;
         public bool IsLazy => _isLazy;
+
+        public PoolableObjectGroup() => _pool = new Queue<IPoolable>();
 
         public void Initialize(IPoolable poolable, Transform rootParent, int poolCount, bool isLazy, IObjectResolver objectResolver)
         {
@@ -88,7 +88,7 @@ namespace UnityBase.Pool
         {
             ClearPool();
             
-            FindDequeuedPoolables<T>()?.ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
+            FindPoolablesOfType<T>()?.ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
         }
 
         private IPoolable GetNewPoolable()
@@ -126,10 +126,9 @@ namespace UnityBase.Pool
             onComplete?.Invoke();
         }
         
-        public static IEnumerable<T> FindDequeuedPoolables<T>(bool inculedInactive = false) where T : IPoolable
+        public static IEnumerable<T> FindPoolablesOfType<T>(bool inculedInactive = false) where T : IPoolable
         {
-            return Object.FindObjectsOfType<MonoBehaviour>(inculedInactive).OfType<T>()
-                         .Where(poolable => poolable.IsActive);
+            return Object.FindObjectsOfType<MonoBehaviour>(inculedInactive).OfType<T>().Where(poolable => poolable.IsActive);
         }
         
         private bool IsAnyPoolableMissing() => _pool.Any(poolable => !poolable.PoolableObject);

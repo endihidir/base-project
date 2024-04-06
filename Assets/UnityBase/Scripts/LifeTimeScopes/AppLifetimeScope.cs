@@ -48,17 +48,18 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<SwipeInputManager>(Lifetime.Singleton).AsImplementedInterfaces();
         }
 
         private void RegisterScopedServices(IContainerBuilder builder)
         {
             builder.Register<JsonDataManager>(Lifetime.Scoped).AsImplementedInterfaces();
+            builder.Register<CommandRecorder>(Lifetime.Scoped).AsImplementedInterfaces();
         }
         
         private void RegisterTransientServices(IContainerBuilder builder)
         {
-            builder.Register<SwipeInputManager>(Lifetime.Transient).AsImplementedInterfaces();
-            builder.Register<CommandRecorder>(Lifetime.Transient).AsImplementedInterfaces();
+           
         }
     }   
 }

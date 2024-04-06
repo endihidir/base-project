@@ -78,14 +78,14 @@ namespace UnityBase.Manager
         
         public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
         {
-            var poolables = PoolableObjectGroup.FindDequeuedPoolables<T>();
+            var poolables = PoolableObjectGroup.FindPoolablesOfType<T>();
             
             poolables?.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
         }
 
         public void HideAll(float duration, float delay, Action onComplete = default)
         {
-            var poolables = PoolableObjectGroup.FindDequeuedPoolables<IPoolable>();
+            var poolables = PoolableObjectGroup.FindPoolablesOfType<IPoolable>();
             
             poolables?.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
         }
