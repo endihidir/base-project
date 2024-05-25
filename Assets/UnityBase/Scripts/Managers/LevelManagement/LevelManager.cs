@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class LevelManager : ILevelDataService, IAppPresenterDataService
+    public class LevelManager : ILevelManagementService, IAppBootService
     {
         public static Func<int, bool> OnSelectChapter;
         public static Func<int, bool> OnSelectLevel;
@@ -86,8 +86,6 @@ namespace UnityBase.Manager
             OnSelectLevel += SelectLevel;
         }
 
-        public void Start() { }
-        
         public void Dispose()
         {
             _gameStateBinding.Remove(OnStartGameStateTransition);
@@ -161,7 +159,6 @@ namespace UnityBase.Manager
         }
 
         public ChapterSO GetLastUnlockedChapterData() => _chapterData?[LastUnlockedChapterIndex];
-        
         public LevelSO GetSelectedLevelData() => GetCurrentChapterData()?.levelData?[LastSelectedLevelIndex];
 
         public LevelSO GetCurrentLevelData() => GetCurrentChapterData()?.levelData?[LastUnlockedLevelIndex];

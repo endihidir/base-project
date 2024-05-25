@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace UnityBase.SceneManagement
 {
-    public class SceneGroupManager : ISceneGroupLoadService
+    public class SceneGroupManager : ISceneManagementService, IAppBootService
     { 
         public event Action<float> OnLoadUpdate;
 
@@ -22,6 +22,9 @@ namespace UnityBase.SceneManagement
         private readonly AsyncOperationGroup _operationGroup;
         private SceneReferenceState _sceneReferenceState;
 
+        public void Initialize() { }
+        public void Dispose() { }
+        
         public SceneGroupManager(ManagerDataHolderSO managerDataHolderSo)
         {
             _sceneManagerSo = managerDataHolderSo.sceneManagerSo;

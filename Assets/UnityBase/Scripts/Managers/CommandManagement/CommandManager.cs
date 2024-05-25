@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CommandManager : ICommandDataService, IAppPresenterDataService
+    public class CommandManager : ICommandManagementService, IAppBootService
     {
         private IDictionary<string, CommandRecorderGroup> _commandRecorders = new Dictionary<string, CommandRecorderGroup>();
 
@@ -19,7 +19,7 @@ namespace UnityBase.Manager
         ~CommandManager() => Dispose();
 
         public void Initialize() { }
-        public void Start() { }
+
         public void Dispose()
         {
             _commandRecorders.ForEach(x => x.Value.Dispose());

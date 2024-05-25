@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CurrencyManager : ICurrencyDataService, ICurrencyViewService, IAppPresenterDataService
+    public class CurrencyManager : ICurrencyManagementService, ICurrencyViewService, IAppBootService
     {
         private const string COIN_AMOUNT_KEY = "CoinAmountKey";
         public event Action<int> OnCoinDataUpdate;
@@ -34,13 +34,8 @@ namespace UnityBase.Manager
         ~CurrencyManager() { }
 
         public void Initialize() { }
-        public void Start() { }
         public void Dispose() { }
-        public void SetCoinViewData(ICoinView coinView)
-        {
-            _coinView = coinView;
-        }
-
+        public void SetCoinViewData(ICoinView coinView) => _coinView = coinView;
         public void IncreaseCoinData(int value)
         {
             SavedCoinAmount += value;
@@ -54,10 +49,7 @@ namespace UnityBase.Manager
 
             OnCoinDataUpdate?.Invoke(SavedCoinAmount);
         }
-
-        public void UpdateCoinView(int value)
-        {
-            _coinView.UpdateView(value);
-        }
+        
+        public void UpdateCoinView(int value) => _coinView.UpdateView(value);
     }
 }

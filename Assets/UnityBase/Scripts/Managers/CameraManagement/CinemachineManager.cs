@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CinemachineManager : ICinemachineDataService, IGameplayPresenterDataService
+    public class CinemachineManager : ICinemachineDataService, IGameplayBootService
     {
         public static Action<GameState> OnChangeCamera;
 
@@ -50,13 +50,6 @@ namespace UnityBase.Manager
         public void Initialize()
         {
             
-        }
-
-        public void Start()
-        {
-            OnChangeCamera += ChangeCamera;
-            
-            _cameraSwipeController.Start();
         }
 
         public void Dispose()

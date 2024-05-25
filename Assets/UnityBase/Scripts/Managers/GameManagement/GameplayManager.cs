@@ -9,34 +9,26 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class GameplayManager : IGameplayDataService, IGameplayPresenterDataService
+    public class GameplayManager : IGameplayManagementService, IGameplayBootService
     {
-        private readonly IGameDataService _gameDataService;
-        private readonly ITutorialStepDataService _tutorialStepDataService;
+        private readonly ITutorialProcessManagementService _tutorialProcessManagementService;
         
-        private GameState _startState = GameState.GameLoadingState;
-        private GameState _currentGameState = GameState.None;
+        private GameState _currentGameState = GameState.GameLoadingState;
         public GameState CurrentGameState => _currentGameState;
         
         private bool _isTransitionStarted;
 
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public GameplayManager(IGameDataService gameDataService, ITutorialStepDataService tutorialStepDataService, ISceneGroupLoadService sceneGroupLoadService)
+        public GameplayManager(ITutorialProcessManagementService tutorialProcessManagementService)
         {
-            _gameDataService = gameDataService;
             
-            _tutorialStepDataService = tutorialStepDataService;
+            _tutorialProcessManagementService = tutorialProcessManagementService;
         }
 
         ~GameplayManager() => Dispose();
 
         public void Initialize()
-        {
-            
-        }
-
-        public void Start()
         {
             InitializeGameState();
         }
@@ -45,40 +37,38 @@ namespace UnityBase.Manager
         {
             DisposeToken();
             
-            _startState = GameState.GameLoadingState;
+            _currentGameState = GameState.GameLoadingState;
             
-            CinemachineManager.OnChangeCamera?.Invoke(_startState);
+            CinemachineManager.OnChangeCamera?.Invoke(_currentGameState);
         }
 
         private void InitializeGameState()
         {
-            if (_tutorialStepDataService.IsSelectedLevelTutorialEnabled)
+            if (_tutorialProcessManagementService.IsSelectedLevelTutorialEnabled)
             {
-                TutorialStepManager.OnCompleteTutorialStep?.Invoke();
+                TutorialProcessManager.OnCompleteTutorialStep?.Invoke();
             }
             
-            var gameState = _tutorialStepDataService.IsSelectedLevelTutorialEnabled ? GameState.GameTutorialState : GameState.GamePlayState;
+            var gameState = _tutorialProcessManagementService.IsSelectedLevelTutorialEnabled ? GameState.GameTutorialState : GameState.GamePlayState;
 
             ChangeGameState(gameState, 1f, 0.5f);
         }
 
-        public async void ChangeGameState(GameState gameState, float transitionDuration, float startDelay = 0f)
+        public async void ChangeGameState(GameState nextGameState, float transitionDuration = 0f, float startDelay = 0f)
         {
-            if (IsStateNotChangeable(gameState)) return;
+            if (IsStateNotChangeable(nextGameState)) return;
 
-            Debug.Log($"Changing state from {_startState} to {gameState}");
+            Debug.Log($"Changing state from {_currentGameState} to {nextGameState}");
 
             _isTransitionStarted = true;
 
-            _gameDataService?.PlayGame();
-
-            GameStateData gameStateData = BuildGameStateData(gameState, transitionDuration);
+            GameStateData gameStateData = BuildGameStateData(nextGameState, transitionDuration);
 
             try
             {
                 await ChangeStateAsync(gameStateData, transitionDuration, startDelay);
                 
-                _startState = gameState;
+                _currentGameState = nextGameState;
                 
                 _isTransitionStarted = false;
             }
@@ -89,7 +79,7 @@ namespace UnityBase.Manager
         }
 
         private GameStateData BuildGameStateData(GameState gameState, float transitionDuration) =>
-                new GameStateData.Builder().WithStartState(_startState)
+                new GameStateData.Builder().WithStartState(_currentGameState)
                 .WithEndState(gameState)
                 .WithDuration(transitionDuration)
                 .Build();
@@ -123,9 +113,9 @@ namespace UnityBase.Manager
 
         private bool IsStateNotChangeable(GameState nextGameplayState)
         {
-            var isStatesAreSame = _startState == nextGameplayState;
-            var isGameFailed = _startState == GameState.GameFailState && nextGameplayState == GameState.GameSuccessState;
-            var isGameSuccess = _startState == GameState.GameSuccessState && nextGameplayState == GameState.GameFailState;
+            var isStatesAreSame = _currentGameState == nextGameplayState;
+            var isGameFailed = _currentGameState == GameState.GameFailState && nextGameplayState == GameState.GameSuccessState;
+            var isGameSuccess = _currentGameState == GameState.GameSuccessState && nextGameplayState == GameState.GameFailState;
             var isTransitionNotCompleted = _isTransitionStarted;
 
             return isStatesAreSame || isGameFailed || isTransitionNotCompleted || isGameSuccess;

@@ -8,7 +8,7 @@ using VContainer;
 public class CoinUI : MonoBehaviour, ICoinView
 {
     [Inject] 
-    private readonly ICurrencyDataService _currencyDataService;
+    private readonly ICurrencyManagementService _currencyManagementService;
     
     [SerializeField] private TextMeshProUGUI _coinTxt;
 
@@ -19,7 +19,7 @@ public class CoinUI : MonoBehaviour, ICoinView
 
     private Tween _iconScaleUpAnim;
     
-    private void Awake() => UpdateView(_currencyDataService.SavedCoinAmount);
+    private void Awake() => UpdateView(_currencyManagementService.SavedCoinAmount);
 
     public void UpdateView(int val)
     {

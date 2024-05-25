@@ -7,7 +7,7 @@ namespace UnityBase.Command
     public class MoveCommandControllerTest : MonoBehaviour, IMoveEntity
     {
         [Inject] 
-        private readonly ICommandDataService _commandDataService;
+        private readonly ICommandManagementService _commandManagementService;
 
         [Inject] 
         private readonly ICommandRecorder _commandRecorder;

@@ -10,7 +10,7 @@ using VContainer;
 
 namespace UnityBase.Manager
 {
-    public class PoolManager : IPoolDataService, IAppPresenterDataService
+    public class PoolManager : IPoolManagementService, IAppBootService
     {
         private PoolManagerSO _poolManagerSo;
         
@@ -32,8 +32,7 @@ namespace UnityBase.Manager
 
         ~PoolManager() => Dispose();
         public void Initialize() => CashPoolables();
-        public void Start() => CreateAllCashedPoolables();
-        
+
         public void Dispose()
         {
             if(_isDisposed) return;
@@ -61,15 +60,15 @@ namespace UnityBase.Manager
             }
         }
 
-        public void HideObject<T>(T poolable, float duration, float delay, Action onComplete = default, bool readLogs = false) where T : IPoolable
+        public void HideObject<T>(T poolable, float duration, float delay, Action onComplete = default) where T : IPoolable
         {
+            if(_isDisposed) return;
+            
             var key = poolable.PoolableObject.GetType();
 
             if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                if(readLogs)
-                    Debug.LogError($"You can not hide object because {key} is not exist in the list of prefabs.");
-                
+                Debug.LogError($"You can not hide object because {key} is not exist in the list of prefabs.");
                 return;
             }
             
@@ -78,6 +77,8 @@ namespace UnityBase.Manager
         
         public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
         {
+            if(_isDisposed) return;
+            
             var poolables = PoolableObjectGroup.FindPoolablesOfType<T>();
             
             poolables?.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
@@ -85,12 +86,14 @@ namespace UnityBase.Manager
 
         public void HideAll(float duration, float delay, Action onComplete = default)
         {
+            if(_isDisposed) return;
+            
             var poolables = PoolableObjectGroup.FindPoolablesOfType<IPoolable>();
             
             poolables?.ForEach(poolable => HideObject(poolable, duration, delay, onComplete));
         }
 
-        public void RemovePool<T>(bool readLogs = false) where T : IPoolable
+        public void RemovePool<T>() where T : IPoolable
         {
             if(_isDisposed) return;
             
@@ -98,9 +101,7 @@ namespace UnityBase.Manager
 
             if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                if(readLogs)
-                    Debug.LogError($"You can not remove pool because {key} is not exist in the list of prefabs.");
-                
+                Debug.LogError($"You can not remove pool because {key} is not exist in the list of prefabs.");
                 return;
             }
 
@@ -109,15 +110,13 @@ namespace UnityBase.Manager
             _poolabeGroups.Remove(key);
         }
 
-        public int GetPoolCount<T>(bool readLogs = false) where T : IPoolable
+        public int GetPoolCount<T>() where T : IPoolable
         {
             var key = typeof(T);
 
             if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                if(readLogs)
-                    Debug.LogError($"You can not get pool count because {key} is not exist in the list of prefabs.");
-                
+                Debug.LogError($"You can not get pool count because {key} is not exist in the list of prefabs.");
                 return 0;
             }
 
@@ -156,7 +155,7 @@ namespace UnityBase.Manager
         }
         
         private void CreateAllCashedPoolables() => _poolabeGroups.Where(poolData=> !poolData.Value.IsLazy)
-                                                             .ForEach(x => x.Value.CreatePool());
+                                                                 .ForEach(x => x.Value.CreatePool());
 
         private PoolableObjectGroup CreateNewGroup<T>() where T : IPoolable
         {

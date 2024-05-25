@@ -9,7 +9,7 @@ namespace UnityBase.BaseLifetimeScope
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<GameplayManagerPresenter>();
+            builder.RegisterEntryPoint<GameplayBootstarpper>();
             builder.Register<GameplayManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CinemachineManager>(Lifetime.Singleton).AsImplementedInterfaces();
 

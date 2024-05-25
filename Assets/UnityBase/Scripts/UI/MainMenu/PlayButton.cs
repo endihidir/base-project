@@ -5,10 +5,10 @@ using VContainer;
 public class PlayButton : ButtonBehaviour
 {
     [Inject] 
-    private readonly ISceneGroupLoadService _sceneGroupLoadService;
+    private readonly ISceneManagementService _sceneManagementService;
     
     protected override void OnClick()
     {
-        _sceneGroupLoadService.LoadSceneAsync(SceneType.Gameplay, true, 5f);
+        _sceneManagementService.LoadSceneAsync(SceneType.Gameplay, true, 5f);
     }
 }

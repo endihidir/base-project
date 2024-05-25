@@ -43,9 +43,9 @@ namespace UnityBase.Pool
 
         public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : IPoolable
         {
-            if (!_poolParent) CreatePoolParent();
-            
             if (IsAnyPoolableMissing()) ClearPool();
+            
+            if (!_poolParent) CreatePoolParent();
             
             IPoolable poolable;
             

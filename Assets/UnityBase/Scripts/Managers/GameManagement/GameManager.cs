@@ -8,21 +8,23 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class GameManager : IGameDataService, IAppPresenterDataService
+    public class GameManager : IGameDataService, IAppBootService
     {
         private CanvasGroup _splashScreen;
-        private readonly ISceneGroupLoadService _sceneGroupLoadService;
-        private float _fixedDeltaTime;
+        
+        private readonly ISceneManagementService _sceneManagementService;
+
         private bool _passSplashScreen;
+        
         private Tween _splashTween;
         
         private EventBinding<GameStateData> _gameStateBinding = new EventBinding<GameStateData>();
 
-        public GameManager(ManagerDataHolderSO managerDataHolderSo, ISceneGroupLoadService sceneGroupLoadService)
+        public GameManager(ManagerDataHolderSO managerDataHolderSo, ISceneManagementService sceneManagementService)
         {
             var gameManagerData = managerDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
-            _sceneGroupLoadService = sceneGroupLoadService;
+            _sceneManagementService = sceneManagementService;
             _passSplashScreen = gameManagerData.passSplashScreen;
             
             Application.targetFrameRate = gameManagerData.targetFrameRate;
@@ -30,45 +32,15 @@ namespace UnityBase.Manager
         }
 
         ~GameManager() => Dispose();
-
-        public void Initialize()
-        {
-            PlayGame();
-            
-            _fixedDeltaTime = Time.fixedDeltaTime;
-        }
-
-        public void Start()
-        {
-            _gameStateBinding.Add(OnStartGameStateTransition);
-            
-            EventBus<GameStateData>.AddListener(_gameStateBinding, GameStateData.GetChannel(TransitionState.Start));
-            
-            LoadGame();
-        }
         
-        public void Dispose()
-        {
-            _gameStateBinding.Remove(OnStartGameStateTransition);
-            
-            EventBus<GameStateData>.RemoveListener(_gameStateBinding, GameStateData.GetChannel(TransitionState.Start));
-            
-            _splashTween.Kill();
-        }
-
-        private void OnStartGameStateTransition(GameStateData gameStateData)
-        {
-            if (gameStateData.EndState == GameState.GamePauseState)
-                PauseGame();
-            else
-                PlayGame();
-        }
+        public void Initialize() => LoadGame();
+        public void Dispose() => _splashTween.Kill();
 
         private async void LoadGame()
         {
             if (!_passSplashScreen) await StartSplashScreen();
 
-            _sceneGroupLoadService.LoadSceneAsync(SceneType.MainMenu);
+            _sceneManagementService.LoadSceneAsync(SceneType.MainMenu);
         }
 
         private async UniTask StartSplashScreen()
@@ -83,20 +55,6 @@ namespace UnityBase.Manager
                                         .OnComplete(() => _splashScreen.gameObject.SetActive(false));
             
             await UniTask.WaitForSeconds(0.25f);
-        }
-
-        public void PlayGame()
-        {
-            if (Time.timeScale > 0f) return;
-            Time.timeScale = 1f;
-            Time.fixedDeltaTime = _fixedDeltaTime * Time.timeScale;
-        }
-
-        public void PauseGame()
-        {
-            if(Time.timeScale < 1f) return;
-            Time.timeScale = 0;
-            Time.fixedDeltaTime = _fixedDeltaTime * Time.timeScale;
         }
     }
 }

@@ -30,7 +30,7 @@ namespace UnityBase.BaseLifetimeScope
         
         private void RegisterEntryPoints(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<AppManagerPresenter>();
+            builder.RegisterEntryPoint<AppBootstrapper>();
         }
         
           private void RegisterSingletonServices(IContainerBuilder builder)
@@ -41,14 +41,14 @@ namespace UnityBase.BaseLifetimeScope
             
             builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PopUpManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TutorialManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<TutorialActionManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TutorialMaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TutorialStepManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<TutorialProcessManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<SwipeInputManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<SwipeManager>(Lifetime.Singleton).AsImplementedInterfaces();
         }
 
         private void RegisterScopedServices(IContainerBuilder builder)
