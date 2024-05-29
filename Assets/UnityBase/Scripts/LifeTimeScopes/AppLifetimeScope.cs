@@ -3,6 +3,7 @@ using UnityBase.Manager;
 using UnityBase.Presenter;
 using UnityBase.ManagerSO;
 using UnityBase.SceneManagement;
+using UnityBase.UI.ButtonCore;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -38,6 +39,8 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<GameManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SceneGroupManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LevelManager>(Lifetime.Singleton).AsImplementedInterfaces();
+
+            builder.Register<ButtonBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
             
             builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PopUpManager>(Lifetime.Singleton).AsImplementedInterfaces();

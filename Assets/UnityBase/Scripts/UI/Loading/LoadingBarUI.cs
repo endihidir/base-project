@@ -1,11 +1,10 @@
 using TMPro;
 using UnityBase.Service;
-using UnityBase.UI.Base;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
-public class LoadingBarUI : BaseUIElements
+public class LoadingBarUI : MonoBehaviour
 {
     [SerializeField] private Slider _progressUI;
     [SerializeField] private TextMeshProUGUI _sliderTxt;
@@ -13,15 +12,8 @@ public class LoadingBarUI : BaseUIElements
     [Inject] 
     private readonly ISceneManagementService _sceneManagementService;
 
-    protected override void OnEnable()
-    {
-        _sceneManagementService.OnLoadUpdate += SetProgressValue;
-    }
-
-    protected override void OnDisable()
-    {
-        _sceneManagementService.OnLoadUpdate -= SetProgressValue;
-    }
+    protected void OnEnable() => _sceneManagementService.OnLoadUpdate += SetProgressValue;
+    protected void OnDisable() => _sceneManagementService.OnLoadUpdate -= SetProgressValue;
 
     private void SetProgressValue(float val)
     {

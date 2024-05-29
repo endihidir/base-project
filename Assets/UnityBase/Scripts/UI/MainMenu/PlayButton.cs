@@ -1,14 +1,26 @@
-using UnityBase.Service;
 using UnityBase.UI.ButtonCore;
-using VContainer;
+using UnityEngine.EventSystems;
 
-public class PlayButton : ButtonBehaviour
+public class PlayButton : ButtonUI
 {
-    [Inject] 
-    private readonly ISceneManagementService _sceneManagementService;
-    
-    protected override void OnClick()
+    protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
     {
-        _sceneManagementService.LoadSceneAsync(SceneType.Gameplay, true, 5f);
+        _buttonBehaviour = buttonBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, UpDownBounceUIAnimation>(this)
+                                                 .SetActionConfigs(SceneType.Gameplay, true, 10f);
+    }
+
+    public override void OnPointerClick(PointerEventData eventData)
+    {
+        _buttonBehaviour.OnClick();
+    }
+
+    public override void OnPointerDown(PointerEventData eventData)
+    {
+        _buttonBehaviour.OnPointerDown();
+    }
+
+    public override void OnPointerUp(PointerEventData eventData)
+    {
+        _buttonBehaviour.OnPointerUp();
     }
 }
