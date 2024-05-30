@@ -33,9 +33,9 @@ namespace UnityBase.Manager
         ~PoolManager() => Dispose();
         public void Initialize()
         {
-            CashPoolables();
+            CachePoolables();
             
-            CreateAllCashedPoolables();
+            CreateAllCachedPoolables();
         }
 
         public void Dispose()
@@ -138,7 +138,7 @@ namespace UnityBase.Manager
             }
         }
 
-        private void CashPoolables()
+        private void CachePoolables()
         {
             var poolData = _poolManagerSo.poolDataSo;
 
@@ -159,7 +159,7 @@ namespace UnityBase.Manager
             }
         }
         
-        private void CreateAllCashedPoolables() => _poolableGroups.Where(poolData=> !poolData.Value.IsLazy)
+        private void CreateAllCachedPoolables() => _poolableGroups.Where(poolData=> !poolData.Value.IsLazy)
                                                                  .ForEach(x => x.Value.CreatePool());
 
         private PoolableObjectGroup CreateNewGroup<T>() where T : IPoolable
