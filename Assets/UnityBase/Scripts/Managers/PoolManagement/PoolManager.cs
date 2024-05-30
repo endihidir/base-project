@@ -18,7 +18,7 @@ namespace UnityBase.Manager
         
         private IObjectResolver _objectResolver;
         
-        private IDictionary<Type, PoolableObjectGroup> _poolabeGroups = new Dictionary<Type, PoolableObjectGroup>();
+        private IDictionary<Type, PoolableObjectGroup> _poolableGroups = new Dictionary<Type, PoolableObjectGroup>();
 
         private bool _isDisposed;
         
@@ -31,15 +31,20 @@ namespace UnityBase.Manager
         }
 
         ~PoolManager() => Dispose();
-        public void Initialize() => CashPoolables();
+        public void Initialize()
+        {
+            CashPoolables();
+            
+            CreateAllCashedPoolables();
+        }
 
         public void Dispose()
         {
             if(_isDisposed) return;
             _isDisposed = true;
-            _poolabeGroups.ForEach(x => x.Value?.Dispose());
+            _poolableGroups.ForEach(x => x.Value?.Dispose());
             _poolManagerSo = null;
-            _poolabeGroups = null;
+            _poolableGroups = null;
             _objectResolver = null;
         }
 
@@ -47,7 +52,7 @@ namespace UnityBase.Manager
         {
             var key = typeof(T);
 
-            if (_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
+            if (_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
             {
                 var poolable = poolableObjectGroup.GetObject<T>(show, duration, delay, onComplete);
                 return poolable;
@@ -66,9 +71,9 @@ namespace UnityBase.Manager
             
             var key = poolable.PoolableObject.GetType();
 
-            if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
+            if (!_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not hide object because {key} is not exist in the list of prefabs.");
+                Debug.LogError($"You can not hide object because {key} does not exist in the list of prefabs.");
                 return;
             }
             
@@ -99,24 +104,24 @@ namespace UnityBase.Manager
             
             var key = typeof(T);
 
-            if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
+            if (!_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not remove pool because {key} is not exist in the list of prefabs.");
+                Debug.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
                 return;
             }
 
             poolableObjectGroup.ClearAll<T>();
             
-            _poolabeGroups.Remove(key);
+            _poolableGroups.Remove(key);
         }
 
         public int GetPoolCount<T>() where T : IPoolable
         {
             var key = typeof(T);
 
-            if (!_poolabeGroups.TryGetValue(key, out var poolableObjectGroup))
+            if (!_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not get pool count because {key} is not exist in the list of prefabs.");
+                Debug.LogError($"You can not get pool count because {key} does not exist in the list of prefabs.");
                 return 0;
             }
 
@@ -127,7 +132,7 @@ namespace UnityBase.Manager
         {
             _objectResolver = objectResolver;
             
-            foreach (var poolableObject in _poolabeGroups)
+            foreach (var poolableObject in _poolableGroups)
             {
                 poolableObject.Value.UpdateObjectResolver(_objectResolver);
             }
@@ -147,14 +152,14 @@ namespace UnityBase.Manager
 
                 var poolable = poolableAsset.poolObject.GetComponent<IPoolable>();
                 var key = poolable.PoolableObject.GetType();
-                if (_poolabeGroups.ContainsKey(key)) continue;
+                if (_poolableGroups.ContainsKey(key)) continue;
                 var poolableObjectGroup = new PoolableObjectGroup();
                 poolableObjectGroup.Initialize(poolable, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy, _objectResolver);
-                _poolabeGroups.Add(key, poolableObjectGroup);
+                _poolableGroups.Add(key, poolableObjectGroup);
             }
         }
         
-        private void CreateAllCashedPoolables() => _poolabeGroups.Where(poolData=> !poolData.Value.IsLazy)
+        private void CreateAllCashedPoolables() => _poolableGroups.Where(poolData=> !poolData.Value.IsLazy)
                                                                  .ForEach(x => x.Value.CreatePool());
 
         private PoolableObjectGroup CreateNewGroup<T>() where T : IPoolable
@@ -167,7 +172,7 @@ namespace UnityBase.Manager
             var poolableObject = poolableAsset.poolObject.GetComponent<T>();
             poolableObjectGroup.Initialize(poolableObject, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy, _objectResolver);
             poolableObjectGroup.CreatePool();
-            _poolabeGroups.Add(type, poolableObjectGroup);
+            _poolableGroups.Add(type, poolableObjectGroup);
             return poolableObjectGroup;
         }
     }
