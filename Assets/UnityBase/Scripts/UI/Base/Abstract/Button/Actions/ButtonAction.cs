@@ -8,7 +8,7 @@ namespace UnityBase.UI.ButtonCore
         {
             _buttonUI = buttonUI;
         }
-
+        
         public abstract void OnClick();
         public abstract void OnPointerDown();
         public abstract void OnPointerUp();

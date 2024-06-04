@@ -17,11 +17,11 @@ namespace UnityBase.Observable
 
         public static implicit operator T(Observable<T> observable) => observable._value;
 
-        public Observable(T value, Action<T> onOnValueChanged = null)
+        public Observable(T value, Action<T> onOnValueChanged = default)
         {
             _value = value;
 
-            if (onOnValueChanged != null)
+            if (onOnValueChanged != default)
             {
                 OnValueChanged += onOnValueChanged;
             }

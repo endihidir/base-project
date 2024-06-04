@@ -5,7 +5,6 @@ namespace UnityBase.UI.ButtonCore
 {
     public interface IButtonUI
     {
-        public IButtonBehaviour ButtonBehaviour { get; }
         public Button Button { get; }
         public Transform Transform { get; }
         public void SetActive(bool value);

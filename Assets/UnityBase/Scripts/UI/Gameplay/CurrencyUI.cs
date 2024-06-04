@@ -1,11 +1,11 @@
-using DG.Tweening;
 using TMPro;
 using UnityBase.Manager;
 using UnityBase.Service;
+using UnityBase.UI.ButtonCore;
 using UnityEngine;
 using VContainer;
 
-public class CoinUI : MonoBehaviour, ICoinView
+public class CurrencyUI : MonoBehaviour
 {
     [Inject] 
     private readonly ICurrencyManagementService _currencyManagementService;
@@ -13,27 +13,26 @@ public class CoinUI : MonoBehaviour, ICoinView
     [SerializeField] private TextMeshProUGUI _coinTxt;
 
     [SerializeField] private Transform _coinIconT;
+    
+    
+    public Transform ViewTransform => transform;
     public Transform CoinIconT => _coinIconT;
 
-    private int _defaultValue;
-
-    private Tween _iconScaleUpAnim;
-    
-    private void Awake() => UpdateView(_currencyManagementService.SavedCoinAmount);
-
-    public void UpdateView(int val)
+    [Inject]
+    private void Construct(IUIBehaviourFactory uiBehaviourFactory)
     {
-        _defaultValue += val;
-        _coinTxt.text = _defaultValue.ToString("0");
-        PlayCoinIconAnimation();
+        
     }
-
+    /*
     private void PlayCoinIconAnimation()
     {
         _iconScaleUpAnim?.Kill(true);
         _iconScaleUpAnim = _coinIconT.transform.DOPunchScale(Vector3.one * 0.6f, 0.2f)
                                                .OnComplete(()=> _coinIconT.transform.localScale = Vector3.one);
+    }*/
+    
+    public void UpdateView(int val)
+    {
+        
     }
-
-    private void OnDestroy() => _iconScaleUpAnim?.Kill();
 }

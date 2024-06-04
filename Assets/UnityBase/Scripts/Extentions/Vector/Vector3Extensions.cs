@@ -28,10 +28,35 @@ namespace UnityBase.Extensions
 		{
 			return v.normalized * length;
 		}
-
-		public static T GetClosest<T>(this Vector3 v, T[] to) where T : MonoBehaviour
+		
+		public static Vector3 GetClosest(this Vector3 v, Vector3[] to)
 		{
-			T closestT = null;
+			Vector3 closestPos = Vector3.zero;
+
+			var minDist = float.MaxValue;
+
+			var targetsLength = to.Length;
+
+			for (int i = 0; i < targetsLength; i++)
+			{
+				var potentialT = to[i] - v;
+
+				potentialT.y = 0f;
+
+				if (potentialT.sqrMagnitude < minDist)
+				{
+					minDist = potentialT.sqrMagnitude;
+
+					closestPos = to[i];
+				}
+			}
+
+			return closestPos;
+		}
+
+		public static T GetClosest<T>(this Vector3 v, T[] to) where T : Component
+		{
+			T closest = null;
 
 			var minDist = float.MaxValue;
 
@@ -47,11 +72,11 @@ namespace UnityBase.Extensions
 				{
 					minDist = potentialT.sqrMagnitude;
 
-					closestT = to[i];
+					closest = to[i];
 				}
 			}
 
-			return closestT;
+			return closest;
 		}
 
 		public static Vector3 WorldToScreen(this Vector3 v, Camera cam)

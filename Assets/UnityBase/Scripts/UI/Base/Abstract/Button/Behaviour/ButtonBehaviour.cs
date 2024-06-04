@@ -1,63 +1,61 @@
-﻿namespace UnityBase.UI.ButtonCore
+﻿using UnityBase.Extensions;
+
+namespace UnityBase.UI.ButtonCore
 {
-    public class ButtonBehaviour<TAct, TAnim> : IButtonBehaviour where TAct : IButtonAction where TAnim : IUIAnimation
+    public class ButtonBehaviour<TAct, TAnim> : IButtonBehaviour<TAct, TAnim> where TAct : IButtonAction where TAnim : IButtonAnimation
     {
         private bool _isClicked;
-
         public bool IsClicked => _isClicked;
-        public IButtonAction ButtonAction { get; }
-        public IUIAnimation UIAnimation { get; }
+        public TAct ButtonAction { get; }
+        public TAnim ButtonAnimation { get; }
 
         public ButtonBehaviour(TAct buttonAction, TAnim uiAnimation)
         {
             ButtonAction = buttonAction;
-            UIAnimation = uiAnimation;
+            ButtonAnimation = uiAnimation;
         }
         
-        public void ConfigureAction(params object[] parameters)
+        public void ConfigureAction(params object[] parameters) => ButtonAction.ConfigureMethod("Configure", parameters);
+        public void ConfigureAnimation(params object[] parameters) => ButtonAnimation.ConfigureMethod("Configure", parameters);
+
+        public virtual async void OnClick()
         {
-            var configureMethod = typeof(TAct).GetMethod("Configure");
-            configureMethod?.Invoke(ButtonAction, parameters);
-        }
-        
-        public void ConfigureAnimation(params object[] parameters)
-        {
-            var configureMethod = typeof(TAnim).GetMethod("Configure");
-            configureMethod?.Invoke(ButtonAction, parameters);
-        }
-        
-        public async void OnClick()
-        {
+            if(ButtonAnimation is null) return;
+            
             if (_isClicked) return;
 
             _isClicked = true;
 
-            await UIAnimation.ClickAnimation();
+            await ButtonAnimation.Click();
 
             ButtonAction?.OnClick();
 
             _isClicked = false;
         }
 
-        public async void OnPointerDown()
+        public virtual async void OnPointerDown()
         {
-            await UIAnimation.PointerDownAnimation();
+            if(ButtonAnimation is null) return;
+            
+            await ButtonAnimation.PointerDown();
             
             ButtonAction?.OnPointerDown();
         }
 
-        public async void OnPointerUp()
+        public virtual async void OnPointerUp()
         {
-            await UIAnimation.PointerUpAnimation();
+            if(ButtonAnimation is null) return;
+            
+            await ButtonAnimation.PointerUp();
 
             ButtonAction?.OnPointerUp();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             ButtonAction?.Dispose();
             
-            UIAnimation?.Dispose();
+            ButtonAnimation?.Dispose();
         }
     }
 }

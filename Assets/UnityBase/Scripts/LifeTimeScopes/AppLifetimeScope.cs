@@ -40,8 +40,8 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<SceneGroupManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LevelManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
-            builder.Register<ButtonBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-            
+            builder.Register<UIBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
+
             builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PopUpManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TutorialActionManager>(Lifetime.Singleton).AsImplementedInterfaces();

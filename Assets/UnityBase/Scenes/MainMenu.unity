@@ -257,7 +257,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f35f5b13c562a4085863c5ca358c9931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _buttonId: 5698e6412b2dd2a43a827febac25448a
   _button: {fileID: 657690129}
 --- !u!1 &679558417
 GameObject:
@@ -310,7 +309,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

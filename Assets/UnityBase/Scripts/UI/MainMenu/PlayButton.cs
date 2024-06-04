@@ -1,26 +1,17 @@
+using DG.Tweening;
+using UnityBase.Extensions;
 using UnityBase.UI.ButtonCore;
-using UnityEngine.EventSystems;
 
 public class PlayButton : ButtonUI
 {
-    protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
+    private IUIBehaviourFactory _uiBehaviourFactory;
+    
+    protected override void Initialize(IUIBehaviourFactory uiBehaviourFactory)
     {
-        _buttonBehaviour = buttonBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, UpDownBounceUIAnimation>(this)
-                                                 .SetActionConfigs(SceneType.Gameplay, true, 10f);
-    }
-
-    public override void OnPointerClick(PointerEventData eventData)
-    {
-        _buttonBehaviour.OnClick();
-    }
-
-    public override void OnPointerDown(PointerEventData eventData)
-    {
-        _buttonBehaviour.OnPointerDown();
-    }
-
-    public override void OnPointerUp(PointerEventData eventData)
-    {
-        _buttonBehaviour.OnPointerUp();
+        _uiBehaviourFactory = uiBehaviourFactory;
+        
+        _buttonBehaviour = _uiBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, ButtonClickAnim>(this)
+                                                 .SetActionConfigs(SceneType.Gameplay, true, 10f)
+                                                 .SetAnimationConfigs(1.05f, 1f, 0.1f, Ease.InOutQuad);
     }
 }

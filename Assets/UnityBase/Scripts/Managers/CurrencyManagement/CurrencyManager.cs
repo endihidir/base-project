@@ -10,13 +10,13 @@ namespace UnityBase.Manager
         private const string COIN_AMOUNT_KEY = "CoinAmountKey";
         public event Action<int> OnCoinDataUpdate;
 
-        private ICoinView _coinView;
+        private ICurrencyView _currencyView;
 
         private int _startCoinAmount;
         
         private bool _isCoinSaveAvailable;
         
-        public Transform CoinIconTransform => _coinView.CoinIconT;
+        public Transform CoinIconTransform => _currencyView.CoinIconT;
         
         public int SavedCoinAmount
         {
@@ -35,7 +35,7 @@ namespace UnityBase.Manager
 
         public void Initialize() { }
         public void Dispose() { }
-        public void SetCoinViewData(ICoinView coinView) => _coinView = coinView;
+        public void SetCoinViewData(ICurrencyView currencyView) => _currencyView = currencyView;
         public void IncreaseCoinData(int value)
         {
             SavedCoinAmount += value;
@@ -50,6 +50,6 @@ namespace UnityBase.Manager
             OnCoinDataUpdate?.Invoke(SavedCoinAmount);
         }
         
-        public void UpdateCoinView(int value) => _coinView.UpdateView(value);
+        public void UpdateCoinView(int value) => _currencyView.UpdateView(value);
     }
 }

@@ -6,33 +6,68 @@ using VContainer;
 
 namespace UnityBase.UI.ButtonCore
 {
-    public abstract class ButtonUI : MonoBehaviour, IButtonUI, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
+    [DisallowMultipleComponent]
+    public abstract class ButtonUI : MonoBehaviour, IButtonUI
     {
         [SerializeField, ReadOnly] private Button _button;
         
-        protected IButtonBehaviour _buttonBehaviour;
+        private EventTrigger _eventTrigger;
 
-        public IButtonBehaviour ButtonBehaviour => _buttonBehaviour;
-        
+        protected IButtonBehaviour _buttonBehaviour;
         public Button Button => _button;
-        
+        public IButtonBehaviour ButtonBehaviour => _buttonBehaviour;
         public virtual Transform Transform => transform;
         
+        
+#if UNITY_EDITOR
+        private void OnValidate() => TryGetComponent(out _button);
+#endif
+
         [Inject]
-        public void Construct(IButtonBehaviourFactory buttonBehaviourFactory) => Initialize(buttonBehaviourFactory);
+        public void Construct(IUIBehaviourFactory uiButtonBehaviourFactory)
+        {
+            Initialize(uiButtonBehaviourFactory);
+            _eventTrigger ??= gameObject.AddComponent<EventTrigger>();
+            CreateEventTriggers();
+        }
+        protected abstract void Initialize(IUIBehaviourFactory uiBehaviourFactory);
+
+        private void OnEnable() => _button.onClick.AddListener(OnClickButton);
+        private void OnDisable() => _button.onClick.RemoveListener(OnClickButton);
+        protected virtual void OnClickButton() => ButtonBehaviour?.OnClick();
+        protected virtual void OnPointerDown()
+        {
+            if(!Button.IsInteractable()) return;
+            
+            ButtonBehaviour?.OnPointerDown();
+        }
+        protected virtual void OnPointerUp()
+        {
+            if(!Button.IsInteractable()) return;
+            
+            ButtonBehaviour?.OnPointerUp();
+        }
 
         public void SetActive(bool value) => gameObject.SetActive(value);
-
         public void SetInteractable(bool value) => _button.interactable = value;
-
         public void SetRaycastTarget(bool value) => _button.image.raycastTarget = value;
-        public void EditorInitialize() => TryGetComponent(out _button);
-        
 
-        protected abstract void Initialize(IButtonBehaviourFactory buttonBehaviourFactory);
-        public abstract void OnPointerClick(PointerEventData eventData);
-        public abstract void OnPointerDown(PointerEventData eventData);
-        public abstract void OnPointerUp(PointerEventData eventData);
-        public virtual void OnDestroy() => _buttonBehaviour?.Dispose();
+        protected virtual void CreateEventTriggers()
+        {
+            AddEventTrigger(_eventTrigger, EventTriggerType.PointerDown, OnPointerDown);
+            AddEventTrigger(_eventTrigger, EventTriggerType.PointerUp, OnPointerUp);
+        }
+        protected void AddEventTrigger(EventTrigger trigger, EventTriggerType eventType, UnityEngine.Events.UnityAction action)
+        {
+            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = eventType };
+            entry.callback.AddListener(_ => action());
+            trigger.triggers.Add(entry);
+        }
+
+        public virtual void OnDestroy()
+        {
+            _eventTrigger?.triggers?.Clear();
+            ButtonBehaviour?.Dispose();
+        }
     }
 }
