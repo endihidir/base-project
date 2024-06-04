@@ -6,8 +6,7 @@ namespace UnityBase.UI.ButtonCore
     {
         public Observable<TData> Views { get; }
         public TData Serialize();
-        public void Deserialize(TData viewData);
-        
+        public void Deserialize(TData value);
         public void Dispose();
     }
 }

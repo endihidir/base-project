@@ -24,10 +24,17 @@ namespace UnityBase.Extensions
             return behaviour;
         }
         
-        public static IViewBehaviour<TAnim, TModel, TData> SetAnimationConfigs<TModel, TAnim, TData>(this IViewBehaviour<TAnim, TModel, TData> behaviour, params object[] animConfigs)
+        public static IViewBehaviour<TAnim, TModel, TData> SetAnimationConfigs<TAnim, TModel, TData>(this IViewBehaviour<TAnim, TModel, TData> behaviour, params object[] animConfigs)
             where TAnim : IViewAnimation where TModel : IViewModel<TData> where TData : struct
         {
             behaviour.ConfigureAnimation(animConfigs);
+            return behaviour;
+        }
+        
+        public static IViewBehaviour<TAnim, TModel, TData> SetModelConfigs<TAnim, TModel, TData>(this IViewBehaviour<TAnim, TModel, TData> behaviour, params object[] modelConfigs)
+            where TAnim : IViewAnimation where TModel : IViewModel<TData> where TData : struct
+        {
+            behaviour.ConfigureModel(modelConfigs);
             return behaviour;
         }
     }
