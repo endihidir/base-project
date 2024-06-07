@@ -13,18 +13,18 @@ namespace UnityBase.Presenter
         [Inject]
         private readonly IEnumerable<IGameplayBootService> _gameplayBootServices;
         
-        public GameplayBootstarpper(IObjectResolver objectResolver, ICurrencyView currencyView)
+        public GameplayBootstarpper(IObjectResolver objectResolver)
         {
-            UpdateGameplayServices(objectResolver, currencyView);
+            UpdateGameplayServices(objectResolver);
         }
 
-        private static void UpdateGameplayServices(IObjectResolver objectResolver, ICurrencyView currencyView)
+        private static void UpdateGameplayServices(IObjectResolver objectResolver)
         {
             var poolManager = objectResolver.Resolve<IPoolManagementService>() as PoolManager;
             poolManager?.UpdateAllResolvers(objectResolver);
 
-            var currencyManager = objectResolver.Resolve<ICurrencyViewService>() as CurrencyManager;
-            currencyManager?.SetCoinViewData(currencyView);
+            /*var currencyManager = objectResolver.Resolve<ICurrencyViewService>() as CurrencyManager;
+            currencyManager?.SetCoinViewData(currencyView);*/
         }
         
         public void Initialize() => _gameplayBootServices.ForEach(x => x.Initialize());

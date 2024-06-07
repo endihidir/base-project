@@ -1,5 +1,4 @@
 using TMPro;
-using UnityBase.Manager;
 using UnityBase.Service;
 using UnityBase.UI.ButtonCore;
 using UnityEngine;

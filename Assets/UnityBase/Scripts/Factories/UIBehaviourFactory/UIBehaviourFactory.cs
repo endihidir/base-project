@@ -21,8 +21,8 @@ namespace UnityBase.UI.ButtonCore
         }
 
         public IViewBehaviour<TAnim, TModel, TData> CreateViewBehaviour<TAnim, TModel, TData>(ICurrencyView<TAnim,TModel, TData> viewUI) where TAnim : IViewAnimation
-            where TModel : IViewModel<TData> 
-            where TData : struct
+                                                                                                                                         where TModel : IViewModel<TData> 
+                                                                                                                                         where TData : struct
         {
             var viewModel = ReflectionExtensions.CreateInstance<TModel>(_container, viewUI);
             

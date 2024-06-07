@@ -10,7 +10,9 @@ public interface IViewBehaviour<out TAnim> : IViewBehaviour
     public void ConfigureAnimation(params object[] parameters);
 }
 
-public interface IViewBehaviour<out TAnim, out TModel, out TData> : IViewBehaviour<TAnim> where TModel : IViewModel<TData> where TAnim : IViewAnimation where TData : struct
+public interface IViewBehaviour<out TAnim, out TModel, out TData> : IViewBehaviour<TAnim> where TModel : IViewModel<TData> 
+                                                                                          where TAnim : IViewAnimation 
+                                                                                          where TData : struct
 {
     public TModel ViewModel { get; }
 

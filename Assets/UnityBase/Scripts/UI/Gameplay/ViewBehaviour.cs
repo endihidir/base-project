@@ -1,7 +1,6 @@
 ﻿using UnityBase.Extensions;
 using UnityBase.UI.ButtonCore;
 
-
 public class ViewBehaviour<TAnim> : IViewBehaviour<TAnim> where TAnim : IViewAnimation
 {
     public TAnim ViewAnimation { get; }
