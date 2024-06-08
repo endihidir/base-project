@@ -11,6 +11,11 @@ namespace UnityBase.UI.ButtonCore
 
     public class InOutView : ViewAnimation
     {
+        public void Configure()
+        {
+           
+        }
+        
         public override UniTask Show()
         {
             return default;

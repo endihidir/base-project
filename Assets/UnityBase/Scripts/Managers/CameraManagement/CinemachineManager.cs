@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CinemachineManager : ICinemachineDataService, IGameplayBootService
+    public class CinemachineManager : ICinemachineManager, IGameplayBootService
     {
         public static Action<GameState> OnChangeCamera;
 

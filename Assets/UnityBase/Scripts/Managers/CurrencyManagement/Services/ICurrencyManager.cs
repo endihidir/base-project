@@ -2,7 +2,7 @@
 
 namespace UnityBase.Service
 {
-    public interface ICurrencyManagementService
+    public interface ICurrencyManager
     {
         public event Action<int> OnCoinDataUpdate;
         public int SavedCoinAmount { get; }

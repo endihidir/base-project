@@ -24,13 +24,13 @@ namespace UnityBase.UI.ButtonCore
 #endif
 
         [Inject]
-        public void Construct(IUIBehaviourFactory uiButtonBehaviourFactory)
+        public void Construct(IButtonBehaviourFactory buttonButtonBehaviourFactory)
         {
-            Initialize(uiButtonBehaviourFactory);
+            Initialize(buttonButtonBehaviourFactory);
             _eventTrigger ??= gameObject.AddComponent<EventTrigger>();
             CreateEventTriggers();
         }
-        protected abstract void Initialize(IUIBehaviourFactory uiBehaviourFactory);
+        protected abstract void Initialize(IButtonBehaviourFactory buttonBehaviourFactory);
 
         private void OnEnable() => _button.onClick.AddListener(OnClickButton);
         private void OnDisable() => _button.onClick.RemoveListener(OnClickButton);

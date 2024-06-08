@@ -11,7 +11,7 @@ namespace UnityBase.Manager
         private readonly ILevelManagementService _levelManagementService;
         private readonly ITutorialActionManagementService _tutorialActionManagementService;
         private readonly ITutorialMaskManagementService _tutorialMaskManagementService;
-        private readonly IJsonDataManagementService _jsonDataManagementService;
+        private readonly IJsonDataManager _jsonDataManager;
         
         private const string TUTORIAL_STEP_KEY = "TutorialStepKey";
         private const string COMPLETED_TURORIAL_LEVEL_KEY = "CompletedTutorialLevelKey";
@@ -41,7 +41,7 @@ namespace UnityBase.Manager
         public bool IsSelectedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManagementService.LastSelectedChapterIndex, _levelManagementService.LastSelectedLevelIndex)
                                                       && !IsSelectedLevelTutorialCompleted();
 
-        public TutorialProcessManager(ManagerDataHolderSO managerDataHolderSo, ILevelManagementService levelManagementService, ITutorialActionManagementService tutorialActionManagementService, ITutorialMaskManagementService tutorialMaskManagementService, IJsonDataManagementService jsonDataManagementService)
+        public TutorialProcessManager(ManagerDataHolderSO managerDataHolderSo, ILevelManagementService levelManagementService, ITutorialActionManagementService tutorialActionManagementService, ITutorialMaskManagementService tutorialMaskManagementService, IJsonDataManager jsonDataManager)
         {
             _tutorialStepManagerSo = managerDataHolderSo.tutorialStepManagerSo;
 
@@ -55,7 +55,7 @@ namespace UnityBase.Manager
             _tutorialActionManagementService = tutorialActionManagementService;
             _tutorialMaskManagementService = tutorialMaskManagementService;
             
-            _jsonDataManagementService = jsonDataManagementService;
+            _jsonDataManager = jsonDataManager;
         }
 
         ~TutorialProcessManager() => Dispose();
@@ -196,12 +196,12 @@ namespace UnityBase.Manager
 
         private void SetCompletedTutorialLevelIndexes(CompletedTutorialLevelData array)
         {
-            _jsonDataManagementService.Save(CompletedTutorialLevelName, array);
+            _jsonDataManager.Save(CompletedTutorialLevelName, array);
         }
 
         private CompletedTutorialLevelData GetCompletedTutorialLevelIndexes()
         {
-            return _jsonDataManagementService.Load(CompletedTutorialLevelName, new CompletedTutorialLevelData(), false);
+            return _jsonDataManager.Load(CompletedTutorialLevelName, new CompletedTutorialLevelData(), false);
         }
 
         private bool IsTutorialStepDataEmpty()

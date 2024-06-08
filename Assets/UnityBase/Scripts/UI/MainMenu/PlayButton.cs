@@ -4,13 +4,13 @@ using UnityBase.UI.ButtonCore;
 
 public class PlayButton : ButtonUI
 {
-    private IUIBehaviourFactory _uiBehaviourFactory;
+    private IButtonBehaviourFactory _buttonBehaviourFactory;
     
-    protected override void Initialize(IUIBehaviourFactory uiBehaviourFactory)
+    protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
     {
-        _uiBehaviourFactory = uiBehaviourFactory;
+        _buttonBehaviourFactory = buttonBehaviourFactory;
         
-        _buttonBehaviour = _uiBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, ButtonClickAnim>(this)
+        _buttonBehaviour = _buttonBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, ButtonClickAnim>(this)
                                                  .SetActionConfigs(SceneType.Gameplay, true, 10f)
                                                  .SetAnimationConfigs(1.05f, 1f, 0.1f, Ease.InOutQuad);
     }

@@ -3,7 +3,7 @@ using UnityBase.Command;
 
 namespace UnityBase.Service
 {
-    public interface ICommandManagementService
+    public interface ICommandManager
     {
         public void AddRecorder(string groupName, ICommandRecorder commandRecorder);
         public void RemoveRecorder(string groupName, ICommandRecorder commandRecorder);

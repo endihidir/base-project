@@ -2,11 +2,16 @@
 
 namespace UnityBase.UI.ButtonCore
 {
-    public interface IViewModel<TData> where TData : struct
+    public interface IViewModel
     {
-        public Observable<TData> Views { get; }
-        public TData Serialize();
-        public void Deserialize(TData value);
         public void Dispose();
+    }
+    
+    public interface IViewModel<TData> : IViewModel where TData : struct
+    {
+        public Observable<TData> Values { get; }
+        public void OnValueChanged(TData value);
+        public T Serialize<T>() where T : struct;
+        public void Deserialize<T>(T value) where T : struct;
     }
 }

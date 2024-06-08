@@ -4,7 +4,7 @@ using CameraState = UnityBase.Manager.CameraState;
 
 namespace UnityBase.Service
 {
-    public interface ICinemachineDataService
+    public interface ICinemachineManager
     {
         public CinemachineVirtualCamera GetVirtualCam(CameraState cameraState);
         public void SetCamFollowTarget(CameraState cameraState, Transform target);

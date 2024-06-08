@@ -4,17 +4,15 @@ public interface IViewBehaviour
 {
     public void Dispose();
 }
-public interface IViewBehaviour<out TAnim> : IViewBehaviour
+
+public interface IViewAnimBehaviour<out TAnim> : IViewBehaviour where TAnim : IViewAnimation 
 {
     public TAnim ViewAnimation { get; }
-    public void ConfigureAnimation(params object[] parameters);
+    public IViewAnimBehaviour<TAnim> ConfigureAnimation(params object[] parameters);
 }
 
-public interface IViewBehaviour<out TAnim, out TModel, out TData> : IViewBehaviour<TAnim> where TModel : IViewModel<TData> 
-                                                                                          where TAnim : IViewAnimation 
-                                                                                          where TData : struct
+public interface IViewModelBehaviour<out TModel, TData> : IViewBehaviour where TModel : IViewModel<TData> where TData : struct 
 {
     public TModel ViewModel { get; }
-
-    public void ConfigureModel(params object[] parameters);
+    public IViewModelBehaviour<TModel, TData> ConfigureModel(params object[] parameters);
 }

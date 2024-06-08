@@ -7,7 +7,7 @@ public class NextLevelButton : ButtonUI
     [Inject] 
     private readonly ISceneManagementService _sceneManagementService;
 
-    protected override void Initialize(IUIBehaviourFactory uiBehaviourFactory)
+    protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
     {
         
     }

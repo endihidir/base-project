@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CommandManager : ICommandManagementService, IAppBootService
+    public class CommandManager : ICommandManager, IAppBootService
     {
         private IDictionary<string, CommandRecorderGroup> _commandRecorders = new Dictionary<string, CommandRecorderGroup>();
 
