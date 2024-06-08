@@ -1,6 +1,6 @@
 ﻿namespace UnityBase.Service
 {
-    public interface IGameDataService
+    public interface IGameManager
     {
         
     }

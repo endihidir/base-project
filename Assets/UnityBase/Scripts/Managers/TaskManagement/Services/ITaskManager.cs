@@ -1,6 +1,6 @@
 ﻿namespace UnityBase.Service
 {
-    public interface ITaskManagementService
+    public interface ITaskManager
     { 
         public void CreateTask(string key);
         public bool IsTaskCompleted(string key);

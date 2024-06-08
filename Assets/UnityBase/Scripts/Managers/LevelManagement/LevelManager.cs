@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class LevelManager : ILevelManagementService, IAppBootService
+    public class LevelManager : ILevelManager, IAppBootService
     {
         public static Func<int, bool> OnSelectChapter;
         public static Func<int, bool> OnSelectLevel;

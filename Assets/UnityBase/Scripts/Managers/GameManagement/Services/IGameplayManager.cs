@@ -2,7 +2,7 @@
 
 namespace UnityBase.Service
 {
-    public interface IGameplayManagementService
+    public interface IGameplayManager
     {
         public GameState CurrentGameState { get; }
         public void ChangeGameState(GameState nextGameState, float transitionDuration, float startDelay = 0f);

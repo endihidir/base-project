@@ -4,15 +4,15 @@ namespace UnityBase.UI.ButtonCore
 {
     public class SceneLoadAction : ButtonAction
     {
-        private readonly ISceneManagementService _sceneManagementService;
+        private readonly ISceneManager _sceneManager;
         
         private SceneType _sceneType;
         private bool _useLoadingScene;
         private float _progressMultiplier;
         
-        public SceneLoadAction(IButtonUI buttonUI, ISceneManagementService sceneManagementService) : base(buttonUI)
+        public SceneLoadAction(IButtonUI buttonUI, ISceneManager sceneManager) : base(buttonUI)
         {
-            _sceneManagementService = sceneManagementService;
+            _sceneManager = sceneManager;
         }
 
         public void Configure(SceneType sceneType, bool useLoadingScene, float progressMultiplier)
@@ -24,7 +24,7 @@ namespace UnityBase.UI.ButtonCore
         
         public override void OnClick()
         {
-            _sceneManagementService.LoadSceneAsync(_sceneType, _useLoadingScene, _progressMultiplier);
+            _sceneManager.LoadSceneAsync(_sceneType, _useLoadingScene, _progressMultiplier);
         }
         
         public override void OnPointerDown()

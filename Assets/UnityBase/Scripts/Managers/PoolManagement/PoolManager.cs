@@ -10,7 +10,7 @@ using VContainer;
 
 namespace UnityBase.Manager
 {
-    public class PoolManager : IPoolManagementService, IAppBootService
+    public class PoolManager : IPoolManager, IAppBootService
     {
         private PoolManagerSO _poolManagerSo;
         

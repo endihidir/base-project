@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class GameManager : IGameDataService, IAppBootService
+    public class GameManager : IGameManager, IAppBootService
     {
         private CanvasGroup _splashScreen;
         
-        private readonly ISceneManagementService _sceneManagementService;
+        private readonly ISceneManager _sceneManager;
 
         private bool _passSplashScreen;
         
@@ -20,11 +20,11 @@ namespace UnityBase.Manager
         
         private EventBinding<GameStateData> _gameStateBinding = new EventBinding<GameStateData>();
 
-        public GameManager(ManagerDataHolderSO managerDataHolderSo, ISceneManagementService sceneManagementService)
+        public GameManager(ManagerDataHolderSO managerDataHolderSo, ISceneManager sceneManager)
         {
             var gameManagerData = managerDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
-            _sceneManagementService = sceneManagementService;
+            _sceneManager = sceneManager;
             _passSplashScreen = gameManagerData.passSplashScreen;
             
             Application.targetFrameRate = gameManagerData.targetFrameRate;
@@ -40,7 +40,7 @@ namespace UnityBase.Manager
         {
             if (!_passSplashScreen) await StartSplashScreen();
 
-            _sceneManagementService.LoadSceneAsync(SceneType.MainMenu);
+            _sceneManager.LoadSceneAsync(SceneType.MainMenu);
         }
 
         private async UniTask StartSplashScreen()

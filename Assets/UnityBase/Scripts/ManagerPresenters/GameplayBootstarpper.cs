@@ -20,7 +20,7 @@ namespace UnityBase.Presenter
 
         private static void UpdateGameplayServices(IObjectResolver objectResolver)
         {
-            var poolManager = objectResolver.Resolve<IPoolManagementService>() as PoolManager;
+            var poolManager = objectResolver.Resolve<IPoolManager>() as PoolManager;
             poolManager?.UpdateAllResolvers(objectResolver);
 
             /*var currencyManager = objectResolver.Resolve<ICurrencyViewService>() as CurrencyManager;

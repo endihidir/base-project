@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TaskManager : ITaskManagementService, IAppBootService
+    public class TaskManager : ITaskManager, IAppBootService
     {
         private readonly IDictionary<string, bool> _tasks;
         public static Action<string> OnTaskComplete { get; }

@@ -10,10 +10,10 @@ public class LoadingBarUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _sliderTxt;
 
     [Inject] 
-    private readonly ISceneManagementService _sceneManagementService;
+    private readonly ISceneManager _sceneManager;
 
-    protected void OnEnable() => _sceneManagementService.OnLoadUpdate += SetProgressValue;
-    protected void OnDisable() => _sceneManagementService.OnLoadUpdate -= SetProgressValue;
+    protected void OnEnable() => _sceneManager.OnLoadUpdate += SetProgressValue;
+    protected void OnDisable() => _sceneManager.OnLoadUpdate -= SetProgressValue;
 
     private void SetProgressValue(float val)
     {

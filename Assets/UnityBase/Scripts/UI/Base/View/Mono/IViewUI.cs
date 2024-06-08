@@ -1,7 +1,6 @@
 ﻿using System;
-using UnityBase.UI.ButtonCore;
 
-namespace UnityBase.Manager
+namespace UnityBase.UI.ViewCore
 {
     public interface IViewUI
     {
@@ -18,5 +17,4 @@ namespace UnityBase.Manager
         public TData Value { get; set; }
         public IViewModelBehaviour<TModel, TData> ModelBehaviour { get; }
     }
-    
 }

@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityBase.Extensions;
-using UnityBase.Manager;
 using VContainer;
 
-namespace UnityBase.UI.ButtonCore
+namespace UnityBase.UI.ViewCore
 {
     public class ViewBehaviourFactory : IViewBehaviourFactory
     {
@@ -52,13 +51,20 @@ namespace UnityBase.UI.ButtonCore
             
             return null;
         }
-    }
-    
-    public interface IViewBehaviourFactory
-    {
-        public IViewAnimBehaviour<TAnim> CreateViewAnim<TAnim>(IViewAnimUI<TAnim> viewUI) where TAnim : class, IViewAnimation;
 
-        public IViewModelBehaviour<TModel, TData> CreateViewModel<TModel, TData>(IViewModelUI<TModel, TData> viewUI) where TModel : IViewModel<TData> where TData : struct;
-        public T GetViewUI<T>() where T : class, IViewUI;
+        public bool TryGetViewUI<T>(out T viewUI) where T : class, IViewUI
+        {
+            var key = typeof(T);
+            
+            viewUI = null;
+            
+            if (_viewAnimBehaviours.TryGetValue(key, out var view))
+            {
+                viewUI = view as T;
+                return true;
+            }
+            
+            return false;
+        }
     }
 }

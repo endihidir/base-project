@@ -8,10 +8,10 @@ public class LevelUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _levelTxt;
     
     [Inject] 
-    private readonly ILevelManagementService _levelManagementService;
+    private readonly ILevelManager _levelManager;
     
     private void Awake()
     {
-        _levelTxt.text = "LEVEL " + _levelManagementService.LevelText.ToString("0");
+        _levelTxt.text = "LEVEL " + _levelManager.LevelText.ToString("0");
     }
 }

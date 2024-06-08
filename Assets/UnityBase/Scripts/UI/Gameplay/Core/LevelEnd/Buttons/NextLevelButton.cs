@@ -5,7 +5,7 @@ using VContainer;
 public class NextLevelButton : ButtonUI
 {
     [Inject] 
-    private readonly ISceneManagementService _sceneManagementService;
+    private readonly ISceneManager _sceneManager;
 
     protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
     {

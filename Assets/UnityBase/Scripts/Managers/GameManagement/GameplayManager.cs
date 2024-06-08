@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class GameplayManager : IGameplayManagementService, IGameplayBootService
+    public class GameplayManager : IGameplayManager, IGameplayBootService
     {
         private readonly ITutorialProcessManagementService _tutorialProcessManagementService;
         

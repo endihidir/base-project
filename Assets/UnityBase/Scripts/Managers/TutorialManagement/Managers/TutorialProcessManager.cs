@@ -8,7 +8,7 @@ namespace UnityBase.Manager
 {
     public class TutorialProcessManager : ITutorialProcessManagementService, IAppBootService
     {
-        private readonly ILevelManagementService _levelManagementService;
+        private readonly ILevelManager _levelManager;
         private readonly ITutorialActionManagementService _tutorialActionManagementService;
         private readonly ITutorialMaskManagementService _tutorialMaskManagementService;
         private readonly IJsonDataManager _jsonDataManager;
@@ -35,13 +35,13 @@ namespace UnityBase.Manager
             set => PlayerPrefs.SetInt(TUTORIAL_STEP_KEY, value);
         }
 
-        public bool IsUnlockedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManagementService.LastUnlockedChapterIndex, _levelManagementService.LastUnlockedLevelIndex)
+        public bool IsUnlockedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManager.LastUnlockedChapterIndex, _levelManager.LastUnlockedLevelIndex)
                                                       && !IsUnlockedLevelTutorialCompleted();
 
-        public bool IsSelectedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManagementService.LastSelectedChapterIndex, _levelManagementService.LastSelectedLevelIndex)
+        public bool IsSelectedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManager.LastSelectedChapterIndex, _levelManager.LastSelectedLevelIndex)
                                                       && !IsSelectedLevelTutorialCompleted();
 
-        public TutorialProcessManager(ManagerDataHolderSO managerDataHolderSo, ILevelManagementService levelManagementService, ITutorialActionManagementService tutorialActionManagementService, ITutorialMaskManagementService tutorialMaskManagementService, IJsonDataManager jsonDataManager)
+        public TutorialProcessManager(ManagerDataHolderSO managerDataHolderSo, ILevelManager levelManager, ITutorialActionManagementService tutorialActionManagementService, ITutorialMaskManagementService tutorialMaskManagementService, IJsonDataManager jsonDataManager)
         {
             _tutorialStepManagerSo = managerDataHolderSo.tutorialStepManagerSo;
 
@@ -51,7 +51,7 @@ namespace UnityBase.Manager
             _tutorialSubStepIndex = _tutorialStepManagerSo.tutorialSubStepIndex;
             _currentTutorialSubStep = _tutorialStepManagerSo.currentTutorialSubStep;
 
-            _levelManagementService = levelManagementService;
+            _levelManager = levelManager;
             _tutorialActionManagementService = tutorialActionManagementService;
             _tutorialMaskManagementService = tutorialMaskManagementService;
             
@@ -99,7 +99,7 @@ namespace UnityBase.Manager
                 _tutorialSubStepIndex = 0;
                 _tutorialStepManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
 
-                _completedTutorialLevelData.indexes.Add(_levelManagementService.LastUnlockedLevelIndex);
+                _completedTutorialLevelData.indexes.Add(_levelManager.LastUnlockedLevelIndex);
 
                 SetCompletedTutorialLevelIndexes(_completedTutorialLevelData);
 
@@ -145,7 +145,7 @@ namespace UnityBase.Manager
         {
             if (IsTutorialStepDataEmpty()) return false;
 
-            var selectedLevelIndex = _levelManagementService.LastSelectedLevelIndex;
+            var selectedLevelIndex = _levelManager.LastSelectedLevelIndex;
 
             var isSelectedLevelTutorialCompleted = _completedTutorialLevelData.indexes.Contains(selectedLevelIndex);
 
@@ -154,7 +154,7 @@ namespace UnityBase.Manager
 
         private bool IsUnlockedLevelTutorialCompleted()
         {
-            var unlockedChapterIndex = _levelManagementService.LastUnlockedLevelIndex;
+            var unlockedChapterIndex = _levelManager.LastUnlockedLevelIndex;
 
             var isUnlockedLevelTutorialCompleted = _completedTutorialLevelData.indexes.Contains(unlockedChapterIndex);
 
@@ -192,7 +192,7 @@ namespace UnityBase.Manager
             return _tutorialStepData[TutorialStepIndex];
         }
 
-        private string CompletedTutorialLevelName => _levelManagementService.LastSelectedChapterIndex + "_" + COMPLETED_TURORIAL_LEVEL_KEY;
+        private string CompletedTutorialLevelName => _levelManager.LastSelectedChapterIndex + "_" + COMPLETED_TURORIAL_LEVEL_KEY;
 
         private void SetCompletedTutorialLevelIndexes(CompletedTutorialLevelData array)
         {

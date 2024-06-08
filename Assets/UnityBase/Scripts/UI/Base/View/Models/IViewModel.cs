@@ -1,6 +1,6 @@
 ﻿using UnityBase.Observable;
 
-namespace UnityBase.UI.ButtonCore
+namespace UnityBase.UI.ViewCore
 {
     public interface IViewModel
     {

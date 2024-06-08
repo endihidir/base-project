@@ -1,9 +1,7 @@
-﻿using System;
-using UnityBase.Manager;
-using UnityBase.Observable;
+﻿using UnityBase.Observable;
 using UnityBase.Service;
 
-namespace UnityBase.UI.ButtonCore
+namespace UnityBase.UI.ViewCore
 {
     public class CoinViewModel : IViewModel<int>
     {

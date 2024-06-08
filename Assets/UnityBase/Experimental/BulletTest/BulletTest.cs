@@ -15,7 +15,7 @@ public class BulletTest : MonoBehaviour, IPoolable
     protected Collider _collider;
 
     [Inject]
-    protected readonly IPoolManagementService PoolManagementService;
+    protected readonly IPoolManager PoolManager;
 
     private void Awake()
     {
@@ -57,7 +57,7 @@ public class BulletTest : MonoBehaviour, IPoolable
         {
             _collider.enabled = false;
             
-            PoolManagementService.HideObject(this, 1f, 0f, default);
+            PoolManager.HideObject(this, 1f, 0f, default);
         }
     }
 

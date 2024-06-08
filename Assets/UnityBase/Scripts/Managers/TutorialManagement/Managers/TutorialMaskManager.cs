@@ -24,9 +24,9 @@ namespace UnityBase.Manager
 
         private CancellationTokenSource _delayCancellationToken;
 
-        private readonly IPoolManagementService _poolManagementService;
+        private readonly IPoolManager _poolManager;
 
-        public TutorialMaskManager(ManagerDataHolderSO managerDataHolderSo, IPoolManagementService poolManagementService)
+        public TutorialMaskManager(ManagerDataHolderSO managerDataHolderSo, IPoolManager poolManager)
         {
             var maskManagerSo = managerDataHolderSo.tutorialMaskManagerSo;
 
@@ -36,7 +36,7 @@ namespace UnityBase.Manager
 
             _maskFadePanel = maskManagerSo.maskFadePanel;
 
-            _poolManagementService = poolManagementService;
+            _poolManager = poolManager;
         }
 
         ~TutorialMaskManager() => Dispose();
@@ -47,7 +47,7 @@ namespace UnityBase.Manager
         // Note : If masks spawn on the same position, they don't appear !!!
         public MaskUI GetMask(Vector3 position, MaskUIData maskUIData, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default)
         {
-            var selectedMask = _poolManagementService.GetObject<MaskUI>(show, duration, delay, onComplete);
+            var selectedMask = _poolManager.GetObject<MaskUI>(show, duration, delay, onComplete);
 
             PrepareMask(selectedMask, position, maskUIData);
 
@@ -60,11 +60,11 @@ namespace UnityBase.Manager
         {
             maskUI = default;
 
-            var poolCount = _poolManagementService.GetPoolCount<MaskUI>();
+            var poolCount = _poolManager.GetPoolCount<MaskUI>();
 
             if (poolCount < 1) return false;
 
-            maskUI = _poolManagementService.GetObject<MaskUI>(show, duration, delay, onComplete);
+            maskUI = _poolManager.GetObject<MaskUI>(show, duration, delay, onComplete);
 
             PrepareMask(maskUI, position, maskUIData);
 
@@ -79,7 +79,7 @@ namespace UnityBase.Manager
 
             for (int i = 0; i < positions.Length; i++)
             {
-                var selectedMask = _poolManagementService.GetObject<MaskUI>(show, duration, delay, onComplete);
+                var selectedMask = _poolManager.GetObject<MaskUI>(show, duration, delay, onComplete);
 
                 PrepareMask(selectedMask, positions[i], maskUIData);
 
@@ -95,13 +95,13 @@ namespace UnityBase.Manager
         {
             masks = new MaskUI[positions.Length];
 
-            var poolCount = _poolManagementService.GetPoolCount<MaskUI>();
+            var poolCount = _poolManager.GetPoolCount<MaskUI>();
 
             if (poolCount < positions.Length) return false;
 
             for (int i = 0; i < positions.Length; i++)
             {
-                var selectedMask = _poolManagementService.GetObject<MaskUI>(show, duration, delay, onComplete);
+                var selectedMask = _poolManager.GetObject<MaskUI>(show, duration, delay, onComplete);
 
                 var position = positions[i];
 
@@ -117,7 +117,7 @@ namespace UnityBase.Manager
 
         public async void HideMask(MaskUI maskUI, float killDuration = 0f, float delay = 0f, Action onComplete = default)
         {
-            _poolManagementService.HideObject(maskUI, killDuration, delay, onComplete);
+            _poolManager.HideObject(maskUI, killDuration, delay, onComplete);
 
             var raycastFitter = _maskRaycastFilters.FirstOrDefault(x => x.TargetMaskUI == maskUI);
 
@@ -131,14 +131,14 @@ namespace UnityBase.Manager
 
         public async void HideAllMasks(float killDuration = 0f, float delay = 0f)
         {
-            _poolManagementService.HideAllObjectsOfType<MaskUI>(killDuration, delay);
+            _poolManager.HideAllObjectsOfType<MaskUI>(killDuration, delay);
 
             _maskRaycastFilters.ForEach(x => x.TargetMaskUI = null);
 
             await DeactivateFadePanelAsync(killDuration, delay);
         }
         
-        public void RemoveMaskPool<T>() where T : MaskUI => _poolManagementService.RemovePool<T>();
+        public void RemoveMaskPool<T>() where T : MaskUI => _poolManager.RemovePool<T>();
 
         //---------------------------------------------------------------------------------------------------------------
         

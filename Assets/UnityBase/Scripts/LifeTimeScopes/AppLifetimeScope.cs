@@ -4,6 +4,7 @@ using UnityBase.Presenter;
 using UnityBase.ManagerSO;
 using UnityBase.SceneManagement;
 using UnityBase.UI.ButtonCore;
+using UnityBase.UI.ViewCore;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;

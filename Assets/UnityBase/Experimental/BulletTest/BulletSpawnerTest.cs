@@ -8,7 +8,7 @@ using VContainer;
 public class BulletSpawnerTest : MonoBehaviour
 {
     [Inject] 
-    private readonly IPoolManagementService _poolManagementService;
+    private readonly IPoolManager _poolManager;
 
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -25,7 +25,7 @@ public class BulletSpawnerTest : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    var bullet = _poolManagementService.GetObject<BulletTest>(true,0f,0f);
+                    var bullet = _poolManager.GetObject<BulletTest>(true,0f,0f);
 
                     bullet.transform.SetParent(transform);
                

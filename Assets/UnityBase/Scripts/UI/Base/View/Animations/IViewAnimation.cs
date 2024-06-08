@@ -1,6 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 
-namespace UnityBase.UI.ButtonCore
+namespace UnityBase.UI.ViewCore
 {
     public interface IViewAnimation
     {

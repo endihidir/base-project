@@ -2,7 +2,7 @@
 
 namespace UnityBase.Service
 {
-    public interface ILevelManagementService
+    public interface ILevelManager
     {
         public int LastSelectedChapterIndex { get; }
         public int LastSelectedLevelIndex { get; }

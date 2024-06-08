@@ -6,15 +6,15 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class PopUpManager : IPopUpManagementService, IAppBootService
+    public class PopUpManager : IPopUpManager, IAppBootService
     {
         private Transform _popUpParent, _settingsPopUpParent;
 
-        private readonly IPoolManagementService _poolManagementService;
+        private readonly IPoolManager _poolManager;
 
-        public PopUpManager(ManagerDataHolderSO managerDataHolderSo, IPoolManagementService poolManagementService)
+        public PopUpManager(ManagerDataHolderSO managerDataHolderSo, IPoolManager poolManager)
         {
-            _poolManagementService = poolManagementService;
+            _poolManager = poolManager;
             _popUpParent = managerDataHolderSo.popUpManagerSo.popUpParent;
             _settingsPopUpParent = managerDataHolderSo.popUpManagerSo.settingsPopUpParent;
         }
@@ -26,7 +26,7 @@ namespace UnityBase.Manager
         {
             var pos = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f);
 
-            var popUp = _poolManagementService.GetObject<T>(show, duration, delay);
+            var popUp = _poolManager.GetObject<T>(show, duration, delay);
 
             popUp.transform.position = pos;
 
@@ -41,19 +41,19 @@ namespace UnityBase.Manager
 
         public void HidePopUp(PopUp popUp, float duration = 0.2f, float delay = 0f, Action onComplete = default)
         {
-            _poolManagementService.HideObject(popUp, duration, delay, onComplete);
+            _poolManager.HideObject(popUp, duration, delay, onComplete);
         }
         
         public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default) where T : PopUp
         {
-            _poolManagementService.HideAllObjectsOfType<T>(duration, delay, onComplete);
+            _poolManager.HideAllObjectsOfType<T>(duration, delay, onComplete);
         }
         
         public void HideAllPopUp(float duration = 0.2f, float delay = 0f)
         {
-            _poolManagementService.HideAllObjectsOfType<PopUp>(duration, delay);
+            _poolManager.HideAllObjectsOfType<PopUp>(duration, delay);
         }
         
-        public void RemovePopUpPool<T>() where T : PopUp => _poolManagementService.RemovePool<T>();
+        public void RemovePopUpPool<T>() where T : PopUp => _poolManager.RemovePool<T>();
     }
 }

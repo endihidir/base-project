@@ -2,7 +2,7 @@
 
 namespace UnityBase.Service
 {
-    public interface ISwipeManagementService
+    public interface ISwipeManager
     {
         public Direction GetSwipeDirection();
         public Vector3 SerializeDirection(Direction direction);

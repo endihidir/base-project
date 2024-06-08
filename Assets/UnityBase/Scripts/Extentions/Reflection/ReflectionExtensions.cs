@@ -27,6 +27,24 @@ namespace UnityBase.Extensions
             return (T)Activator.CreateInstance(typeof(T), finalArgs.ToArray());
         }
         
+        public static T CreateInstance<T>( params object[] args)
+        {
+            var constructor = typeof(T).GetConstructors()[0];
+            
+            var parameters = constructor.GetParameters();
+            
+            var finalArgs = new List<object>();
+
+            foreach (var parameter in parameters)
+            {
+                var matchingArg = args.FirstOrDefault(arg => parameter.ParameterType.IsInstanceOfType(arg));
+                
+                finalArgs.Add(matchingArg);
+            }
+
+            return (T)Activator.CreateInstance(typeof(T), finalArgs.ToArray());
+        }
+        
         public static void ConfigureMethod<T>(this T target, string methodName, params object[] parameters)
         {
             var methods = target.GetType().GetMethods()

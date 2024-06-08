@@ -1,8 +1,7 @@
 using System;
 using Sirenix.OdinInspector;
 using TMPro;
-using UnityBase.Manager;
-using UnityBase.UI.ButtonCore;
+using UnityBase.UI.ViewCore;
 using UnityEngine;
 using VContainer;
 

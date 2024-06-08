@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace UnityBase.SceneManagement
 {
-    public class SceneGroupManager : ISceneManagementService, IAppBootService
+    public class SceneGroupManager : ISceneManager, IAppBootService
     { 
         public event Action<float> OnLoadUpdate;
 
