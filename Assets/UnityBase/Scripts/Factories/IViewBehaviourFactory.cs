@@ -2,9 +2,9 @@ namespace UnityBase.UI.ViewCore
 {
     public interface IViewBehaviourFactory
     {
-        public IViewAnimBehaviour<TAnim> CreateViewAnim<TAnim>(IViewAnimUI<TAnim> viewUI) where TAnim : class, IViewAnimation;
-        public IViewModelBehaviour<TModel, TData> CreateViewModel<TModel, TData>(IViewModelUI<TModel, TData> viewUI) where TModel : IViewModel<TData> where TData : struct;
-        public T GetViewUI<T>() where T : class, IViewUI;
-        public bool TryGetViewUI<T>(out T viewUI) where T : class, IViewUI;
+        public IViewBehaviour<TAnim> CreateViewAnimationBehaviour<TAnim>(IViewUI viewUI) where TAnim : class, IViewAnimation;
+        public IViewBehaviour<TModel, TData> CreateViewModelBehaviour<TModel, TData>(IViewUI viewUI) where TModel : IViewModel<TData> where TData : struct;
+        public bool TryGetAnimationBehaviour<TViewUI>(out IViewBehaviour<IViewAnimation> viewBehaviour) where TViewUI : IViewUI;
+        public bool TryGetModelBehaviour<TViewUI>(out IViewBehaviour viewBehaviour) where TViewUI : IViewUI;
     }
 }

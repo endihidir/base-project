@@ -7,18 +7,29 @@ namespace UnityBase.UI.ViewCore
     {
         public Observable<int> Values { get; }
 
+        private readonly IViewUI _viewUI;
+
         private readonly IJsonDataManager _jsonDataManager;
+
+        private int _value;
         
-        public CoinViewModel(IViewModelUI<CoinViewModel, int> viewModelUI, IJsonDataManager jsonDataManager)
+        public CoinViewModel(IViewUI viewUI, IJsonDataManager jsonDataManager)
         {
+            _viewUI = viewUI;
+            
             _jsonDataManager = jsonDataManager;
            
-            Values = new Observable<int>(viewModelUI.Value);
+            Values = new Observable<int>(_value);
             
             Values.AddListener(OnValueChanged);
         }
         
         public void Configure()
+        {
+            
+        }
+
+        public void ChangeValue(int value)
         {
             
         }

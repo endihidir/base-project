@@ -7,7 +7,9 @@ namespace UnityBase.UI.ViewCore
 {
     public class ViewBehaviourFactory : IViewBehaviourFactory
     {
-        private readonly IDictionary<Type, IViewUI> _viewAnimBehaviours;
+        private readonly IDictionary<Type, IViewAnimationGroup> _viewAnimations;
+
+        private readonly IDictionary<Type, IViewBehaviour> _viewModels;
         
         private readonly IObjectResolver _container;
 
@@ -15,56 +17,59 @@ namespace UnityBase.UI.ViewCore
         {
             _container = container;
 
-            _viewAnimBehaviours = new Dictionary<Type, IViewUI>();
+            _viewAnimations = new Dictionary<Type, IViewAnimationGroup>();
         }
 
-        public IViewAnimBehaviour<TAnim> CreateViewAnim<TAnim>(IViewAnimUI<TAnim> viewUI) where TAnim : class, IViewAnimation
+        public IViewBehaviour<TAnim> CreateViewAnimationBehaviour<TAnim>(IViewUI viewUI) where TAnim : class, IViewAnimation
         {
-            _viewAnimBehaviours[viewUI.Key] = viewUI;
-            
             var viewAnimation = ReflectionExtensions.CreateInstance<TAnim>(_container, viewUI);
             
             var viewBehaviour = new ViewAnimBehaviour<TAnim>(viewAnimation);
+            
+            AddViewAnimation(viewUI.Key, viewBehaviour);
 
             return viewBehaviour;
         }
 
-        public IViewModelBehaviour<TModel, TData> CreateViewModel<TModel, TData>(IViewModelUI<TModel, TData> viewUI) where TModel : IViewModel<TData> where TData : struct
+        public IViewBehaviour<TModel, TData> CreateViewModelBehaviour<TModel, TData>(IViewUI viewUI) where TModel : IViewModel<TData> where TData : struct
         {
-            _viewAnimBehaviours[viewUI.Key] = viewUI;
-            
             var viewModel = ReflectionExtensions.CreateInstance<TModel>(_container, viewUI);
 
             var viewBehaviour = new ViewModelBehaviour<TModel, TData>(viewModel);
+            
+            _viewModels[viewUI.Key] = viewBehaviour;
 
             return viewBehaviour;
         }
 
-        public T GetViewUI<T>() where T : class, IViewUI
+        public bool TryGetAnimationBehaviour<TViewUI>(out IViewBehaviour<IViewAnimation> viewBehaviour) where TViewUI : IViewUI
         {
-            var key = typeof(T);
+            viewBehaviour = null;
             
-            if (_viewAnimBehaviours.TryGetValue(key, out var viewUI))
-            {
-                return viewUI as T;
-            }
+            var key = typeof(TViewUI);
             
-            return null;
+            return _viewAnimations.TryGetValue(key, out var viewAnimationGroup) && viewAnimationGroup.TryGetAnimationBehaviour(out viewBehaviour);
         }
 
-        public bool TryGetViewUI<T>(out T viewUI) where T : class, IViewUI
+        public bool TryGetModelBehaviour<TViewUI>(out IViewBehaviour viewBehaviour) where TViewUI : IViewUI
         {
-            var key = typeof(T);
+            viewBehaviour = null;
             
-            viewUI = null;
-            
-            if (_viewAnimBehaviours.TryGetValue(key, out var view))
+            var key = typeof(TViewUI);
+
+            return _viewModels.TryGetValue(key, out viewBehaviour);
+        }
+        
+        private void AddViewAnimation(Type key, IViewBehaviour<IViewAnimation> viewBehaviour)
+        {
+            if (!_viewAnimations.TryGetValue(key, out var viewAnimationGroup))
             {
-                viewUI = view as T;
-                return true;
+                viewAnimationGroup = new ViewAnimationGroup();
+                
+                _viewAnimations[key] = viewAnimationGroup;
             }
             
-            return false;
+            _viewAnimations[key].AddAnimationBehaviour(viewBehaviour);
         }
     }
 }
