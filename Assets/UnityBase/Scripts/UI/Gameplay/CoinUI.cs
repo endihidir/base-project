@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityBase.UI.ViewCore;
 using UnityEngine;
@@ -11,19 +10,16 @@ public class CoinUI : MonoBehaviour, IViewUI
     [SerializeField] private TextMeshProUGUI _coinTxt;
 
     [SerializeField] private Transform _coinIconT;
-    public Type Key => GetType();
-
-    private IViewBehaviour _viewAnimBehaviour, _viewModelBehaviour;
     
     [Inject]
-    private void Construct(IViewBehaviourFactory viewBehaviourFactory)
+    public void Construct(IViewBehaviourFactory viewBehaviourFactory)
     {
-        _viewAnimBehaviour = viewBehaviourFactory.CreateViewAnimationBehaviour<InOutView>(this);
+        viewBehaviourFactory.CreateViewAnimation<MoveView>(this);
+        viewBehaviourFactory.CreateViewModel<CoinViewModel>(this);
     }
     
     private void OnDestroy()
     {
-        _viewAnimBehaviour?.Dispose();
-        _viewModelBehaviour?.Dispose();
+       
     }
 }

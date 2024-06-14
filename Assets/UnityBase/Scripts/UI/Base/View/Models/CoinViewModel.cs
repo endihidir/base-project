@@ -3,52 +3,43 @@ using UnityBase.Service;
 
 namespace UnityBase.UI.ViewCore
 {
-    public class CoinViewModel : IViewModel<int>
+    public class CoinViewModel : ICoinModel
     {
-        public Observable<int> Values { get; }
-
-        private readonly IViewUI _viewUI;
+        public Observable<int> Coins { get; }
 
         private readonly IJsonDataManager _jsonDataManager;
 
         private int _value;
         
-        public CoinViewModel(IViewUI viewUI, IJsonDataManager jsonDataManager)
+        public CoinViewModel(IJsonDataManager jsonDataManager)
         {
-            _viewUI = viewUI;
-            
             _jsonDataManager = jsonDataManager;
            
-            Values = new Observable<int>(_value);
-            
-            Values.AddListener(OnValueChanged);
+            Coins = new Observable<int>(_value);
         }
         
-        public void Configure()
+        public CoinData Serialize()
         {
-            
+            return _jsonDataManager.Load<CoinData>("CoinData");
         }
 
-        public void ChangeValue(int value)
+        public void Deserialize(CoinData savedData)
         {
-            
-        }
-
-        public void OnValueChanged(int value)
-        {
-            
-        }
-
-        public T Serialize<T>() where T : struct
-        {
-            return _jsonDataManager.Load<T>("CoinData");
-        }
-
-        public void Deserialize<T>(T value) where T : struct
-        {
-            _jsonDataManager.Save("CoinData", value);
+            _jsonDataManager.Save("CoinData", savedData);
         }
         
-        public void Dispose() => Values?.Dispose();
+        public void Dispose() => Coins?.Dispose();
+    }
+    
+    public interface ICoinModel : IViewModel
+    {
+        public Observable<int> Coins { get; }
+        CoinData Serialize();
+        void Deserialize(CoinData savedData);
+    }
+
+    public struct CoinData
+    {
+        
     }
 }

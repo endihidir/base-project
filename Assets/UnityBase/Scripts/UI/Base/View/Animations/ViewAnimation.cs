@@ -1,32 +1,15 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using DG.Tweening;
+using UnityEngine;
 
 namespace UnityBase.UI.ViewCore
 {
-    public abstract class ViewAnimation : IViewAnimation
+    public class MoveView : IViewAnimation
     {
-        public abstract UniTask Show();
-        public abstract UniTask Hide();
-        public abstract void Dispose();
-    }
+        private Transform _mainTransform;
 
-    public class InOutView : ViewAnimation
-    {
-        public void Configure()
-        {
-           
-        }
+        private Tween _moveTween;
         
-        public override UniTask Show()
-        {
-            return default;
-        }
-
-        public override UniTask Hide()
-        {
-            return default;
-        }
-
-        public override void Dispose()
+        public void Dispose()
         {
             
         }

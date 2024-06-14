@@ -150,7 +150,8 @@ namespace UnityBase.Manager
                     continue;
                 }
 
-                var poolable = poolableAsset.poolObject.GetComponent<IPoolable>();
+                var isPoolable = poolableAsset.poolObject.TryGetComponent<IPoolable>(out var poolable);
+                if(!isPoolable) continue;
                 var key = poolable.PoolableObject.GetType();
                 if (_poolableGroups.ContainsKey(key)) continue;
                 var poolableObjectGroup = new PoolableObjectGroup();
@@ -160,7 +161,7 @@ namespace UnityBase.Manager
         }
         
         private void CreateAllCachedPoolables() => _poolableGroups.Where(poolData=> !poolData.Value.IsLazy)
-                                                                 .ForEach(x => x.Value.CreatePool());
+                                                                  .ForEach(x => x.Value.CreatePool());
 
         private PoolableObjectGroup CreateNewGroup<T>() where T : IPoolable
         {
