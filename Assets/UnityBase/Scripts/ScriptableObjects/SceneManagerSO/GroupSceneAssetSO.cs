@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/SceneManagement/GroupSceneAsset")]
     public class GroupSceneAssetSO : SceneAssetSO

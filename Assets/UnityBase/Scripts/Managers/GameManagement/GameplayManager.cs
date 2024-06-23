@@ -11,7 +11,8 @@ namespace UnityBase.Manager
 {
     public class GameplayManager : IGameplayManager, IGameplayBootService
     {
-        private readonly ITutorialProcessManagementService _tutorialProcessManagementService;
+        private readonly ISceneManager _sceneManager;
+        private readonly ITutorialProcessManager _tutorialProcessManager;
         
         private GameState _currentGameState = GameState.GameLoadingState;
         public GameState CurrentGameState => _currentGameState;
@@ -20,21 +21,31 @@ namespace UnityBase.Manager
 
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public GameplayManager(ITutorialProcessManagementService tutorialProcessManagementService)
+        public GameplayManager(ISceneManager sceneManager, ITutorialProcessManager tutorialProcessManager)
         {
-            
-            _tutorialProcessManagementService = tutorialProcessManagementService;
+            _sceneManager = sceneManager;
+            _tutorialProcessManager = tutorialProcessManager;
         }
 
         ~GameplayManager() => Dispose();
 
         public void Initialize()
         {
-            InitializeGameState();
+            _sceneManager.OnSceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(SceneType sceneType)
+        {
+            if (sceneType == SceneType.Gameplay)
+            {
+                InitializeGameState();
+            }
         }
 
         public void Dispose()
         {
+            _sceneManager.OnSceneLoaded -= OnSceneLoaded;
+            
             DisposeToken();
             
             _currentGameState = GameState.GameLoadingState;
@@ -44,14 +55,14 @@ namespace UnityBase.Manager
 
         private void InitializeGameState()
         {
-            if (_tutorialProcessManagementService.IsSelectedLevelTutorialEnabled)
+            if (_tutorialProcessManager.IsSelectedLevelTutorialEnabled)
             {
                 TutorialProcessManager.OnCompleteTutorialStep?.Invoke();
             }
             
-            var gameState = _tutorialProcessManagementService.IsSelectedLevelTutorialEnabled ? GameState.GameTutorialState : GameState.GamePlayState;
+            var gameState = _tutorialProcessManager.IsSelectedLevelTutorialEnabled ? GameState.GameTutorialState : GameState.GamePlayState;
 
-            ChangeGameState(gameState, 1f, 0.5f);
+            ChangeGameState(gameState, 1f);
         }
 
         public async void ChangeGameState(GameState nextGameState, float transitionDuration = 0f, float startDelay = 0f)

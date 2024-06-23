@@ -46,7 +46,5 @@ namespace UnityBase.PopUpCore
             _canvasGroup.interactable = interactable;
             _canvasGroup.blocksRaycasts = raycastTarget;
         }
-
-        protected virtual void OnDestroy() { }
     }
 }

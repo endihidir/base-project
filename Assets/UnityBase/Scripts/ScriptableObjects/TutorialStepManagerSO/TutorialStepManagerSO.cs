@@ -1,7 +1,7 @@
 using UnityBase.Manager;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/TutorialStepManagerData")]
     public class TutorialStepManagerSO : ScriptableObject

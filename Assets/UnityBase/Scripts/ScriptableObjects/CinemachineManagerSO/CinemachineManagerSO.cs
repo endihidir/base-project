@@ -1,7 +1,7 @@
 using Cinemachine;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(fileName = "CinemachineManagerData", menuName = "Game/ManagerData/CinemachineManagerData")]
     public class CinemachineManagerSO : ScriptableObject

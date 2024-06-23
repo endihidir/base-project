@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
+using UnityBase.Managers.SO;
 using UnityBase.Service;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TutorialProcessManager : ITutorialProcessManagementService, IAppBootService
+    public class TutorialProcessManager : ITutorialProcessManager, IAppBootService
     {
         private readonly ILevelManager _levelManager;
-        private readonly ITutorialActionManagementService _tutorialActionManagementService;
-        private readonly ITutorialMaskManagementService _tutorialMaskManagementService;
+        private readonly ITutorialActionManager _tutorialActionManager;
+        private readonly ITutorialMaskManager _tutorialMaskManager;
         private readonly IJsonDataManager _jsonDataManager;
         
         private const string TUTORIAL_STEP_KEY = "TutorialStepKey";
@@ -41,9 +42,9 @@ namespace UnityBase.Manager
         public bool IsSelectedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManager.LastSelectedChapterIndex, _levelManager.LastSelectedLevelIndex)
                                                       && !IsSelectedLevelTutorialCompleted();
 
-        public TutorialProcessManager(ManagerDataHolderSO managerDataHolderSo, ILevelManager levelManager, ITutorialActionManagementService tutorialActionManagementService, ITutorialMaskManagementService tutorialMaskManagementService, IJsonDataManager jsonDataManager)
+        public TutorialProcessManager(GameDataHolderSO gameDataHolderSo, ILevelManager levelManager, ITutorialActionManager tutorialActionManager, ITutorialMaskManager tutorialMaskManager, IJsonDataManager jsonDataManager)
         {
-            _tutorialStepManagerSo = managerDataHolderSo.tutorialStepManagerSo;
+            _tutorialStepManagerSo = gameDataHolderSo.tutorialStepManagerSo;
 
             _disableTutorial = _tutorialStepManagerSo.disableTutorial;
             _tutorialStepData = _tutorialStepManagerSo.tutorialStepData;
@@ -52,8 +53,8 @@ namespace UnityBase.Manager
             _currentTutorialSubStep = _tutorialStepManagerSo.currentTutorialSubStep;
 
             _levelManager = levelManager;
-            _tutorialActionManagementService = tutorialActionManagementService;
-            _tutorialMaskManagementService = tutorialMaskManagementService;
+            _tutorialActionManager = tutorialActionManager;
+            _tutorialMaskManager = tutorialMaskManager;
             
             _jsonDataManager = jsonDataManager;
         }
@@ -78,8 +79,8 @@ namespace UnityBase.Manager
         {
             if (IsTutorialStepDataEmpty()) return;
 
-            _tutorialActionManagementService.HideAllTutorials();
-            _tutorialMaskManagementService.HideAllMasks();
+            _tutorialActionManager.HideAllTutorials();
+            _tutorialMaskManager.HideAllMasks();
 
             UpdateTutorialSubSteps();
         }

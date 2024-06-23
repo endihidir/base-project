@@ -1,7 +1,7 @@
 using System;
 using Cinemachine;
 using UnityBase.Controller;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
 using UnityBase.Service;
 using UnityEngine;
 
@@ -23,9 +23,9 @@ namespace UnityBase.Manager
 
         private CameraState _currentCameraState;
 
-        public CinemachineManager(ManagerDataHolderSO managerDataHolderSo)
+        public CinemachineManager(GameDataHolderSO gameDataHolderSo)
         {
-            var cinemachineData = managerDataHolderSo.cinemachineManagerSo;
+            var cinemachineData = gameDataHolderSo.cinemachineManagerSo;
             _stateDrivenCameras = cinemachineData.stateDrivenCameras;
             _cinemachineBrain = cinemachineData.cinemachineBrain;
             _cinemachineBrain.m_UpdateMethod = cinemachineData.cinemachineUpdateMethod;

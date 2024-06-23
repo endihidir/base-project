@@ -1,8 +1,8 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityBase.EventBus;
+using UnityBase.GameDataHolder;
 using UnityBase.Manager.Data;
-using UnityBase.ManagerSO;
 using UnityBase.Service;
 using UnityEngine;
 
@@ -20,9 +20,9 @@ namespace UnityBase.Manager
         
         private EventBinding<GameStateData> _gameStateBinding = new EventBinding<GameStateData>();
 
-        public GameManager(ManagerDataHolderSO managerDataHolderSo, ISceneManager sceneManager)
+        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneManager sceneManager)
         {
-            var gameManagerData = managerDataHolderSo.gameManagerSo;
+            var gameManagerData = gameDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
             _sceneManager = sceneManager;
             _passSplashScreen = gameManagerData.passSplashScreen;

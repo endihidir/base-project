@@ -1,7 +1,7 @@
 using UnityBase.Command;
+using UnityBase.GameDataHolder;
 using UnityBase.Manager;
 using UnityBase.Presenter;
-using UnityBase.ManagerSO;
 using UnityBase.SceneManagement;
 using UnityBase.UI.ButtonCore;
 using UnityBase.UI.ViewCore;
@@ -13,13 +13,13 @@ namespace UnityBase.BaseLifetimeScope
 {
     public class AppLifetimeScope : LifetimeScope
     {
-        [SerializeField] private ManagerDataHolderSO _managerDataHolderSo;
+        [SerializeField] private GameDataHolderSO gameDataHolderSo;
 
         protected override void Configure(IContainerBuilder builder)
         {
-            _managerDataHolderSo.Initialize();
+            gameDataHolderSo.Initialize();
             
-            builder.RegisterInstance(_managerDataHolderSo);
+            builder.RegisterInstance(gameDataHolderSo);
 
             RegisterEntryPoints(builder);
 
@@ -40,10 +40,7 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<GameManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SceneGroupManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LevelManager>(Lifetime.Singleton).AsImplementedInterfaces();
-
-            builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<ButtonBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-
+            
             builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PopUpManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TutorialActionManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -51,9 +48,12 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<TutorialProcessManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<CoinManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SwipeManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            
+            builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ButtonBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
         }
 
         private void RegisterScopedServices(IContainerBuilder builder)

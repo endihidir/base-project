@@ -185,15 +185,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f365e9d0873149a8993a885ede8aa65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _openOnStart: 0
-  _openDuration: 0.5
-  _cloaseDuration: 0.5
+  _openDuration: 0
+  _closeDuration: 0.5
   _openDelay: 0
   _closeDelay: 0
   _ease: 7
-  _unscaledTime: 1
   _canvasGroup: {fileID: 3519798843219184847}
-  _dynamicUIs: []
 --- !u!1 &4986992081715745943
 GameObject:
   m_ObjectHideFlags: 0

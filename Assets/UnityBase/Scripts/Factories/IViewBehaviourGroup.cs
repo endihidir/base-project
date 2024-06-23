@@ -1,4 +1,3 @@
-using VContainer;
 
 namespace UnityBase.UI.ViewCore
 {

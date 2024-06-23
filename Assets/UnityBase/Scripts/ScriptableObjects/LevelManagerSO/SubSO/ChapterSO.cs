@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/LevelManagement/ChapterData", order = 0)]
     public class ChapterSO : ScriptableObject

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/SceneManagement/SingleSceneAsset")]
     public class SingleSceneAssetSO : SceneAssetSO

@@ -8,48 +8,54 @@ namespace UnityBase.UI.ButtonCore
     {
         private Transform _buttonTransform;
         
-        private Tween _bounceTween;
+        private Tween _onClickTween;
 
-        private float _startValue, _endValue, _duration;
+        private float _startScale, _duration;
+
+        private bool _isPointerUp;
 
         private Ease _ease;
 
         public ButtonClickAnim(IButtonUI buttonUI) : base(buttonUI)
         {
-            _buttonTransform = _buttonUI.Transform;
+            _buttonTransform = _buttonUI.Button.transform;
         }
         
-        public void Configure(float startValue, float endValue, float duration, Ease ease)
+        public IButtonAnimation Configure(float scaleUpValue, float duration, Ease ease)
         {
-            _startValue = startValue;
-            _endValue = endValue;
+            _startScale = scaleUpValue;
             _duration = duration;
             _ease = ease;
+            return this;
         }
 
         public override async UniTask Click()
         {
-            await _bounceTween.AsyncWaitForCompletion().AsUniTask();
+            await UniTask.WaitUntil(()=> _isPointerUp);
         }
 
         public override async UniTask PointerDown()
         {
-            _bounceTween?.Kill();
+            _onClickTween?.Kill();
 
-            _bounceTween = _buttonTransform.DOScale(_startValue, _duration).SetEase(_ease);
+            _isPointerUp = false;
 
-            await _bounceTween.AsyncWaitForCompletion().AsUniTask();
+            _onClickTween = _buttonTransform.DOScale(_startScale, _duration).SetEase(_ease);
+
+            await _onClickTween.AsyncWaitForCompletion().AsUniTask();
         }
 
         public override async UniTask PointerUp()
         {
-            _bounceTween?.Kill();
+            _onClickTween?.Kill();
 
-            _bounceTween = _buttonTransform.DOScale(_endValue, _duration).SetEase(_ease);
+            _onClickTween = _buttonTransform.DOScale(1f, _duration).SetEase(_ease);
 
-            await _bounceTween.AsyncWaitForCompletion().AsUniTask();
+            await _onClickTween.AsyncWaitForCompletion().AsUniTask();
+
+            _isPointerUp = true;
         }
 
-        public override void Dispose() => _bounceTween?.Kill();
+        public override void Dispose() => _onClickTween?.Kill();
     }
 }

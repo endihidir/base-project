@@ -1,4 +1,4 @@
-﻿using UnityBase.ManagerSO;
+﻿using UnityBase.Managers.SO;
 
 namespace UnityBase.Service
 {

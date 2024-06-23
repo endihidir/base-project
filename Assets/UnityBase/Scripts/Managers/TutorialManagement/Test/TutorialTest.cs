@@ -10,15 +10,15 @@ using VContainer;
 public class TutorialTest : MonoBehaviour
 {
     [Inject]
-    private readonly ITutorialActionManagementService _tutorialActionManagementService;
+    private readonly ITutorialActionManager _tutorialActionManager;
     
     [Inject]
-    private readonly ITutorialMaskManagementService _tutorialMaskManagementService;
+    private readonly ITutorialMaskManager _tutorialMaskManager;
     
     [Button]
     public void HandDrawTest()
     {
-        var tut = _tutorialActionManagementService.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
 
         var pos1 = new Vector3(Screen.width * 0.2f, Screen.height * 0.8f);
         var pos2 = new Vector3(Screen.width * 0.75f, Screen.height * 0.5f);
@@ -28,7 +28,7 @@ public class TutorialTest : MonoBehaviour
         
         var maskData = new MaskUIData(PositionSpace.ScreenSpace, Vector2.one * 150f);
         
-        _tutorialMaskManagementService.GetMasks(poses, maskData);
+        _tutorialMaskManager.GetMasks(poses, maskData);
         
         var act = tut.GetAction<DrawAction>(0.85f);
         
@@ -38,13 +38,13 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void HandMoveTest()
     {
-        var tut = _tutorialActionManagementService.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
         
         var pos1 = new Vector3(Screen.width * 0.6f, Screen.height * 0.5f);
         var pos2 = new Vector3(Screen.width * 0.4f, Screen.height * 0.75f);
         var maskData = new MaskUIData(PositionSpace.ScreenSpace, Vector2.one * 150f);
         
-        _tutorialMaskManagementService.GetMasks(new []{pos1, pos2}, maskData);
+        _tutorialMaskManager.GetMasks(new []{pos1, pos2}, maskData);
 
         var act = tut.GetAction<MoveAction>(0.85f);
         
@@ -54,13 +54,13 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void HandSlideTest()
     {
-        var tut = _tutorialActionManagementService.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
         
         var pos1 = new Vector3(Screen.width * 0.2f, Screen.height * 0.5f);
         var pos2 = new Vector3(Screen.width * 0.75f, Screen.height * 0.75f);
         var maskData = new MaskUIData(PositionSpace.ScreenSpace, Vector2.one * 150f);
         
-        _tutorialMaskManagementService.GetMasks(new []{pos1, pos2}, maskData);
+        _tutorialMaskManager.GetMasks(new []{pos1, pos2}, maskData);
 
         var act = tut.GetAction<SlideAction>(0.85f);
         act.Slide(pos1, pos2, 1f).AlignDirection();
@@ -69,12 +69,12 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void HandClickTest()
     {
-        var tut = _tutorialActionManagementService.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
         
         var pos1 = new Vector3(Screen.width * 0.5f, Screen.height * 0.8f);
         var maskData = new MaskUIData(PositionSpace.ScreenSpace, Vector2.one * 150f);
         
-        _tutorialMaskManagementService.GetMask(pos1, maskData);
+        _tutorialMaskManager.GetMask(pos1, maskData);
         
         var act = tut.GetAction<ClickAction>(0.85f);
         
@@ -84,15 +84,15 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void HandKill()
     {
-        _tutorialActionManagementService.HideAllTutorialOfType<HandTutorial>(0.5f);
-        _tutorialMaskManagementService.HideAllMasks(0.5f);
+        _tutorialActionManager.HideAllTutorialOfType<HandTutorial>(0.5f);
+        _tutorialMaskManager.HideAllMasks(0.5f);
     }
     
     [Button]
     public void TextTypeWriteTest()
     {
         string text = "sdfsdfsdjkfsdfsdjkfsdjfjkdfjkskjfjsfjsfjsjkfjksfjksjkfjksfjsfjkkjsfjksfjksjkfjkskfjsjk";
-        var tut = _tutorialActionManagementService.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
         var act = tut.Action<TypeWriterAction>(new Vector2(300, 300));
         var pos2 = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f);
         act.TypeWriter(text, pos2, 0.05f);
@@ -102,7 +102,7 @@ public class TutorialTest : MonoBehaviour
     public void TextMoveInOutTest()
     {
         string text = "sdfsdfsdjkfsdfsdjkfsdjfjkdfjkskjfjsfjsfjsjkfjksfjksjkfjksfjsfjkkjsfjksfjksjkfjkskfjsjk";
-        var tut = _tutorialActionManagementService.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
         var act = tut.Action<MoveInOutAction>(new Vector2(300, 300));
         
         var pos1 = new Vector3(-Screen.width * 0.5f, Screen.height * 0.5f);
@@ -116,7 +116,7 @@ public class TutorialTest : MonoBehaviour
     public void TextScaleUpTest()
     {
         string text = "sdfsdfsdjkfsdfsdjkfsdjfjkdfjkskjfjsfjsfjsjkfjksfjksjkfjksfjsfjkkjsfjksfjksjkfjkskfjsjk";
-        var tut = _tutorialActionManagementService.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager.GetTutorial<TextTutorial>(PositionSpace.ScreenSpace);
         var act = tut.Action<ScaleAction>(new Vector2(300, 300));
         var pos2 = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f);
         act.ScaleUp(pos2, 1f, 0f).SetText(text);
@@ -125,6 +125,6 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void TextKill()
     {
-        _tutorialActionManagementService.HideAllTutorialOfType<TextTutorial>(0.5f);
+        _tutorialActionManager.HideAllTutorialOfType<TextTutorial>(0.5f);
     }
 }

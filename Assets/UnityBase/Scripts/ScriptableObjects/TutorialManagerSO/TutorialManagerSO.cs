@@ -1,7 +1,7 @@
 using UnityBase.Tag;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/TutorialManagerData")]
     public class TutorialManagerSO : ScriptableObject

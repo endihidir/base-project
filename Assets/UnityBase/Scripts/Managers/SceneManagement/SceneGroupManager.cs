@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
-using UnityBase.Controller;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
+using UnityBase.Managers.SO;
 using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -13,40 +13,42 @@ namespace UnityBase.SceneManagement
 {
     public class SceneGroupManager : ISceneManager, IAppBootService
     { 
-        public event Action<float> OnLoadUpdate;
-
         private bool _sceneLoadInProgress;
         private readonly SceneManagerSO _sceneManagerSo;
-        private readonly LoadingSceneController _loadingSceneController;
+        private readonly ILoadingMenuActivator _loadingMenuActivator;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
         private SceneReferenceState _sceneReferenceState;
-
+        public event Action<SceneType> OnSceneLoaded;
+        public LoadingProgress LoadingProgress { get; }
         public void Initialize() { }
         public void Dispose() { }
         
-        public SceneGroupManager(ManagerDataHolderSO managerDataHolderSo)
+        public SceneGroupManager(GameDataHolderSO gameDataHolderSo)
         {
-            _sceneManagerSo = managerDataHolderSo.sceneManagerSo;
+            _sceneManagerSo = gameDataHolderSo.sceneManagerSo;
             
-            _loadingSceneController = new LoadingSceneController(_sceneManagerSo.loadingSceneAssetSo.sceneData);
+            _loadingMenuActivator = _sceneManagerSo.LoadingMenuActivator;
+            _loadingMenuActivator?.SetActive(false);
             
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
+            
+            LoadingProgress = new LoadingProgress();
         }
 
-        public async UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene, float progressMultiplier)
+        public async UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene, float delayMultiplier = 10f)
         {
             if (_sceneLoadInProgress) return;
             
             _sceneLoadInProgress = true;
             
-            await UnloadSceneAsync();
-            
             if (useLoadingScene)
             {
-                await _loadingSceneController.Initialize();
+                _loadingMenuActivator?.SetActive(true);
             }
+            
+            await UnloadSceneAsync();
             
             var sceneGroup = _sceneManagerSo.GetSceneData(sceneType);
 
@@ -59,38 +61,30 @@ namespace UnityBase.SceneManagement
                 if (sceneData.reference.State == SceneReferenceState.Regular)
                 {
                     var operation = SceneManager.LoadSceneAsync(sceneData.reference.Path, LoadSceneMode.Additive);
-
-                    operation.allowSceneActivation = false;
                     
                     _operationGroup.Operations.Add(operation);
                 }
                 else if(sceneData.reference.State == SceneReferenceState.Addressable)
                 {
-                    var sceneHandle = Addressables.LoadSceneAsync(sceneData.reference.Path, LoadSceneMode.Additive, false);
+                    var sceneHandle = Addressables.LoadSceneAsync(sceneData.reference.Path, LoadSceneMode.Additive);
                     
                     _handleGroup.Handles.Add(sceneHandle);
-                    
-                    await UniTask.WaitUntil(() => sceneHandle.IsDone);
                 }
             }
 
-            await WaitProgress(progressMultiplier, 0.1f);
-            
-            if (_sceneReferenceState == SceneReferenceState.Regular)
+            while (!_operationGroup.IsDone || !_handleGroup.IsDone)
             {
-                _operationGroup.Operations.ForEach(x => x.allowSceneActivation = true);
-
-                await UniTask.WaitUntil(() => _operationGroup.IsDone);
-            }
-            else if (_sceneReferenceState == SceneReferenceState.Addressable)
-            {
-                await _handleGroup.ActivateResultsAsync();
+                LoadingProgress?.Report((_operationGroup.Progress + _handleGroup.Progress) / 1f);
+                
+                await UniTask.WaitForSeconds(0.1f * delayMultiplier);
             }
 
             if (useLoadingScene)
             {
-                await _loadingSceneController.ReleaseLoadingScene();
+                _loadingMenuActivator?.SetActive(false);
             }
+            
+            OnSceneLoaded?.Invoke(sceneType);
             
             _sceneLoadInProgress = false;
         }
@@ -121,24 +115,6 @@ namespace UnityBase.SceneManagement
             }
             
             await Resources.UnloadUnusedAssets();
-        }
-
-        private async UniTask WaitProgress(float progressMultiplier, float delay)
-        {
-            var currentProgressValue = 0f;
-            
-            var progress = _sceneReferenceState == SceneReferenceState.Regular ? 1f : _handleGroup.Progress;
-
-            var targetProgressValue = progress / 0.9f;
-
-            while (!Mathf.Approximately(currentProgressValue, targetProgressValue))
-            {
-                currentProgressValue = Mathf.MoveTowards(currentProgressValue, targetProgressValue, progressMultiplier * Time.deltaTime);
-                
-                OnLoadUpdate?.Invoke(currentProgressValue);
-                
-                await UniTask.WaitForSeconds(delay);
-            }
         }
 
         private List<string> GetScenes()

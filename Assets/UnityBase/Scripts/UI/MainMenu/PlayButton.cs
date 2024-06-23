@@ -1,17 +1,14 @@
 using DG.Tweening;
-using UnityBase.Extensions;
 using UnityBase.UI.ButtonCore;
 
 public class PlayButton : ButtonUI
 {
-    private IButtonBehaviourFactory _buttonBehaviourFactory;
-    
     protected override void Initialize(IButtonBehaviourFactory buttonBehaviourFactory)
     {
-        _buttonBehaviourFactory = buttonBehaviourFactory;
+        _buttonAction = buttonBehaviourFactory.CreateButtonAction<SceneLoadAction>(this)
+                                              .Configure(SceneType.Gameplay, true);
         
-        _buttonBehaviour = _buttonBehaviourFactory.CreateButtonBehaviour<SceneLoadAction, ButtonClickAnim>(this)
-                                                 .SetActionConfigs(SceneType.Gameplay, true, 10f)
-                                                 .SetAnimationConfigs(1.05f, 1f, 0.1f, Ease.InOutQuad);
+        _buttonAnimation = buttonBehaviourFactory.CreateButtonAnimation<ButtonClickAnim>(this)
+                                                 .Configure(1.05f, 0.1f, Ease.InOutQuad);
     }
 }

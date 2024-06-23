@@ -11,4 +11,12 @@ namespace UnityBase.UI.ButtonCore
         public abstract UniTask PointerUp();
         public abstract void Dispose();
     }
+    
+    public interface IButtonAnimation
+    {
+        public UniTask Click();
+        public UniTask PointerDown();
+        public UniTask PointerUp();
+        public void Dispose();
+    }
 }

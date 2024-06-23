@@ -5,7 +5,6 @@ namespace UnityBase.UI.ButtonCore
     public class SceneLoadAction : ButtonAction
     {
         private readonly ISceneManager _sceneManager;
-        
         private SceneType _sceneType;
         private bool _useLoadingScene;
         private float _progressMultiplier;
@@ -15,11 +14,12 @@ namespace UnityBase.UI.ButtonCore
             _sceneManager = sceneManager;
         }
 
-        public void Configure(SceneType sceneType, bool useLoadingScene, float progressMultiplier)
+        public IButtonAction Configure(SceneType sceneType, bool useLoadingScene, float progressMultiplier = 10f)
         {
             _sceneType = sceneType;
             _useLoadingScene = useLoadingScene;
             _progressMultiplier = progressMultiplier;
+            return this;
         }
         
         public override void OnClick()
@@ -42,4 +42,6 @@ namespace UnityBase.UI.ButtonCore
             
         }
     }
+    
+    
 }

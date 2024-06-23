@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sirenix.Utilities;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
+using UnityBase.Managers.SO;
 using UnityBase.Pool;
 using UnityBase.Service;
 using UnityEngine;
@@ -22,9 +23,9 @@ namespace UnityBase.Manager
 
         private bool _isDisposed;
         
-        public PoolManager(ManagerDataHolderSO managerDataHolderSo, IObjectResolver objectResolver)
+        public PoolManager(GameDataHolderSO gameDataHolderSo, IObjectResolver objectResolver)
         {
-            _poolManagerSo = managerDataHolderSo.poolManagerSo;
+            _poolManagerSo = gameDataHolderSo.poolManagerSo;
             _poolableObjectsParent = _poolManagerSo.poolParentTransform;
             _objectResolver = objectResolver;
             _isDisposed = false;

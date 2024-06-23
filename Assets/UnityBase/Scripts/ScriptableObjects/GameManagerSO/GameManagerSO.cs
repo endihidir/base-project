@@ -1,7 +1,7 @@
 using UnityBase.Tag;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/GameManagerData")]
     public class GameManagerSO : ScriptableObject

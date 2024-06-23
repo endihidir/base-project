@@ -126,8 +126,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 437a86d510d8f5b4a82044fe9478625c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rectTransform: {fileID: 2952098105503347757}
   _coinTxt: {fileID: 4120144027425935978}
   _coinIconT: {fileID: 6228701307464480175}
+  _moveInOutViewConfigSo: {fileID: 11400000, guid: b53209177dbb8374daba4a6128fe12a6,
+    type: 2}
+  _bounceViewConfigSo: {fileID: 11400000, guid: 7dea88bb15a7e9e4f8719e58555dd8fd,
+    type: 2}
 --- !u!1 &6523711435974158728
 GameObject:
   m_ObjectHideFlags: 0

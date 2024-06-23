@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/LevelManagerData")]
     public class LevelManagerSO : ScriptableObject
@@ -10,7 +10,6 @@ namespace UnityBase.ManagerSO
         public int defaultUnlockedChapterIndex = 0;
 
         public int defaultUnlockedLevelIndex = 0;
-
 
         public void Initialize()
         {

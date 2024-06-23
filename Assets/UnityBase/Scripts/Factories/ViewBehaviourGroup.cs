@@ -13,18 +13,15 @@ namespace UnityBase.UI.ViewCore
 
         private readonly IObjectResolver _container;
         
-        public ViewBehaviourGroup(IObjectResolver container)
-        {
-            _container = container;
-        }
-        
+        public ViewBehaviourGroup(IObjectResolver container) => _container = container;
+
         public TAnim CreateAnimation<TAnim>() where TAnim : class, IViewAnimation
         {
             var key = typeof(TAnim);
 
             if (!_viewAnimations.TryGetValue(key, out var viewAnimation))
             {
-                viewAnimation = ReflectionExtensions.CreateInstance<TAnim>(_container);
+                viewAnimation = ClassExtensions.CreateInstance<TAnim>(_container);
                 
                 _viewAnimations[key] = viewAnimation;
             }
@@ -38,7 +35,7 @@ namespace UnityBase.UI.ViewCore
 
             if (!_viewModels.TryGetValue(key, out var viewModel))
             {
-                viewModel = ReflectionExtensions.CreateInstance<TModel>(_container);
+                viewModel = ClassExtensions.CreateInstance<TModel>(_container);
                 
                 _viewModels[key] = viewModel;
             }
@@ -57,6 +54,7 @@ namespace UnityBase.UI.ViewCore
             }
 
             animation = null;
+            
             return false;
         }
 
@@ -71,6 +69,7 @@ namespace UnityBase.UI.ViewCore
             }
 
             model = null;
+            
             return false;
         }
     }

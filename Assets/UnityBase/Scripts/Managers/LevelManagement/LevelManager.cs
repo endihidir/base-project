@@ -1,7 +1,8 @@
 using System;
 using UnityBase.EventBus;
+using UnityBase.GameDataHolder;
 using UnityBase.Manager.Data;
-using UnityBase.ManagerSO;
+using UnityBase.Managers.SO;
 using UnityBase.Service;
 using UnityEngine;
 
@@ -32,6 +33,8 @@ namespace UnityBase.Manager
 
         #region PROPERTIES
 
+        private bool IsThereMoreThanOneChapter => _chapterData.Length > 1;
+        
         public int LastSelectedChapterIndex
         {
             get => PlayerPrefs.GetInt(LAST_SELECTED_CHAPTER_KEY, 0);
@@ -66,9 +69,9 @@ namespace UnityBase.Manager
 
         #endregion
 
-        public LevelManager(ManagerDataHolderSO managerDataHolderSo)
+        public LevelManager(GameDataHolderSO gameDataHolderSo)
         {
-            var levelManagerData = managerDataHolderSo.levelManagerSo;
+            var levelManagerData = gameDataHolderSo.levelManagerSo;
 
             _chapterData = levelManagerData.chapterData;
             _defaultUnlockedChapterIndex = levelManagerData.defaultUnlockedChapterIndex;
@@ -105,7 +108,7 @@ namespace UnityBase.Manager
             }
             else
             {
-                Debug.LogError("Selected Chapter data is not exist!");
+                Debug.LogError("Selected Chapter data does not exist!");
             }
 
             return isChapterExist;
@@ -121,7 +124,7 @@ namespace UnityBase.Manager
             }
             else
             {
-                Debug.LogError("Selected Level data is not exist!");
+                Debug.LogError("Selected Level data does not exist!");
             }
 
             return isLevelExist;
@@ -137,9 +140,10 @@ namespace UnityBase.Manager
 
         private void UpdateLevel()
         {
-            // if there is a chapter system, activate below statement !!!
-
-            //if (LastSelectedChapterIndex != LastUnlockedChapterIndex || LastSelectedLevelIndex != LastUnlockedLevelIndex) return;
+            if (IsThereMoreThanOneChapter)
+            {
+                if (LastSelectedChapterIndex != LastUnlockedChapterIndex || LastSelectedLevelIndex != LastUnlockedLevelIndex) return;
+            }
 
             LevelText++;
 

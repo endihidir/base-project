@@ -2,7 +2,7 @@ using Sirenix.OdinInspector;
 using UnityBase.Pool;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/PoolManagement/PoolableAsset", fileName = "PoolableAsset")]
     public class PoolableAssetSO : ScriptableObject

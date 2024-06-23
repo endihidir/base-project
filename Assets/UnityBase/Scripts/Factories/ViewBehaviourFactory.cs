@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UnityBase.Extensions;
+using UnityEngine;
 using VContainer;
 
 namespace UnityBase.UI.ViewCore
@@ -15,25 +17,10 @@ namespace UnityBase.UI.ViewCore
             _container = container;
             _viewBehaviourGroup = new Dictionary<Type, IViewBehaviourGroup>();
         }
-
-        public TAnim CreateViewAnimation<TAnim>(IViewUI viewUI) where TAnim : class, IViewAnimation
+        public TModel CreateViewModel<TModel>(Component component) where TModel : class, IViewModel
         {
-            var key = viewUI.GetType();
-
-            if (!_viewBehaviourGroup.TryGetValue(key, out var viewAnimationGroup))
-            {
-                viewAnimationGroup = new ViewBehaviourGroup(_container);
-
-                _viewBehaviourGroup[key] = viewAnimationGroup;
-            }
+            var key = component.GetType();
             
-            return viewAnimationGroup.CreateAnimation<TAnim>();
-        }
-
-        public TModel CreateViewModel<TModel>(IViewUI viewUI) where TModel : class, IViewModel
-        {
-            var key = viewUI.GetType();
-
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewAnimationGroup))
             {
                 viewAnimationGroup = new ViewBehaviourGroup(_container);
@@ -44,7 +31,37 @@ namespace UnityBase.UI.ViewCore
             return viewAnimationGroup.CreateModel<TModel>();
         }
 
-        public bool TryGetViewAnimation<TViewUI, TViewAnim>(out TViewAnim viewAnimation) where TViewUI : IViewUI where TViewAnim : class, IViewAnimation
+        public TAnim CreateViewAnimation<TAnim>(Component component) where TAnim : class, IViewAnimation
+        {
+            var key = component.GetType();
+            
+            if (!_viewBehaviourGroup.TryGetValue(key, out var viewAnimationGroup))
+            {
+                viewAnimationGroup = new ViewBehaviourGroup(_container);
+
+                _viewBehaviourGroup[key] = viewAnimationGroup;
+            }
+            
+            return viewAnimationGroup.CreateAnimation<TAnim>();
+        }
+
+        public TModel CreateViewLocalModel<TModel>() where TModel : class, IViewModel => ClassExtensions.CreateInstance<TModel>(_container);
+        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IViewAnimation => ClassExtensions.CreateInstance<TAnim>(_container);
+
+        public bool TryGetModel<TViewUI, TViewModel>(out TViewModel viewModel) where TViewUI : Component where TViewModel : class, IViewModel
+        {
+            var viewKey = typeof(TViewUI);
+            
+            if (_viewBehaviourGroup.TryGetValue(viewKey, out var viewBehaviourGroup))
+            {
+                return viewBehaviourGroup.TryGetModel(out viewModel);
+            }
+
+            viewModel = null;
+            return false;
+        }
+
+        public bool TryGetViewAnimation<TViewUI, TViewAnim>(out TViewAnim viewAnimation) where TViewUI : Component where TViewAnim : class, IViewAnimation
         {
             var viewKey = typeof(TViewUI);
             
@@ -57,17 +74,5 @@ namespace UnityBase.UI.ViewCore
             return false;
         }
 
-        public bool TryGetModel<TViewUI, TViewModel>(out TViewModel viewModel) where TViewUI : IViewUI where TViewModel : class, IViewModel
-        {
-            var viewKey = typeof(TViewUI);
-            
-            if (_viewBehaviourGroup.TryGetValue(viewKey, out var viewBehaviourGroup))
-            {
-                return viewBehaviourGroup.TryGetModel(out viewModel);
-            }
-
-            viewModel = null;
-            return false;
-        }
     }
 }

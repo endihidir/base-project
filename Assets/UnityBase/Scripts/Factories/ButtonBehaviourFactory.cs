@@ -1,5 +1,4 @@
 ﻿using UnityBase.Extensions;
-using UnityBase.Manager;
 using VContainer;
 
 namespace UnityBase.UI.ButtonCore
@@ -12,14 +11,17 @@ namespace UnityBase.UI.ButtonCore
         {
             _container = container;
         }
-        
-        public IButtonBehaviour<TAct, TAnim> CreateButtonBehaviour<TAct, TAnim>(IButtonUI buttonUI) where TAct : IButtonAction where TAnim : IButtonAnimation
+
+        public TAct CreateButtonAction<TAct>(IButtonUI buttonUI) where TAct : class, IButtonAction
         {
-            var buttonAction = ReflectionExtensions.CreateInstance<TAct>(_container, buttonUI);
+          
             
-            var buttonAnimation = ReflectionExtensions.CreateInstance<TAnim>(_container, buttonUI);
-            
-            return new ButtonBehaviour<TAct, TAnim>(buttonAction, buttonAnimation);
+            return ClassExtensions.CreateInstance<TAct>(_container, buttonUI);
+        }
+
+        public TAnim CreateButtonAnimation<TAnim>(IButtonUI buttonUI) where TAnim : class, IButtonAnimation
+        {
+            return ClassExtensions.CreateInstance<TAnim>(_container, buttonUI);
         }
     }
 }

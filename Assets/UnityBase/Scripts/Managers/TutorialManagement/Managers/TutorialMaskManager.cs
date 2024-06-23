@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityBase.Extensions;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
 using UnityBase.Pool;
 using UnityBase.Service;
 using UnityEngine;
@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace UnityBase.Manager
 {
-    public class TutorialMaskManager : ITutorialMaskManagementService, IAppBootService
+    public class TutorialMaskManager : ITutorialMaskManager, IAppBootService
     {
         private GameObject _maskRoot;
 
@@ -26,9 +26,9 @@ namespace UnityBase.Manager
 
         private readonly IPoolManager _poolManager;
 
-        public TutorialMaskManager(ManagerDataHolderSO managerDataHolderSo, IPoolManager poolManager)
+        public TutorialMaskManager(GameDataHolderSO gameDataHolderSo, IPoolManager poolManager)
         {
-            var maskManagerSo = managerDataHolderSo.tutorialMaskManagerSo;
+            var maskManagerSo = gameDataHolderSo.tutorialMaskManagerSo;
 
             _maskRoot = maskManagerSo.maskRoot;
 

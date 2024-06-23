@@ -2,14 +2,19 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/SceneManagerData")]
     public class SceneManagerSO : ScriptableObject
     {
-        public SingleSceneAssetSO loadingSceneAssetSo;
-        
         [SerializeField] private List<SceneAssetSO> _sceneAssets;
+        
+        public ILoadingMenuActivator LoadingMenuActivator;
+        public void Initialize()
+        {
+            LoadingMenuActivator = FindObjectsOfType<MonoBehaviour>().OfType<ILoadingMenuActivator>().FirstOrDefault();
+        }
+        
         public List<SceneData> GetSceneData(SceneType sceneType)
         {
             var scene = _sceneAssets.FirstOrDefault(x => x.sceneType == sceneType);
@@ -33,17 +38,12 @@ namespace UnityBase.ManagerSO
             return sceneGroup;
         }
 
-        public void Initialize()
-        {
-
-        }
     }
     
 }
 
 public enum SceneType
 {
-    Loading,
     MainMenu,
     Gameplay
 }

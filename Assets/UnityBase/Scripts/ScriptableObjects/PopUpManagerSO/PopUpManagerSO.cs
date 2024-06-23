@@ -1,7 +1,7 @@
 using UnityBase.Tag;
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     [CreateAssetMenu(menuName = "Game/ManagerData/PopUpManagerData")]
     public class PopUpManagerSO : ScriptableObject
@@ -13,8 +13,6 @@ namespace UnityBase.ManagerSO
         public void Initialize()
         {
             popUpParent = FindObjectOfType<Tag_PopUpCanvas>()?.transform;
-
-            settingsPopUpParent = FindObjectOfType<Tag_SettingsPopUpCanvas>()?.transform;
         }
     }
 }

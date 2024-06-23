@@ -37,8 +37,7 @@ namespace UnityBase.Manager
             File.WriteAllText(filePath, jsonData);
 
 #if UNITY_EDITOR
-            if(!Application.isPlaying)
-                AssetDatabase.Refresh();
+            AssetDatabase.Refresh();
 #endif
             return true;
         }
@@ -79,8 +78,7 @@ namespace UnityBase.Manager
                 await File.WriteAllTextAsync(filePath, jsonData);
                 
 #if UNITY_EDITOR
-                if(!Application.isPlaying)
-                    AssetDatabase.Refresh();
+                AssetDatabase.Refresh();
 #endif
                 
                 return true;

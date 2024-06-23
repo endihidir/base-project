@@ -14,4 +14,12 @@ namespace UnityBase.UI.ButtonCore
         public abstract void OnPointerUp();
         public abstract void Dispose();
     }
+    
+    public interface IButtonAction
+    {
+        public void OnClick();
+        public void OnPointerDown();
+        public void OnPointerUp();
+        public void Dispose();
+    }
 }

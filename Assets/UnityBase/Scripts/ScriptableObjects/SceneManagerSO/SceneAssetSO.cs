@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityBase.ManagerSO
+namespace UnityBase.Managers.SO
 {
     public abstract class SceneAssetSO : ScriptableObject
     {

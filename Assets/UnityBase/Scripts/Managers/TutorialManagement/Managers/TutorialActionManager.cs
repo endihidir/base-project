@@ -1,13 +1,14 @@
 using System;
 using UnityBase.Extensions;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
+using UnityBase.Managers.SO;
 using UnityBase.Service;
 using UnityBase.TutorialCore;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TutorialActionManager : ITutorialActionManagementService, IAppBootService
+    public class TutorialActionManager : ITutorialActionManager, IAppBootService
     {
         private Transform _tutorialsParent;
 
@@ -15,9 +16,9 @@ namespace UnityBase.Manager
 
         private readonly IPoolManager _poolManager;
 
-        public TutorialActionManager(ManagerDataHolderSO managerDataHolderSo, IPoolManager poolManager)
+        public TutorialActionManager(GameDataHolderSO gameDataHolderSo, IPoolManager poolManager)
         {
-            _tutorialManagerSo = managerDataHolderSo.tutorialManagerSo;
+            _tutorialManagerSo = gameDataHolderSo.tutorialManagerSo;
 
             _poolManager = poolManager;
 

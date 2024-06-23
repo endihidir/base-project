@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityBase.ManagerSO;
+using UnityBase.GameDataHolder;
 using UnityBase.PopUpCore;
 using UnityBase.Service;
 using UnityEngine;
@@ -12,11 +12,11 @@ namespace UnityBase.Manager
 
         private readonly IPoolManager _poolManager;
 
-        public PopUpManager(ManagerDataHolderSO managerDataHolderSo, IPoolManager poolManager)
+        public PopUpManager(GameDataHolderSO gameDataHolderSo, IPoolManager poolManager)
         {
             _poolManager = poolManager;
-            _popUpParent = managerDataHolderSo.popUpManagerSo.popUpParent;
-            _settingsPopUpParent = managerDataHolderSo.popUpManagerSo.settingsPopUpParent;
+            _popUpParent = gameDataHolderSo.popUpManagerSo.popUpParent;
+            _settingsPopUpParent = gameDataHolderSo.popUpManagerSo.settingsPopUpParent;
         }
 
         public void Initialize() { }
