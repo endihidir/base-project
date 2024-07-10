@@ -15,6 +15,7 @@ namespace UnityBase.BaseLifetimeScope
     {
         [SerializeField] private GameDataHolderSO gameDataHolderSo;
 
+        private IObjectResolver _objectResolver;
         protected override void Configure(IContainerBuilder builder)
         {
             gameDataHolderSo.Initialize();
@@ -35,7 +36,7 @@ namespace UnityBase.BaseLifetimeScope
             builder.RegisterEntryPoint<AppBootstrapper>();
         }
         
-          private void RegisterSingletonServices(IContainerBuilder builder)
+        private void RegisterSingletonServices(IContainerBuilder builder)
         {
             builder.Register<GameManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SceneGroupManager>(Lifetime.Singleton).AsImplementedInterfaces();

@@ -1,5 +1,6 @@
 using System;
 using UnityBase.Service;
+using UnityBase.UI.Dynamic;
 using UnityBase.UI.ViewCore;
 using UnityEngine;
 

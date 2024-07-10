@@ -1,9 +1,11 @@
 using UnityEngine;
+using VContainer;
 
 namespace UnityBase.UI.ViewCore
 {
     public interface IViewBehaviourFactory
     {
+        public void UpdateResolver(IObjectResolver resolver);
         public TModel CreateViewModel<TModel>(Component component) where TModel : class, IViewModel;
         public TAnim CreateViewAnimation<TAnim>(Component component) where TAnim : class, IViewAnimation;
         public TModel CreateViewLocalModel<TModel>() where TModel : class, IViewModel;

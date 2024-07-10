@@ -6,11 +6,6 @@ public class SuccessMenuGroup : MenuGroup
 {
     protected override void OnStartGameStateTransition(GameStateData gameStateData)
     {
-
-    }
-
-    protected override void OnCompleteGameStateTransition(GameStateData gameStateData)
-    {
         var openCondition = gameStateData is { StartState: GameState.GamePlayState or GameState.GameTutorialState, EndState: GameState.GameSuccessState };
         
         var closeCondition = gameStateData is { StartState: GameState.GameSuccessState, EndState: GameState.GameLoadingState };
@@ -23,5 +18,10 @@ public class SuccessMenuGroup : MenuGroup
         {
             CloseMenuGroup();
         }
+    }
+
+    protected override void OnCompleteGameStateTransition(GameStateData gameStateData)
+    {
+        
     }
 }

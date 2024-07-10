@@ -11,9 +11,9 @@ namespace UnityBase.UI.ViewCore
         
         private readonly IDictionary<Type, IViewModel> _viewModels = new Dictionary<Type, IViewModel>();
 
-        private readonly IObjectResolver _container;
+        private readonly IObjectResolver _resolver;
         
-        public ViewBehaviourGroup(IObjectResolver container) => _container = container;
+        public ViewBehaviourGroup(IObjectResolver resolver) => _resolver = resolver;
 
         public TAnim CreateAnimation<TAnim>() where TAnim : class, IViewAnimation
         {
@@ -21,7 +21,7 @@ namespace UnityBase.UI.ViewCore
 
             if (!_viewAnimations.TryGetValue(key, out var viewAnimation))
             {
-                viewAnimation = ClassExtensions.CreateInstance<TAnim>(_container);
+                viewAnimation = ClassExtensions.CreateInstance<TAnim>(_resolver);
                 
                 _viewAnimations[key] = viewAnimation;
             }
@@ -35,7 +35,7 @@ namespace UnityBase.UI.ViewCore
 
             if (!_viewModels.TryGetValue(key, out var viewModel))
             {
-                viewModel = ClassExtensions.CreateInstance<TModel>(_container);
+                viewModel = ClassExtensions.CreateInstance<TModel>(_resolver);
                 
                 _viewModels[key] = viewModel;
             }

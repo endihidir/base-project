@@ -1,15 +1,18 @@
 ﻿using Cinemachine;
 using UnityEngine;
-using CameraState = UnityBase.Manager.CameraState;
 
 namespace UnityBase.Service
 {
     public interface ICinemachineManager
     {
+        public void ChangeCamera(CameraState cameraState);
         public CinemachineVirtualCamera GetVirtualCam(CameraState cameraState);
-        public void SetCamFollowTarget(CameraState cameraState, Transform target);
-        public void SetCamLookTarget(CameraState cameraState, Transform target);
-        public void SetCamFollowTargets(Transform target);
-        public void SetCamLookTargets(Transform target);
+        public void SetGameplayTargetParent(Transform parent);
+        public void SetGameplayTargetPosition(Vector3 position);
+        public void SetGameplayTargetLocalPosition(Vector3 position);
+        public void SetGameplayTargetRotation(Quaternion rotation);
+        public void SetGameplayTargetLocalRotation(Quaternion rotation);
+        public void RotateGameplayTarget(float speed, float deltaTime);
+        public void ResetGameplayTarget(bool resetInLocal);
     }
 }

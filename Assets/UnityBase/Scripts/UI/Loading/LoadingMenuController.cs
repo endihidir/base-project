@@ -1,12 +1,14 @@
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using TMPro;
 using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
-public class LoadingMenuController : MonoBehaviour, ILoadingMenuActivator
+public class LoadingMenuController : MonoBehaviour, ILoadingMenuController
 {
-    [Inject] private readonly ISceneManager _sceneManager;
+    [Inject] private readonly ISceneGroupManager _sceneGroupManager;
 
     [SerializeField] private CanvasGroup _loadingCanvasGroup;
     
@@ -18,8 +20,8 @@ public class LoadingMenuController : MonoBehaviour, ILoadingMenuActivator
     
     private float _targetProgress;
     
-    protected void OnEnable() => _sceneManager.LoadingProgress.Progressed += OnProgress;
-    protected void OnDisable() => _sceneManager.LoadingProgress.Progressed -= OnProgress;
+    protected void OnEnable() => _sceneGroupManager.LoadingProgress.Progressed += OnProgress;
+    protected void OnDisable() => _sceneGroupManager.LoadingProgress.Progressed -= OnProgress;
     private void OnProgress(float val) => _targetProgress = val;
     private void Update()
     {
@@ -31,10 +33,20 @@ public class LoadingMenuController : MonoBehaviour, ILoadingMenuActivator
         _sliderTxt.text = "Loading... " + percentage.ToString("0.0") +"%";
     }
 
-    public void SetActive(bool value) => _loadingCanvasGroup.alpha = value ? 1 : 0;
+    public async UniTask SetActive(bool value)
+    {
+        await _loadingCanvasGroup.DOFade(value ? 1f : 0f, 0.1f).SetEase(Ease.InOutQuad).AsyncWaitForCompletion();
+    }
+
+    public void Reset()
+    {
+        _targetProgress = 0f;
+        _sliderImage.fillAmount = _targetProgress;
+    }
 }
 
-public interface ILoadingMenuActivator
+public interface ILoadingMenuController
 {
-    public void SetActive(bool value);
+    public UniTask SetActive(bool value);
+    public void Reset();
 }

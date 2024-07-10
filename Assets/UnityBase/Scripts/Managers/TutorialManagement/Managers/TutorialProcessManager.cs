@@ -20,7 +20,7 @@ namespace UnityBase.Manager
         public static Action OnCompleteTutorialStep;
         public static Action<TutorialSubStep> OnUpdateTutorialSubStep;
 
-        private TutorialStepManagerSO _tutorialStepManagerSo;
+        private TutorialProcessManagerSO _tutorialProcessManagerSo;
 
         private bool _disableTutorial;
         private TutorialSubStepData[] _tutorialStepData;
@@ -44,13 +44,13 @@ namespace UnityBase.Manager
 
         public TutorialProcessManager(GameDataHolderSO gameDataHolderSo, ILevelManager levelManager, ITutorialActionManager tutorialActionManager, ITutorialMaskManager tutorialMaskManager, IJsonDataManager jsonDataManager)
         {
-            _tutorialStepManagerSo = gameDataHolderSo.tutorialStepManagerSo;
+            _tutorialProcessManagerSo = gameDataHolderSo.tutorialProcessManagerSo;
 
-            _disableTutorial = _tutorialStepManagerSo.disableTutorial;
-            _tutorialStepData = _tutorialStepManagerSo.tutorialStepData;
-            _currentTutorialStep = _tutorialStepManagerSo.currentTutorialStep;
-            _tutorialSubStepIndex = _tutorialStepManagerSo.tutorialSubStepIndex;
-            _currentTutorialSubStep = _tutorialStepManagerSo.currentTutorialSubStep;
+            _disableTutorial = _tutorialProcessManagerSo.disableTutorial;
+            _tutorialStepData = _tutorialProcessManagerSo.tutorialStepData;
+            _currentTutorialStep = _tutorialProcessManagerSo.currentTutorialStep;
+            _tutorialSubStepIndex = _tutorialProcessManagerSo.tutorialSubStepIndex;
+            _currentTutorialSubStep = _tutorialProcessManagerSo.currentTutorialSubStep;
 
             _levelManager = levelManager;
             _tutorialActionManager = tutorialActionManager;
@@ -67,7 +67,7 @@ namespace UnityBase.Manager
 
             _currentTutorialStep = (TutorialStep)TutorialStepIndex;
 
-            _tutorialStepManagerSo.currentTutorialStep = _currentTutorialStep;
+            _tutorialProcessManagerSo.currentTutorialStep = _currentTutorialStep;
         }
 
         public void Dispose()
@@ -88,17 +88,17 @@ namespace UnityBase.Manager
         private void UpdateTutorialSubSteps()
         {
             _tutorialSubStepIndex++;
-            _tutorialStepManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
+            _tutorialProcessManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
 
             _currentTutorialSubStep = GetCurrentTutorialSubStep(_tutorialSubStepIndex);
-            _tutorialStepManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
+            _tutorialProcessManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
 
             OnUpdateTutorialSubStep?.Invoke(_currentTutorialSubStep);
 
             if (_currentTutorialSubStep == TutorialSubStep.Completed)
             {
                 _tutorialSubStepIndex = 0;
-                _tutorialStepManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
+                _tutorialProcessManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
 
                 _completedTutorialLevelData.indexes.Add(_levelManager.LastUnlockedLevelIndex);
 
@@ -123,7 +123,7 @@ namespace UnityBase.Manager
 
                 _currentTutorialStep = (TutorialStep)TutorialStepIndex;
 
-                _tutorialStepManagerSo.currentTutorialStep = _currentTutorialStep;
+                _tutorialProcessManagerSo.currentTutorialStep = _currentTutorialStep;
             }
         }
 
@@ -169,10 +169,10 @@ namespace UnityBase.Manager
             if (_currentTutorialSubStep == TutorialSubStep.Completed) return;
 
             _tutorialSubStepIndex = GetCurrentTutorialStep().menuTutorialFinishIndex;
-            _tutorialStepManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
+            _tutorialProcessManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
 
             _currentTutorialSubStep = (TutorialSubStep)_tutorialSubStepIndex;
-            _tutorialStepManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
+            _tutorialProcessManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
         }
 
         public void ResetTutorial()
@@ -182,10 +182,10 @@ namespace UnityBase.Manager
             if (_currentTutorialSubStep == TutorialSubStep.Completed) return;
 
             _tutorialSubStepIndex = 0;
-            _tutorialStepManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
+            _tutorialProcessManagerSo.tutorialSubStepIndex = _tutorialSubStepIndex;
 
             _currentTutorialSubStep = (TutorialSubStep)_tutorialSubStepIndex;
-            _tutorialStepManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
+            _tutorialProcessManagerSo.currentTutorialSubStep = _currentTutorialSubStep;
         }
 
         private TutorialSubStepData GetCurrentTutorialStep()

@@ -12,7 +12,7 @@ namespace UnityBase.Manager
     {
         private CanvasGroup _splashScreen;
         
-        private readonly ISceneManager _sceneManager;
+        private readonly ISceneGroupManager _sceneGroupManager;
 
         private bool _passSplashScreen;
         
@@ -20,11 +20,11 @@ namespace UnityBase.Manager
         
         private EventBinding<GameStateData> _gameStateBinding = new EventBinding<GameStateData>();
 
-        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneManager sceneManager)
+        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneGroupManager sceneGroupManager)
         {
             var gameManagerData = gameDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
-            _sceneManager = sceneManager;
+            _sceneGroupManager = sceneGroupManager;
             _passSplashScreen = gameManagerData.passSplashScreen;
             
             Application.targetFrameRate = gameManagerData.targetFrameRate;
@@ -40,7 +40,7 @@ namespace UnityBase.Manager
         {
             if (!_passSplashScreen) await StartSplashScreen();
 
-            _sceneManager.LoadSceneAsync(SceneType.MainMenu);
+            _sceneGroupManager.LoadSceneAsync(SceneType.MainMenu);
         }
 
         private async UniTask StartSplashScreen()

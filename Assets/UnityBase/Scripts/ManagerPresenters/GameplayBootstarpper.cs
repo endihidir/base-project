@@ -22,9 +22,6 @@ namespace UnityBase.Presenter
         {
             var poolManager = objectResolver.Resolve<IPoolManager>() as PoolManager;
             poolManager?.UpdateAllResolvers(objectResolver);
-
-            /*var currencyManager = objectResolver.Resolve<ICurrencyViewService>() as CurrencyManager;
-            currencyManager?.SetCoinViewData(currencyView);*/
         }
         
         public void Initialize() => _gameplayBootServices.ForEach(x => x.Initialize());

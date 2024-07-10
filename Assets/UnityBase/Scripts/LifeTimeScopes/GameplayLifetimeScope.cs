@@ -12,8 +12,6 @@ namespace UnityBase.BaseLifetimeScope
             builder.RegisterEntryPoint<GameplayBootstarpper>();
             builder.Register<GameplayManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CinemachineManager>(Lifetime.Singleton).AsImplementedInterfaces();
-
-            //builder.RegisterComponentInHierarchy<CurrencyUI>().AsImplementedInterfaces();
         }
     }
 }

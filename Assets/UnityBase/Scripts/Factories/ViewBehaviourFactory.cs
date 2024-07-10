@@ -10,20 +10,29 @@ namespace UnityBase.UI.ViewCore
     {
         private readonly IDictionary<Type, IViewBehaviourGroup> _viewBehaviourGroup;
         
-        private readonly IObjectResolver _container;
+        private IObjectResolver _resolver;
 
-        public ViewBehaviourFactory(IObjectResolver container)
+        public ViewBehaviourFactory(IObjectResolver resolver)
         {
-            _container = container;
+            _resolver = resolver;
+            
             _viewBehaviourGroup = new Dictionary<Type, IViewBehaviourGroup>();
         }
+
+        public void UpdateResolver(IObjectResolver resolver)
+        {
+            if(_resolver.Equals(resolver)) return;
+            
+            _resolver = resolver;
+        }
+
         public TModel CreateViewModel<TModel>(Component component) where TModel : class, IViewModel
         {
             var key = component.GetType();
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewAnimationGroup))
             {
-                viewAnimationGroup = new ViewBehaviourGroup(_container);
+                viewAnimationGroup = new ViewBehaviourGroup(_resolver);
                 
                 _viewBehaviourGroup[key] = viewAnimationGroup;
             }
@@ -37,7 +46,7 @@ namespace UnityBase.UI.ViewCore
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewAnimationGroup))
             {
-                viewAnimationGroup = new ViewBehaviourGroup(_container);
+                viewAnimationGroup = new ViewBehaviourGroup(_resolver);
 
                 _viewBehaviourGroup[key] = viewAnimationGroup;
             }
@@ -45,8 +54,8 @@ namespace UnityBase.UI.ViewCore
             return viewAnimationGroup.CreateAnimation<TAnim>();
         }
 
-        public TModel CreateViewLocalModel<TModel>() where TModel : class, IViewModel => ClassExtensions.CreateInstance<TModel>(_container);
-        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IViewAnimation => ClassExtensions.CreateInstance<TAnim>(_container);
+        public TModel CreateViewLocalModel<TModel>() where TModel : class, IViewModel => ClassExtensions.CreateInstance<TModel>(_resolver);
+        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IViewAnimation => ClassExtensions.CreateInstance<TAnim>(_resolver);
 
         public bool TryGetModel<TViewUI, TViewModel>(out TViewModel viewModel) where TViewUI : Component where TViewModel : class, IViewModel
         {

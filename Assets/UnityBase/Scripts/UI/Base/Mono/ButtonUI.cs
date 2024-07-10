@@ -27,9 +27,12 @@ namespace UnityBase.UI.ButtonCore
 #endif
 
         [Inject]
-        public void Construct(IButtonBehaviourFactory buttonButtonBehaviourFactory)
+        public void Construct(IButtonBehaviourFactory buttonButtonBehaviourFactory, IObjectResolver resolver)
         {
+            buttonButtonBehaviourFactory.UpdateResolver(resolver);
+            
             Initialize(buttonButtonBehaviourFactory);
+            
             CreateEventTriggers();
         }
         protected abstract void Initialize(IButtonBehaviourFactory buttonBehaviourFactory);

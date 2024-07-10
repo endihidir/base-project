@@ -11,25 +11,27 @@ using UnityEngine.SceneManagement;
 
 namespace UnityBase.SceneManagement
 {
-    public class SceneGroupManager : ISceneManager, IAppBootService
+    public class SceneGroupManager : ISceneGroupManager, IAppBootService
     { 
         private bool _sceneLoadInProgress;
-        private readonly SceneManagerSO _sceneManagerSo;
-        private readonly ILoadingMenuActivator _loadingMenuActivator;
+        private readonly SceneGroupManagerSO _sceneGroupManagerSo;
+        private readonly ILoadingMenuController _loadingMenuController;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
         private SceneReferenceState _sceneReferenceState;
-        public event Action<SceneType> OnSceneLoaded;
+        public event Action<SceneType> OnBeforeSceneLoad;
+        public event Action<SceneType> OnSceneReady;
+        public event Action<SceneType> OnSceneReadyToPlay;
         public LoadingProgress LoadingProgress { get; }
         public void Initialize() { }
         public void Dispose() { }
         
         public SceneGroupManager(GameDataHolderSO gameDataHolderSo)
         {
-            _sceneManagerSo = gameDataHolderSo.sceneManagerSo;
+            _sceneGroupManagerSo = gameDataHolderSo.sceneGroupManagerSo;
             
-            _loadingMenuActivator = _sceneManagerSo.LoadingMenuActivator;
-            _loadingMenuActivator?.SetActive(false);
+            _loadingMenuController = _sceneGroupManagerSo.LoadingMenuController;
+            _loadingMenuController.SetActive(false);
             
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
@@ -45,12 +47,15 @@ namespace UnityBase.SceneManagement
             
             if (useLoadingScene)
             {
-                _loadingMenuActivator?.SetActive(true);
+                _loadingMenuController.Reset();
+                await _loadingMenuController.SetActive(true);
             }
+            
+            OnBeforeSceneLoad?.Invoke(sceneType);
             
             await UnloadSceneAsync();
             
-            var sceneGroup = _sceneManagerSo.GetSceneData(sceneType);
+            var sceneGroup = _sceneGroupManagerSo.GetSceneData(sceneType);
 
             for (int i = 0; i < sceneGroup.Count; i++)
             {
@@ -78,13 +83,15 @@ namespace UnityBase.SceneManagement
                 
                 await UniTask.WaitForSeconds(0.1f * delayMultiplier);
             }
+            
+            OnSceneReady?.Invoke(sceneType);
 
             if (useLoadingScene)
             {
-                _loadingMenuActivator?.SetActive(false);
+                await _loadingMenuController.SetActive(false);
             }
             
-            OnSceneLoaded?.Invoke(sceneType);
+            OnSceneReadyToPlay?.Invoke(sceneType);
             
             _sceneLoadInProgress = false;
         }
