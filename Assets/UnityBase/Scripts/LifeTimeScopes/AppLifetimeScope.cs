@@ -14,8 +14,7 @@ namespace UnityBase.BaseLifetimeScope
     public class AppLifetimeScope : LifetimeScope
     {
         [SerializeField] private GameDataHolderSO gameDataHolderSo;
-
-        private IObjectResolver _objectResolver;
+        
         protected override void Configure(IContainerBuilder builder)
         {
             gameDataHolderSo.Initialize();
