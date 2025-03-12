@@ -13,18 +13,28 @@ namespace UnityBase.Presenter
         [Inject]
         private readonly IEnumerable<IGameplayBootService> _gameplayBootServices;
         
-        public GameplayBootstarpper(IObjectResolver objectResolver)
+        public GameplayBootstarpper(IObjectResolver objectResolver) => UpdateObjectResolvers(objectResolver);
+
+        private static void UpdateObjectResolvers(IObjectResolver objectResolver)
         {
-            UpdateGameplayServices(objectResolver);
+            var resolverContainer = objectResolver.Resolve<IObjectResolverContainer>();
+            
+            resolverContainer.Update(objectResolver);
+
+            var resolverUpdaters = objectResolver.Resolve<IEnumerable<IResolverUpdater>>();
+            
+            foreach (var resolverUpdater in resolverUpdaters)
+            {
+                resolverUpdater.UpdateResolver(objectResolver);
+            }
         }
 
-        private static void UpdateGameplayServices(IObjectResolver objectResolver)
-        {
-            var poolManager = objectResolver.Resolve<IPoolManager>() as PoolManager;
-            poolManager?.UpdateAllResolvers(objectResolver);
-        }
-        
         public void Initialize() => _gameplayBootServices.ForEach(x => x.Initialize());
         public void Dispose() => _gameplayBootServices.ForEach(x => x.Dispose());
+    }
+    
+    public interface IResolverUpdater
+    {
+        public void UpdateResolver(IObjectResolver objectResolver);
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityBase.GameDataHolder;
 using UnityBase.PopUpCore;
+using UnityBase.Presenter;
 using UnityBase.Service;
 using UnityEngine;
+using VContainer;
 
 namespace UnityBase.Manager
 {
-    public class PopUpManager : IPopUpManager, IAppBootService
+    public class PopUpManager : IPopUpManager, IAppBootService, IResolverUpdater
     {
         private Transform _popUpParent, _settingsPopUpParent;
 
@@ -55,5 +57,9 @@ namespace UnityBase.Manager
         }
         
         public void RemovePopUpPool<T>() where T : PopUp => _poolManager.RemovePool<T>();
+        public void UpdateResolver(IObjectResolver objectResolver)
+        {
+            
+        }
     }
 }

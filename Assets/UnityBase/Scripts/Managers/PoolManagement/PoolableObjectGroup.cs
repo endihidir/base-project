@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.Utilities;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -12,33 +11,48 @@ namespace UnityBase.Pool
     public sealed class PoolableObjectGroup
     {
         private IPoolable _poolable;
+        
         private Transform _poolableRoot;
+        
         private int _poolCount;
+        
         private bool _isLazy;
+        
         private GameObject _poolParent;
+        
         private IObjectResolver _objectResolver;
+        
         private readonly Queue<IPoolable> _pool;
         public Queue<IPoolable> Pool => _pool;
         public bool IsLazy => _isLazy;
 
         public PoolableObjectGroup() => _pool = new Queue<IPoolable>();
-
-        public void Initialize(IPoolable poolable, Transform rootParent, int poolCount, bool isLazy, IObjectResolver objectResolver)
+        
+        
+        public void Initialize(IPoolable poolable, Transform rootParent, int poolCount, bool isLazy)
         {
             _poolable = poolable;
+            
             _poolableRoot = rootParent;
+            
             _poolCount = poolCount;
-            _objectResolver = objectResolver;
+            
             _isLazy = isLazy;
+            
             CreatePoolParent();
         }
         
-        public void UpdateObjectResolver(IObjectResolver objectResolver) => _objectResolver = objectResolver;
+        public void SetObjectResolver(IObjectResolver objectResolver)
+        {
+            _objectResolver = objectResolver;
+        }
 
         public void CreatePool()
         {
-            for (int i = 0; i < _poolCount; i++) 
+            for (int i = 0; i < _poolCount; i++)
+            {
                 CreateNewObject(true);
+            }
         }
 
         public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : IPoolable
@@ -51,13 +65,25 @@ namespace UnityBase.Pool
             
             if (_poolable.IsUnique)
             {
-                if (!_pool.TryPeek(out poolable)) 
+                if (_pool.TryPeek(out poolable) && poolable is Component poolableObj)
+                {
+                    _objectResolver.InjectGameObject(poolableObj.gameObject);
+                }
+                else
+                {
                     poolable = GetNewPoolable();
+                }
             }
             else
             {
-                if (!_pool.TryDequeue(out poolable)) 
+                if (_pool.TryDequeue(out poolable) && poolable is Component poolableObj)
+                {
+                    _objectResolver.InjectGameObject(poolableObj.gameObject);
+                }
+                else
+                {
                     poolable = GetNewPoolable();
+                }
             }
 
             if (show) 
@@ -70,25 +96,41 @@ namespace UnityBase.Pool
         {
             if (!poolable.IsActive) return;
 
-            poolable.Hide(duration, delay, ()=> OnHideComplete(poolable, onComplete));
+            poolable.Hide(duration, delay, ()=> ReturnToPool(poolable, onComplete));
         }
 
         private void ClearPool()
         {
-            _pool?.Where(poolable => poolable.PoolableObject)
-                  .ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
+            foreach (var poolable in _pool)
+            {
+                if (poolable is Component poolableObj)
+                {
+                    Object.Destroy(poolableObj);
+                }
+            }
 
             _pool?.Clear();
 
-            if (_poolParent) 
-                Object.Destroy(_poolParent);
+            if (!_poolParent) return;
+                
+            Object.Destroy(_poolParent);
         }
 
         public void ClearAll<T>() where T : IPoolable
         {
             ClearPool();
-            
-            FindPoolablesOfType<T>()?.ForEach(poolable => Object.Destroy(poolable.PoolableObject.gameObject));
+
+            foreach (var poolable in FindPoolablesOfType<T>())
+            {
+                if (poolable is Component poolableObj)
+                {
+                    Object.Destroy(poolableObj);
+                }
+                else
+                {
+                    Debug.LogError($"{poolable.GetType()} is not Component!");
+                }
+            }
         }
 
         private IPoolable GetNewPoolable()
@@ -100,14 +142,16 @@ namespace UnityBase.Pool
 
         private void CreateNewObject(bool onInitialize)
         {
-            var poolableObject = Object.Instantiate(_poolable.PoolableObject, _poolParent.transform);
+            if (_poolable is not Component poolableComponent) return;
             
+            var poolableObject = Object.Instantiate(poolableComponent, _poolParent.transform);
+                
             _objectResolver.InjectGameObject(poolableObject.gameObject);
 
-            poolableObject.name = _poolable.PoolableObject.name;
-            
-            var poolable = poolableObject.GetComponent<IPoolable>();
+            poolableObject.name = poolableComponent.name;
 
+            if (poolableObject is not IPoolable poolable) return;
+            
             if (onInitialize)
             {
                 poolable.Hide(0f, 0f, default);
@@ -116,13 +160,24 @@ namespace UnityBase.Pool
             _pool.Enqueue(poolable);
         }
 
-        private void OnHideComplete(IPoolable poolable, Action onComplete)
+        public void ReturnToPool(IPoolable poolable, Action onComplete)
         {
             if(!_poolParent) CreatePoolParent();
-            var poolableT = poolable.PoolableObject.transform;
+
+            if (poolable is not Component poolableObj)
+            {
+                Debug.LogError($"{poolable.GetType()} is not Component!");
+                return;
+            }
+            
+            var poolableT = poolableObj.transform;
+
             poolableT.SetParent(_poolParent.transform);
+
             poolableT.localPosition = Vector3.zero;
+
             _pool.Enqueue(poolable);
+
             onComplete?.Invoke();
         }
         
@@ -131,20 +186,31 @@ namespace UnityBase.Pool
             return Object.FindObjectsOfType<MonoBehaviour>(inculedInactive).OfType<T>().Where(poolable => poolable.IsActive);
         }
         
-        private bool IsAnyPoolableMissing() => _pool.Any(poolable => !poolable.PoolableObject);
+        private bool IsAnyPoolableMissing() => _pool.Any(poolable => poolable is null);
 
         private void CreatePoolParent()
         {
-            _poolParent = new GameObject("Pool_" + _poolable.PoolableObject.name);
+            if (_poolable is not Component poolableObj)
+            {
+                Debug.LogError($"{_poolable?.GetType()} is not Component!");
+                return;
+            }
+            
+            _poolParent = new GameObject("Pool_" + poolableObj.name);
+                
             _poolParent.transform.SetParent(_poolableRoot);
         }
 
         public void Dispose()
         {
             ClearPool();
+            
             _poolable = default;
+            
             _poolableRoot = null;
+            
             _poolParent = null;
+            
             _poolCount = 0;
         }
     }

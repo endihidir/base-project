@@ -22,8 +22,7 @@ namespace UnityBase.TutorialCore
         #endregion
 
         #region PROPERTIES
-
-        public Component PoolableObject => this;
+        
         public bool IsActive => isActiveAndEnabled;
         public bool IsUnique => false;
         public PositionSpace SpawnSpace => _spawnSpace;

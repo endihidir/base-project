@@ -8,7 +8,6 @@ using VContainer;
 public class BulletTest : MonoBehaviour, IPoolable
 {
     private Tween _scaleTween;
-    public Component PoolableObject => this;
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
     

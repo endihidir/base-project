@@ -32,9 +32,8 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
     public MaskableGraphic graphic { get { return _graphic ?? (_graphic = GetComponent<MaskableGraphic>()); } }
     public Image Image { get; private set; }
     
-    public RectTransform fitTarget
+    public RectTransform FitTarget
     {
-        get { return m_FitTarget; }
         set
         {
             m_FitTarget = value;
@@ -43,7 +42,6 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
     }
     
     public bool fitOnLateUpdate { get { return m_FitOnLateUpdate; } set { m_FitOnLateUpdate = value; } }
-    public Component PoolableObject => this;
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
 

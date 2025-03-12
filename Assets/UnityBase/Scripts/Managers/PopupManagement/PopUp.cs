@@ -16,7 +16,6 @@ namespace UnityBase.PopUpCore
 
         [SerializeField] protected bool _isSettingsPopUp;
         public bool IsSettingsPopUp => _isSettingsPopUp;
-        public Component PoolableObject => this;
         public virtual bool IsActive => isActiveAndEnabled;
         public virtual bool IsUnique => true;
 

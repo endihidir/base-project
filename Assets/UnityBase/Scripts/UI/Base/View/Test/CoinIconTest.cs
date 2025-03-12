@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class CoinIconTest : MonoBehaviour, IPoolable
 {
-    public Component PoolableObject => this;
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
 

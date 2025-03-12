@@ -18,7 +18,7 @@ internal class MenuOptions_UIUnmask
 
         var unmaskedPanel = CreateUnmaskedPanel(AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd"), Image.Type.Sliced);
         var maskUI = unmaskedPanel.GetComponentInChildren<MaskUI>();
-        maskUI.fitTarget = button.transform as RectTransform;
+        maskUI.FitTarget = button.transform as RectTransform;
         maskUI.fitOnLateUpdate = true;
 
         var screen = unmaskedPanel.transform.Find("Screen").GetComponent<Image>();

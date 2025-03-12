@@ -18,7 +18,7 @@ public class TutorialTest : MonoBehaviour
     [Button]
     public void HandDrawTest()
     {
-        var tut = _tutorialActionManager.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
+        var tut = _tutorialActionManager?.GetTutorial<HandTutorial>(PositionSpace.ScreenSpace);
 
         var pos1 = new Vector3(Screen.width * 0.2f, Screen.height * 0.8f);
         var pos2 = new Vector3(Screen.width * 0.75f, Screen.height * 0.5f);
@@ -30,9 +30,9 @@ public class TutorialTest : MonoBehaviour
         
         _tutorialMaskManager.GetMasks(poses, maskData);
         
-        var act = tut.GetAction<DrawAction>(0.85f);
+        var act = tut?.GetAction<DrawAction>(0.85f);
         
-        act.Draw(poses, 1.25f, PathType.CatmullRom, true);
+        act?.Draw(poses, 1.25f, PathType.CatmullRom, true);
     }
     
     [Button]

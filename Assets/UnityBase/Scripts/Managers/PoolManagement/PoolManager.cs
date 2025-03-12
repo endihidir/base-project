@@ -5,33 +5,38 @@ using Sirenix.Utilities;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.Pool;
+using UnityBase.Presenter;
 using UnityBase.Service;
 using UnityEngine;
 using VContainer;
 
 namespace UnityBase.Manager
 {
-    public class PoolManager : IPoolManager, IAppBootService
+    public class PoolManager : IPoolManager, IAppBootService, IResolverUpdater
     {
-        private PoolManagerSO _poolManagerSo;
+        private readonly PoolManagerSO _poolManagerSo;
+
+        private readonly IObjectResolverContainer _objectResolverContainer;
         
         private Transform _poolableObjectsParent;
-        
-        private IObjectResolver _objectResolver;
         
         private IDictionary<Type, PoolableObjectGroup> _poolableGroups = new Dictionary<Type, PoolableObjectGroup>();
 
         private bool _isDisposed;
         
-        public PoolManager(GameDataHolderSO gameDataHolderSo, IObjectResolver objectResolver)
+        public PoolManager(GameDataHolderSO gameDataHolderSo, IObjectResolverContainer objectResolverContainer)
         {
             _poolManagerSo = gameDataHolderSo.poolManagerSo;
+            
             _poolableObjectsParent = _poolManagerSo.poolParentTransform;
-            _objectResolver = objectResolver;
+
+            _objectResolverContainer = objectResolverContainer;
+            
             _isDisposed = false;
         }
 
         ~PoolManager() => Dispose();
+
         public void Initialize()
         {
             CachePoolables();
@@ -42,11 +47,12 @@ namespace UnityBase.Manager
         public void Dispose()
         {
             if(_isDisposed) return;
+            
             _isDisposed = true;
+            
             _poolableGroups.ForEach(x => x.Value?.Dispose());
-            _poolManagerSo = null;
+           
             _poolableGroups = null;
-            _objectResolver = null;
         }
 
         public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : IPoolable
@@ -56,12 +62,15 @@ namespace UnityBase.Manager
             if (_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
             {
                 var poolable = poolableObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+                
                 return poolable;
             }
             else
             {
                 poolableObjectGroup = CreateNewGroup<T>();
+                
                 var poolable = poolableObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+
                 return poolable;
             }
         }
@@ -69,17 +78,29 @@ namespace UnityBase.Manager
         public void HideObject<T>(T poolable, float duration, float delay, Action onComplete = default) where T : IPoolable
         {
             if(_isDisposed) return;
-            
-            var key = poolable.PoolableObject.GetType();
 
-            if (!_poolableGroups.TryGetValue(key, out var poolableObjectGroup))
+            if (!_poolableGroups.TryGetValue(typeof(T), out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not hide object because {key} does not exist in the list of prefabs.");
+                Debug.LogError($"You can not hide object because {typeof(T)} does not exist in the list of prefabs.");
                 return;
             }
             
             poolableObjectGroup.HideObject(poolable, duration, delay, onComplete);
         }
+        
+        public void ReturnToPool<T>(T poolable, Action onComplete = default) where T : IPoolable
+        {
+            if(_isDisposed) return;
+
+            if (!_poolableGroups.TryGetValue(typeof(T), out var poolableObjectGroup))
+            {
+                Debug.LogError($"You can not hide object because {typeof(T)} does not exist in the list of prefabs.");
+                return;
+            }
+            
+            poolableObjectGroup.ReturnToPool(poolable, onComplete);
+        }
+
         
         public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = default) where T : IPoolable
         {
@@ -129,16 +150,6 @@ namespace UnityBase.Manager
             return poolableObjectGroup.Pool.Count;
         }
 
-        public void UpdateAllResolvers(IObjectResolver objectResolver)
-        {
-            _objectResolver = objectResolver;
-            
-            foreach (var poolableObject in _poolableGroups)
-            {
-                poolableObject.Value.UpdateObjectResolver(_objectResolver);
-            }
-        }
-
         private void CachePoolables()
         {
             var poolData = _poolManagerSo.poolDataSo;
@@ -152,11 +163,19 @@ namespace UnityBase.Manager
                 }
 
                 var isPoolable = poolableAsset.poolObject.TryGetComponent<IPoolable>(out var poolable);
+                
                 if(!isPoolable) continue;
-                var key = poolable.PoolableObject.GetType();
+                
+                var key = poolable.GetType();
+                
                 if (_poolableGroups.ContainsKey(key)) continue;
+                
                 var poolableObjectGroup = new PoolableObjectGroup();
-                poolableObjectGroup.Initialize(poolable, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy, _objectResolver);
+                
+                poolableObjectGroup.Initialize(poolable, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
+                
+                poolableObjectGroup.SetObjectResolver(_objectResolverContainer.ObjectResolver);
+                
                 _poolableGroups.Add(key, poolableObjectGroup);
             }
         }
@@ -167,15 +186,34 @@ namespace UnityBase.Manager
         private PoolableObjectGroup CreateNewGroup<T>() where T : IPoolable
         {
             var type = typeof(T);
+            
             var poolData = _poolManagerSo.poolDataSo;
-            var poolableAsset = poolData.FirstOrDefault(x => x.poolObject.GetComponent<IPoolable>().PoolableObject.GetType() == type);
+            
+            var poolableAsset = poolData.FirstOrDefault(x => x.poolObject.GetComponent<IPoolable>().GetType() == type);
+            
             if (poolableAsset == null) return default;
+            
             var poolableObjectGroup = new PoolableObjectGroup();
+            
             var poolableObject = poolableAsset.poolObject.GetComponent<T>();
-            poolableObjectGroup.Initialize(poolableObject, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy, _objectResolver);
+            
+            poolableObjectGroup.Initialize(poolableObject, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
+            
+            poolableObjectGroup.SetObjectResolver(_objectResolverContainer.ObjectResolver);
+            
             poolableObjectGroup.CreatePool();
+            
             _poolableGroups.Add(type, poolableObjectGroup);
+            
             return poolableObjectGroup;
+        }
+        
+        public void UpdateResolver(IObjectResolver objectResolver)
+        {
+            foreach (var poolableObject in _poolableGroups)
+            {
+                poolableObject.Value.SetObjectResolver(objectResolver);
+            }
         }
     }
 }
