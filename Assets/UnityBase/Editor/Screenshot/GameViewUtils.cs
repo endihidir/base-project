@@ -1,11 +1,6 @@
-﻿using System;
-using System.Reflection;
-#if UNITY_EDITOR
+﻿using System.Reflection;
 using UnityEditor;
-#endif
-using UnityEngine;
 
-#if UNITY_EDITOR
 public static class GameViewUtils
 {
 	static object gameViewSizesInstance;
@@ -150,4 +145,3 @@ public static class GameViewUtils
 
 	static object GetGroup(GameViewSizeGroupType type) => getGroup.Invoke(gameViewSizesInstance, new object[] { (int)type });
 }
-#endif

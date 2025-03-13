@@ -1,0 +1,17 @@
+{
+    "name": "UnityBase.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b35c24c15cc264146b5ba20ba48df275",
+        "GUID:478a2357cc57436488a56e564b08d223"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

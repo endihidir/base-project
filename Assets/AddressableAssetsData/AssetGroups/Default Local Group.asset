@@ -38,12 +38,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea50560fade9f8c42a7d3b5fc20ec992
-    m_Address: Assets/UnityBase/Scenes/MainMenu.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/MainMenu.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: df5ef17091c026c42a06505cccd2e543
-    m_Address: Assets/UnityBase/Scenes/Gameplay.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/Gameplay.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
