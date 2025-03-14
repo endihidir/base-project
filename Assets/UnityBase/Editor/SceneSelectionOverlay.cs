@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Overlays;
@@ -7,11 +9,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [Overlay(typeof(SceneView), "Scene Selection")]
-//[Icon(k_icon)]
 public class SceneSelectionOverlay : ToolbarOverlay
-{
-    //public const string k_icon = "Assets/Editor/Icons/UnityIcon.png";
-
+{ 
     SceneSelectionOverlay() : base(SceneDropdownToggle.k_id) { }
 
     [EditorToolbarElement(k_id, typeof(SceneView))]
@@ -23,7 +22,6 @@ public class SceneSelectionOverlay : ToolbarOverlay
         { 
             text= "Scenes";
             tooltip = "Select a scene to load";
-            //icon = AssetDatabase.LoadAssetAtPath<Texture2D>(SceneSelectionOverlay.k_icon);
 
             dropdownClicked += ShowSceneMenu;
         }
@@ -47,6 +45,24 @@ public class SceneSelectionOverlay : ToolbarOverlay
 
             menu.ShowAsContext();
         }
+        
+        private void ShowBuildSettingsSceneMenu()
+        {
+            GenericMenu menu = new GenericMenu();
+            
+            Scene currentScene = SceneManager.GetActiveScene();
+            
+            List<string> scenePaths = GetBuildSettingsScenes();
+
+            foreach (var path in scenePaths)
+            {
+                string name = Path.GetFileNameWithoutExtension(path);
+                
+                menu.AddItem(new GUIContent(name), String.CompareOrdinal(currentScene.name, name) == 0, () => OpenScene(currentScene, path));
+            }
+
+            menu.ShowAsContext();
+        }
 
         void OpenScene(Scene currentScene, string path)
         {
@@ -59,6 +75,21 @@ public class SceneSelectionOverlay : ToolbarOverlay
             {
                 EditorSceneManager.OpenScene(path);
             }
+        }
+        
+        private List<string> GetBuildSettingsScenes()
+        {
+            List<string> scenes = new List<string>();
+            
+            foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+            {
+                if (scene.enabled)
+                {
+                    scenes.Add(scene.path);
+                }
+            }
+            
+            return scenes;
         }
     }
 }
