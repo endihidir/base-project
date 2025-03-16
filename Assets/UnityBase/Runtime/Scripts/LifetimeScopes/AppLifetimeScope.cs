@@ -59,7 +59,7 @@ namespace UnityBase.BaseLifetimeScope
 
         private void RegisterScopedServices(IContainerBuilder builder)
         {
-            builder.Register<JsonDataManager>(Lifetime.Scoped).AsImplementedInterfaces();
+            builder.Register<SaveManager>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<CommandRecorder>(Lifetime.Scoped).AsImplementedInterfaces();
         }
         

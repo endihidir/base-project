@@ -13,7 +13,7 @@ namespace UnityBase.Manager
         private readonly ILevelManager _levelManager;
         private readonly ITutorialActionManager _tutorialActionManager;
         private readonly ITutorialMaskManager _tutorialMaskManager;
-        private readonly IJsonDataManager _jsonDataManager;
+        private readonly ISaveManager _saveManager;
         
         private const string TUTORIAL_STEP_KEY = "TutorialStepKey";
         private const string COMPLETED_TURORIAL_LEVEL_KEY = "CompletedTutorialLevelKey";
@@ -43,7 +43,7 @@ namespace UnityBase.Manager
         public bool IsSelectedLevelTutorialEnabled => IsLevelMatchedWithTutorial(_levelManager.LastSelectedChapterIndex, _levelManager.LastSelectedLevelIndex)
                                                       && !IsSelectedLevelTutorialCompleted();
 
-        public TutorialProcessManager(GameDataHolderSO gameDataHolderSo, ILevelManager levelManager, ITutorialActionManager tutorialActionManager, ITutorialMaskManager tutorialMaskManager, IJsonDataManager jsonDataManager)
+        public TutorialProcessManager(GameDataHolderSO gameDataHolderSo, ILevelManager levelManager, ITutorialActionManager tutorialActionManager, ITutorialMaskManager tutorialMaskManager, ISaveManager saveManager)
         {
             _tutorialProcessManagerSo = gameDataHolderSo.tutorialProcessManagerSo;
 
@@ -57,7 +57,7 @@ namespace UnityBase.Manager
             _tutorialActionManager = tutorialActionManager;
             _tutorialMaskManager = tutorialMaskManager;
             
-            _jsonDataManager = jsonDataManager;
+            _saveManager = saveManager;
         }
 
         ~TutorialProcessManager() => Dispose();
@@ -198,12 +198,12 @@ namespace UnityBase.Manager
 
         private void SetCompletedTutorialLevelIndexes(CompletedTutorialLevelData array)
         {
-            _jsonDataManager.Save(CompletedTutorialLevelName, array);
+            _saveManager.SaveToJson(CompletedTutorialLevelName, array);
         }
 
         private CompletedTutorialLevelData GetCompletedTutorialLevelIndexes()
         {
-            return _jsonDataManager.Load(CompletedTutorialLevelName, new CompletedTutorialLevelData(), false);
+            return _saveManager.LoadFromJson(CompletedTutorialLevelName, new CompletedTutorialLevelData(), false);
         }
 
         private bool IsTutorialStepDataEmpty()

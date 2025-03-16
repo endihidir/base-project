@@ -8,7 +8,7 @@ namespace UnityBase.Scripts.Editor
         [MenuItem("Edit/Clear All Save Load Data")]
         private static void ClearAllSaveLoadData()
         {
-            JsonDataManager.ClearAllSaveLoadData();
+            SaveManager.ClearAllSaveLoadData();
         }
     }
 }

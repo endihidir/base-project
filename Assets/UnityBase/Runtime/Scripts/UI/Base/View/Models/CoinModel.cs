@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityBase.Observable;
 using UnityBase.Service;
 
@@ -9,11 +8,11 @@ namespace UnityBase.UI.ViewCore
     {
         public Observable<int> Coins { get; }
 
-        private readonly IJsonDataManager _jsonDataManager;
+        private readonly ISaveManager _saveManager;
         
-        public CoinModel(IJsonDataManager jsonDataManager)
+        public CoinModel(ISaveManager saveManager)
         {
-            _jsonDataManager = jsonDataManager;
+            _saveManager = saveManager;
            
             Coins = new Observable<int>(Deserialize().coins);
         }
@@ -27,12 +26,12 @@ namespace UnityBase.UI.ViewCore
         
         public CoinData Deserialize()
         {
-            return _jsonDataManager.Load<CoinData>("CoinData");
+            return _saveManager.LoadFromPrefs<CoinData>("CoinData");
         }
 
         public void Serialize(CoinData savedData)
         {
-            _jsonDataManager.Save("CoinData", savedData);
+            _saveManager.SaveToPrefs("CoinData", savedData);
         }
 
         public void Add(int value)
