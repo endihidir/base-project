@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityBase.Observable;
 using UnityBase.Service;
 
@@ -40,7 +41,7 @@ namespace UnityBase.UI.ViewCore
             
             Serialize(new CoinData{coins = Coins.Value});
         }
-
+        
         public void Dispose()
         {
             Coins?.Dispose();

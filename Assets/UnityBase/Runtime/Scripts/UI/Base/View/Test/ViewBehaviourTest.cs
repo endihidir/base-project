@@ -23,7 +23,7 @@ public class ViewBehaviourTest : MonoBehaviour
         
         _coinManager.SaveData(1);
         
-        coinIcon.MoveTo(_coinManager.CoinIconT, ()=>
+        coinIcon.MoveTo(_coinManager.CoinIconT,0.5f, ()=>
         {
             _coinManager.UpdateView();
             _coinManager.PlayBounceAnim();

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityBase.BootService;
@@ -19,26 +20,32 @@ namespace UnityBase.Manager
     {
         private const string DirectoryName = "JsonData";
 
+        private readonly JsonSerializer _jsonSerializer = new();
+
 #if UNITY_EDITOR
         private static string DirectoryPath => $"{Application.dataPath}/{DirectoryName}";
 #else
         private static string DirectoryPath => $"{Application.persistentDataPath}/{DirectoryName}";
 #endif
-        
-        public void Initialize() { }
 
+        public void Initialize() { }
+        
         public bool Save<T>(string key, T data)
         {
             EnsureDirectoryExists();
-
+            
             var filePath = GetFilePath(key);
 
-            var jsonData = JsonConvert.SerializeObject(data);
+            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
             
-            File.WriteAllText(filePath, jsonData);
+            using var writer = new StreamWriter(fs, Encoding.UTF8, bufferSize: 8192, leaveOpen: false);
+            
+            using var jsonWriter = new JsonTextWriter(writer);
+            
+            _jsonSerializer.Serialize(jsonWriter, data);
 
 #if UNITY_EDITOR
-            if(!Application.isPlaying)
+            if (!Application.isPlaying)
                 AssetDatabase.Refresh();
 #endif
             return true;
@@ -47,7 +54,7 @@ namespace UnityBase.Manager
         public T Load<T>(string key, T defaultData = default, bool autoSaveDefaultData = true)
         {
             EnsureDirectoryExists();
-
+            
             var filePath = GetFilePath(key);
 
             if (!File.Exists(filePath))
@@ -56,75 +63,16 @@ namespace UnityBase.Manager
                 {
                     Save(key, defaultData);
                 }
-                
                 return defaultData;
             }
 
-            var jsonData = File.ReadAllText(filePath);
-                
-            var data = JsonConvert.DeserializeObject<T>(jsonData);
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             
-            return data;
-        }
-
-        public async UniTask<bool> SaveAsync<T>(string key, T data)
-        {
-            EnsureDirectoryExists();
-
-            var filePath = GetFilePath(key);
+            using var reader = new StreamReader(fs, Encoding.UTF8, bufferSize: 8192, leaveOpen: false, detectEncodingFromByteOrderMarks: false);
             
-            try
-            {
-                var jsonData = JsonConvert.SerializeObject(data);
-                
-                await File.WriteAllTextAsync(filePath, jsonData);
-                
-#if UNITY_EDITOR
-                if(!Application.isPlaying)
-                    AssetDatabase.Refresh();
-#endif
-                
-                return true;
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-                
-                return false;
-            }
-        }
-
-        public async UniTask<T> LoadAsync<T>(string key, T defaultData = default, bool autoSaveDefaultData = true)
-        {
-            EnsureDirectoryExists();
-
-            var filePath = GetFilePath(key);
-
-            if (!File.Exists(filePath))
-            {
-                if (defaultData is not null && autoSaveDefaultData)
-                {
-                    await SaveAsync(key, defaultData);
-                }
-
-                return defaultData;
-            }
-
-            try
-            {
-                var jsonData = await File.ReadAllTextAsync(filePath);
-                
-                var data = JsonConvert.DeserializeObject<T>(jsonData);
-                
-                return data;
-
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-                
-                return defaultData;
-            }
+            using var jsonReader = new JsonTextReader(reader);
+            
+            return _jsonSerializer.Deserialize<T>(jsonReader);
         }
         
         private void EnsureDirectoryExists()
