@@ -1,5 +1,6 @@
 using DG.Tweening;
 using TMPro;
+using UnityEngine;
 
 namespace UnityBase.UI.ViewCore
 {
@@ -8,35 +9,25 @@ namespace UnityBase.UI.ViewCore
         private TextMeshProUGUI _coinTxt;
         
         private ICoinModel _coinModel;
-
-        private int _value;
         
         private Tween _valueIncrease;
-        
-        public ICoinView Initialize(TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel)
+        public Transform CoinIconTransform { get; private set; }
+
+        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel)
         {
+            CoinIconTransform = coinIconTransform;
             _coinTxt = textMeshProUGUI;
             _coinModel = coinModel;
-            _value = _coinModel.Coins.Value;
-            _coinTxt.text = _value.ToString();
+            _coinTxt.text = _coinModel.Coins.Value.ToString();
             return this;
         }
 
         public ICoinView UpdateView()
         {
-            /*_valueIncrease?.Kill();
-            var dif = _coinModel.Coins.Value - _value;
-            _valueIncrease = DOTween.To(GetValue, SetValue, _coinModel.Coins.Value, dif / 30f);*/
-            SetValue(_coinModel.Coins.Value);
+            _coinTxt.text = _coinModel.Coins.Value.ToString();
             return this;
         }
-
-        private int GetValue() => _value;
-        private void SetValue(int value)
-        {
-            _value = value;
-            _coinTxt.text = _value.ToString();
-        }
+        
         public void Dispose()
         {
             _valueIncrease?.Kill();
@@ -45,7 +36,8 @@ namespace UnityBase.UI.ViewCore
     
     public interface ICoinView : IView
     {
-        public ICoinView Initialize(TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel);
+        public Transform CoinIconTransform { get; }
+        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel);
         public ICoinView UpdateView();
     }
 }

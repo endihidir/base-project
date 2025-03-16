@@ -24,7 +24,6 @@ public class ViewBehaviourTest : MonoBehaviour
         {
             _coinManager.SaveData(1);
             _coinManager.UpdateView();
-            _coinManager.PlayBounceAnim();
             _poolManager.HideObject(coinIcon, 0f, 0.1f);
         });
     }

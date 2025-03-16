@@ -7,7 +7,6 @@ namespace UnityBase.Service
     {
         public Transform CoinIconT { get; }
         public void SaveData(int coin);
-        public void PlayBounceAnim(Action onComplete = default);
         public void UpdateView();
     }
 }

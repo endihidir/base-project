@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityBase.UI.ViewCore
 {
-    public class CoinCoinBounceAnimation : ICoinBounceAnimation
+    public class CoinBounceAnimation : ICoinBounceAnimation
     {
         private Transform _coinIconTransform;
 

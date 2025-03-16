@@ -1,5 +1,3 @@
-using System;
-using TMPro;
 using UnityBase.BootService;
 using UnityBase.Service;
 using UnityBase.UI.Dynamic;
@@ -22,8 +20,8 @@ namespace UnityBase.Manager
         {
             get
             {
-                _viewBehaviourFactory.TryGetViewAnimation<CoinViewUI, CoinCoinBounceAnimation>(out var coinViewAnim);
-                return coinViewAnim.CoinIconTransform; 
+                _viewBehaviourFactory.TryGetView<CoinViewUI, CoinView>(out var coinView);
+                return coinView.CoinIconTransform; 
             }
         }
 
@@ -36,18 +34,6 @@ namespace UnityBase.Manager
             else
             {
                 Debug.LogError("Coin model does not exist!");
-            }
-        }
-
-        public void PlayBounceAnim(Action onComplete)
-        {
-            if (_viewBehaviourFactory.TryGetViewAnimation<CoinViewUI, CoinCoinBounceAnimation>(out var coinViewAnim))
-            {
-                coinViewAnim.Bounce(onComplete);
-            }
-            else
-            {
-                Debug.LogError("Coin bounce animation does not exist!");
             }
         }
 

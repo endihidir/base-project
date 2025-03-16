@@ -14,8 +14,7 @@ namespace UnityBase.UI.Dynamic
         [SerializeField] private MoveInOutViewConfigSO _moveInOutViewConfigSo;
 
         [SerializeField] private BounceViewConfigSO _bounceViewConfigSo;
-
-        private ICoinBounceAnimation _coinBounceCoinAnimation;
+        
         private IMoveInOutAnimation _moveInOutAnim;
         private ICoinModel _coinModel;
         private ICoinView _coinView;
@@ -24,11 +23,7 @@ namespace UnityBase.UI.Dynamic
         {
             _coinModel = viewBehaviourFactory.CreateModel<CoinModel>(this).Initialize();
 
-            _coinView = viewBehaviourFactory.CreateView<CoinView>(this).Initialize(_coinTxt, _coinModel);
-            
-            _coinBounceCoinAnimation = viewBehaviourFactory.CreateAnimation<CoinCoinBounceAnimation>(this)
-                .Initialize(_coinIconT)
-                .Configure(_bounceViewConfigSo);
+            _coinView = viewBehaviourFactory.CreateView<CoinView>(this).Initialize(_coinIconT, _coinTxt, _coinModel);
             
             _moveInOutAnim = viewBehaviourFactory.CreateViewLocalAnimation<MoveInOutAnimation>()
                 .Initialize(_rectTransform)
@@ -59,7 +54,6 @@ namespace UnityBase.UI.Dynamic
         {
             _moveInOutAnim?.Dispose();
             _coinModel?.Dispose();
-            _coinBounceCoinAnimation?.Dispose();
             _coinView?.Dispose();
         }
     }
