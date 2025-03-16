@@ -5,21 +5,31 @@ using UnityEngine;
 
 namespace UnityBase.UI.Dynamic
 {
-    public class LevelUI : DynamicUI
+    public class CoinViewUI : DynamicUI
     {
-        [SerializeField] private TextMeshProUGUI _levelTxt;
+        [SerializeField] private TextMeshProUGUI _coinTxt;
+
+        [SerializeField] private Transform _coinIconT;
 
         [SerializeField] private MoveInOutViewConfigSO _moveInOutViewConfigSo;
 
-        private IMoveInOutAnimation _moveInOutAnim;
+        [SerializeField] private BounceViewConfigSO _bounceViewConfigSo;
 
-        private ILevelModel _levelModel;
+        private ICoinBounceAnimation _coinBounceCoinAnimation;
+        private IMoveInOutAnimation _moveInOutAnim;
+        private ICoinModel _coinModel;
+        private ICoinView _coinView;
 
         protected override void Initialize(IViewBehaviourFactory viewBehaviourFactory)
         {
-            _levelModel = viewBehaviourFactory.CreateModel<LevelModel>(this)
-                .Initialize(_levelTxt);
+            _coinModel = viewBehaviourFactory.CreateModel<CoinModel>(this).Initialize();
 
+            _coinView = viewBehaviourFactory.CreateView<CoinView>(this).Initialize(_coinTxt, _coinModel);
+            
+            _coinBounceCoinAnimation = viewBehaviourFactory.CreateAnimation<CoinCoinBounceAnimation>(this)
+                .Initialize(_coinIconT)
+                .Configure(_bounceViewConfigSo);
+            
             _moveInOutAnim = viewBehaviourFactory.CreateViewLocalAnimation<MoveInOutAnimation>()
                 .Initialize(_rectTransform)
                 .Configure(_moveInOutViewConfigSo);
@@ -48,7 +58,9 @@ namespace UnityBase.UI.Dynamic
         protected override void OnDestroy()
         {
             _moveInOutAnim?.Dispose();
-            _levelModel?.Dispose();
+            _coinModel?.Dispose();
+            _coinBounceCoinAnimation?.Dispose();
+            _coinView?.Dispose();
         }
     }
 }

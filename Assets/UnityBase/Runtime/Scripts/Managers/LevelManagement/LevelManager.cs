@@ -1,4 +1,5 @@
 using System;
+using UnityBase.BootService;
 using UnityBase.EventBus;
 using UnityBase.GameDataHolder;
 using UnityBase.Manager.Data;

@@ -21,10 +21,12 @@ public class ViewBehaviourTest : MonoBehaviour
         //coinIcon.transform.SetAsFirstSibling();
         coinIcon.transform.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.3f);
         
+        _coinManager.SaveData(1);
+        
         coinIcon.MoveTo(_coinManager.CoinIconT, ()=>
         {
-            _coinManager.Collect(1);
-            //_coinManager.PlayBounceAnim(null);
+            _coinManager.UpdateView();
+            _coinManager.PlayBounceAnim();
             _poolManager.HideObject(coinIcon, 0f, 0.1f);
         });
     }

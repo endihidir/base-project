@@ -481,6 +481,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1719630295}
+  - component: {fileID: 1719630296}
   m_Layer: 0
   m_Name: GameArena
   m_TagString: Untagged
@@ -503,6 +504,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1719630296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719630294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dd2a5c29ccb02c4d9cf68d9a909ff54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parent: {fileID: 1725484346}
 --- !u!1001 &1725484344
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -624,6 +638,12 @@ PrefabInstance:
 --- !u!1 &1725484345 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2777816043287028128, guid: 0fd56f648f5e646e79e49c014a465a7b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1725484344}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1725484346 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2777816043189031056, guid: 0fd56f648f5e646e79e49c014a465a7b,
     type: 3}
   m_PrefabInstance: {fileID: 1725484344}
   m_PrefabAsset: {fileID: 0}

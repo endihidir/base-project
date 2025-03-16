@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityBase.BootService;
 using UnityBase.Manager;
@@ -7,12 +7,12 @@ using VContainer.Unity;
 
 namespace UnityBase.Presenter
 {
-    public class GameplayBootstarpper : IInitializable, IDisposable
+    public class MenuBootstarpper : IInitializable, IDisposable
     {
         [Inject]
-        private readonly IEnumerable<IGameplayBootService> _gameplayBootServices;
+        private readonly IEnumerable<IMenuBootService> _menuBootServices;
         
-        public GameplayBootstarpper(IObjectResolver objectResolver) => UpdateObjectResolvers(objectResolver);
+        public MenuBootstarpper(IObjectResolver objectResolver) => UpdateObjectResolvers(objectResolver);
 
         private static void UpdateObjectResolvers(IObjectResolver objectResolver)
         {
@@ -23,7 +23,7 @@ namespace UnityBase.Presenter
 
         public void Initialize()
         {
-            foreach (var gameplayBootService in _gameplayBootServices)
+            foreach (var gameplayBootService in _menuBootServices)
             {
                 gameplayBootService?.Initialize();
             }
@@ -31,7 +31,7 @@ namespace UnityBase.Presenter
 
         public void Dispose()
         {
-            foreach (var gameplayBootService in _gameplayBootServices)
+            foreach (var gameplayBootService in _menuBootServices)
             {
                 gameplayBootService?.Dispose();
             }

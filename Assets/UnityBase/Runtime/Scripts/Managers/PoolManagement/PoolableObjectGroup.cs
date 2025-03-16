@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityBase.Manager;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -20,7 +21,7 @@ namespace UnityBase.Pool
         
         private GameObject _poolParent;
         
-        private IObjectResolver _objectResolver;
+        private IObjectResolverContainer _objectResolverContainer;
         
         private readonly Queue<IPoolable> _pool;
         public Queue<IPoolable> Pool => _pool;
@@ -28,9 +29,11 @@ namespace UnityBase.Pool
 
         public PoolableObjectGroup() => _pool = new Queue<IPoolable>();
         
-        
-        public void Initialize(IPoolable poolable, Transform rootParent, int poolCount, bool isLazy)
+      
+        public void Initialize(IObjectResolverContainer objectResolverContainer, IPoolable poolable, Transform rootParent, int poolCount, bool isLazy)
         {
+            _objectResolverContainer = objectResolverContainer;
+            
             _poolable = poolable;
             
             _poolableRoot = rootParent;
@@ -40,11 +43,6 @@ namespace UnityBase.Pool
             _isLazy = isLazy;
             
             CreatePoolParent();
-        }
-        
-        public void SetObjectResolver(IObjectResolver objectResolver)
-        {
-            _objectResolver = objectResolver;
         }
 
         public void CreatePool()
@@ -67,7 +65,7 @@ namespace UnityBase.Pool
             {
                 if (_pool.TryPeek(out poolable) && poolable is Component poolableObj)
                 {
-                    _objectResolver.InjectGameObject(poolableObj.gameObject);
+                    _objectResolverContainer.ObjectResolver.InjectGameObject(poolableObj.gameObject);
                 }
                 else
                 {
@@ -78,7 +76,7 @@ namespace UnityBase.Pool
             {
                 if (_pool.TryDequeue(out poolable) && poolable is Component poolableObj)
                 {
-                    _objectResolver.InjectGameObject(poolableObj.gameObject);
+                    _objectResolverContainer.ObjectResolver.InjectGameObject(poolableObj.gameObject);
                 }
                 else
                 {
@@ -146,7 +144,7 @@ namespace UnityBase.Pool
             
             var poolableObject = Object.Instantiate(poolableComponent, _poolParent.transform);
                 
-            _objectResolver.InjectGameObject(poolableObject.gameObject);
+            _objectResolverContainer.ObjectResolver.InjectGameObject(poolableObject.gameObject);
 
             poolableObject.name = poolableComponent.name;
 

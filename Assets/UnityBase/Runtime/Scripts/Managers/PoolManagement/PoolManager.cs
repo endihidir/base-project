@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.Pool;
-using UnityBase.Presenter;
 using UnityBase.Service;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.Manager
 {
-    public class PoolManager : IPoolManager, IAppBootService, IResolverUpdater
+    public class PoolManager : IPoolManager, IAppBootService
     {
         private readonly PoolManagerSO _poolManagerSo;
 
@@ -180,9 +179,7 @@ namespace UnityBase.Manager
                 
                 var poolableObjectGroup = new PoolableObjectGroup();
                 
-                poolableObjectGroup.Initialize(poolable, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
-                
-                poolableObjectGroup.SetObjectResolver(_objectResolverContainer.ObjectResolver);
+                poolableObjectGroup.Initialize(_objectResolverContainer, poolable, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
                 
                 _poolableGroups.Add(key, poolableObjectGroup);
             }
@@ -212,23 +209,13 @@ namespace UnityBase.Manager
             
             var poolableObject = poolableAsset.poolObject.GetComponent<T>();
             
-            poolableObjectGroup.Initialize(poolableObject, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
-            
-            poolableObjectGroup.SetObjectResolver(_objectResolverContainer.ObjectResolver);
+            poolableObjectGroup.Initialize(_objectResolverContainer, poolableObject, _poolableObjectsParent, poolableAsset.poolSize, poolableAsset.isLazy);
             
             poolableObjectGroup.CreatePool();
             
             _poolableGroups.Add(type, poolableObjectGroup);
             
             return poolableObjectGroup;
-        }
-        
-        public void UpdateResolver(IObjectResolver objectResolver)
-        {
-            foreach (var poolableObject in _poolableGroups)
-            {
-                poolableObject.Value.SetObjectResolver(objectResolver);
-            }
         }
     }
 }

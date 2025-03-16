@@ -15,11 +15,11 @@ namespace UnityBase.UI.Dynamic
         protected void Awake() => _rectTransform ??= GetComponent<RectTransform>();
 
         [Inject]
-        private void Construct(IViewBehaviourFactory viewBehaviourFactory, IObjectResolver resolver)
+        private void Construct(IViewBehaviourFactory viewBehaviourFactory)
         {
-            viewBehaviourFactory.UpdateResolver(resolver);
             Initialize(viewBehaviourFactory);
         }
+        
         protected abstract void Initialize(IViewBehaviourFactory viewBehaviourFactory);
 
         public abstract void OpenView();

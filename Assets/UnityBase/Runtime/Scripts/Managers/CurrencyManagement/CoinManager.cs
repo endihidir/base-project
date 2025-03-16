@@ -1,4 +1,6 @@
 using System;
+using TMPro;
+using UnityBase.BootService;
 using UnityBase.Service;
 using UnityBase.UI.Dynamic;
 using UnityBase.UI.ViewCore;
@@ -20,16 +22,16 @@ namespace UnityBase.Manager
         {
             get
             {
-                _viewBehaviourFactory.TryGetViewAnimation<CoinUI, BounceView>(out var coinViewAnim);
+                _viewBehaviourFactory.TryGetViewAnimation<CoinViewUI, CoinCoinBounceAnimation>(out var coinViewAnim);
                 return coinViewAnim.CoinIconTransform; 
             }
         }
 
-        public void Collect(int coins)
+        public void SaveData(int coin)
         {
-            if (_viewBehaviourFactory.TryGetModel<CoinUI, CoinModel>(out var coinViewModel))
+            if (_viewBehaviourFactory.TryGetModel<CoinViewUI, CoinModel>(out var coinViewModel))
             {
-                coinViewModel.Add(coins);
+                coinViewModel.Add(coin);
             }
             else
             {
@@ -39,13 +41,25 @@ namespace UnityBase.Manager
 
         public void PlayBounceAnim(Action onComplete)
         {
-            if (_viewBehaviourFactory.TryGetViewAnimation<CoinUI, BounceView>(out var coinViewAnim))
+            if (_viewBehaviourFactory.TryGetViewAnimation<CoinViewUI, CoinCoinBounceAnimation>(out var coinViewAnim))
             {
                 coinViewAnim.Bounce(onComplete);
             }
             else
             {
                 Debug.LogError("Coin bounce animation does not exist!");
+            }
+        }
+
+        public void UpdateView()
+        {
+            if (_viewBehaviourFactory.TryGetView<CoinViewUI, CoinView>(out var coinViewModel))
+            {
+               coinViewModel.UpdateView();
+            }
+            else
+            {
+                Debug.LogError("Coin model does not exist!");
             }
         }
 

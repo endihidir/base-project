@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using UnityBase.BootService;
 using UnityBase.Service;
 
 #if UNITY_EDITOR
@@ -37,7 +38,8 @@ namespace UnityBase.Manager
             File.WriteAllText(filePath, jsonData);
 
 #if UNITY_EDITOR
-            AssetDatabase.Refresh();
+            if(!Application.isPlaying)
+                AssetDatabase.Refresh();
 #endif
             return true;
         }
@@ -78,7 +80,8 @@ namespace UnityBase.Manager
                 await File.WriteAllTextAsync(filePath, jsonData);
                 
 #if UNITY_EDITOR
-                AssetDatabase.Refresh();
+                if(!Application.isPlaying)
+                    AssetDatabase.Refresh();
 #endif
                 
                 return true;
@@ -142,7 +145,8 @@ namespace UnityBase.Manager
             }
             
 #if UNITY_EDITOR
-            AssetDatabase.Refresh();
+            if(!Application.isPlaying)
+                AssetDatabase.Refresh();
 #endif
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityBase.BootService;
 using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityBase.Pool;

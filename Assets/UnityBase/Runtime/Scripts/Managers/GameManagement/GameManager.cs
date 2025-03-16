@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using UnityBase.BootService;
 using UnityBase.EventBus;
 using UnityBase.GameDataHolder;
 using UnityBase.Manager.Data;

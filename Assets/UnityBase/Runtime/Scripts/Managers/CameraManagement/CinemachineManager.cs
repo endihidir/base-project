@@ -1,4 +1,5 @@
 using Cinemachine;
+using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Service;
 using UnityEngine;

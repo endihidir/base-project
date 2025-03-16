@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityBase.UI.ViewCore
 {
-    public class MoveInOutView : IMoveInOutView
+    public class MoveInOutAnimation : IMoveInOutAnimation
     {
         private RectTransform _mainTransform;
 
@@ -12,13 +12,13 @@ namespace UnityBase.UI.ViewCore
         
         private MoveInOutViewConfigSO _moveInOutViewConfigSo;
         
-        public IMoveInOutView Initialize(RectTransform mainTransform)
+        public IMoveInOutAnimation Initialize(RectTransform mainTransform)
         {
             _mainTransform = mainTransform;
             return this;
         }
 
-        public IMoveInOutView Configure(MoveInOutViewConfigSO moveInOutViewConfig)
+        public IMoveInOutAnimation Configure(MoveInOutViewConfigSO moveInOutViewConfig)
         {
             _moveInOutViewConfigSo = moveInOutViewConfig;
             return this;
@@ -64,10 +64,10 @@ namespace UnityBase.UI.ViewCore
         }
     }
 
-    public interface IMoveInOutView : IViewAnimation
+    public interface IMoveInOutAnimation : IAnimation
     {
-        public IMoveInOutView Initialize(RectTransform mainTransform);
-        public IMoveInOutView Configure(MoveInOutViewConfigSO moveInOutViewConfig);
+        public IMoveInOutAnimation Initialize(RectTransform mainTransform);
+        public IMoveInOutAnimation Configure(MoveInOutViewConfigSO moveInOutViewConfig);
         public void MoveIn();
         public void MoveOut();
         public void MoveInInstantly();

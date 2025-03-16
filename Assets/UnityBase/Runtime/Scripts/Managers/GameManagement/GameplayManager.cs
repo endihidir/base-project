@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityBase.BootService;
 using UnityBase.EventBus;
 using UnityBase.Extensions;
 using UnityBase.Manager.Data;

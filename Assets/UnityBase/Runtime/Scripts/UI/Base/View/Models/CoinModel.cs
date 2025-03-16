@@ -1,5 +1,4 @@
 ﻿using System;
-using TMPro;
 using UnityBase.Observable;
 using UnityBase.Service;
 
@@ -10,34 +9,19 @@ namespace UnityBase.UI.ViewCore
         public Observable<int> Coins { get; }
 
         private readonly IJsonDataManager _jsonDataManager;
-
-        private int _value;
-
-        private TextMeshProUGUI _coinTxt;
         
         public CoinModel(IJsonDataManager jsonDataManager)
         {
             _jsonDataManager = jsonDataManager;
-
-            _value = Deserialize().coins;
            
-            Coins = new Observable<int>(_value, UpdateCoinView);
+            Coins = new Observable<int>(Deserialize().coins);
         }
 
-        public ICoinModel Initialize(TextMeshProUGUI coinTxt)
+        public ICoinModel Initialize()
         {
-            _coinTxt = coinTxt;
-            
             Coins?.Invoke();
             
             return this;
-        }
-
-        private void UpdateCoinView(int value)
-        {
-            _coinTxt.text = value.ToString("0");
-            
-            Serialize(new CoinData{coins = Coins.Value});
         }
         
         public CoinData Deserialize()
@@ -53,6 +37,8 @@ namespace UnityBase.UI.ViewCore
         public void Add(int value)
         {
             Coins.Set(Coins.Value + value);
+            
+            Serialize(new CoinData{coins = Coins.Value});
         }
 
         public void Dispose()
@@ -61,10 +47,10 @@ namespace UnityBase.UI.ViewCore
         }
     }
     
-    public interface ICoinModel : IViewModel
+    public interface ICoinModel : IModel
     {
         public Observable<int> Coins { get; }
-        public ICoinModel Initialize(TextMeshProUGUI coinTxt);
+        public ICoinModel Initialize();
         CoinData Deserialize();
         void Serialize(CoinData savedData);
         public void Add(int value);

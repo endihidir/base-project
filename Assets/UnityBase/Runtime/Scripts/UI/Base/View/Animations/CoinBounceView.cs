@@ -1,11 +1,12 @@
 using System;
 using DG.Tweening;
+using TMPro;
 using UnityBase.UI.Config.SO;
 using UnityEngine;
 
 namespace UnityBase.UI.ViewCore
 {
-    public class BounceView : IBounceView
+    public class CoinCoinBounceAnimation : ICoinBounceAnimation
     {
         private Transform _coinIconTransform;
 
@@ -15,13 +16,13 @@ namespace UnityBase.UI.ViewCore
 
         public Transform CoinIconTransform => _coinIconTransform;
         
-        public IBounceView Initialize(Transform coinIconTransform)
+        public ICoinBounceAnimation Initialize(Transform coinIconTransform)
         {
             _coinIconTransform = coinIconTransform;
             return this;
         }
 
-        public IBounceView Configure(BounceViewConfigSO bounceViewConfigSo)
+        public ICoinBounceAnimation Configure(BounceViewConfigSO bounceViewConfigSo)
         {
             _bounceViewConfig = bounceViewConfigSo;
             return this;
@@ -44,10 +45,10 @@ namespace UnityBase.UI.ViewCore
         public void Dispose() => _bounceTween?.Kill();
     }
     
-    public interface IBounceView : IViewAnimation
+    public interface ICoinBounceAnimation : IAnimation
     {
-        public IBounceView Initialize(Transform coinIconTransform);
-        public IBounceView Configure(BounceViewConfigSO bounceViewConfigSo);
+        public ICoinBounceAnimation Initialize(Transform coinIconTransform);
+        public ICoinBounceAnimation Configure(BounceViewConfigSO bounceViewConfigSo);
         public void Bounce(Action onComplete);
     }
 }

@@ -1,32 +1,25 @@
 ﻿using UnityBase.Extensions;
-using VContainer;
+using UnityBase.Manager;
 
 namespace UnityBase.UI.ButtonCore
 {
     public class ButtonBehaviourFactory : IButtonBehaviourFactory
     {
-        private IObjectResolver _resolver;
+        private IObjectResolverContainer _objectResolverContainer;
 
-        public ButtonBehaviourFactory(IObjectResolver resolver)
+        public ButtonBehaviourFactory(IObjectResolverContainer resolverContainer)
         {
-            _resolver = resolver;
+            _objectResolverContainer = resolverContainer;
         }
-
-        public void UpdateResolver(IObjectResolver resolver)
-        {
-            if(_resolver.Equals(resolver)) return;
-            
-            _resolver = resolver;
-        }
-
+        
         public TAct CreateButtonAction<TAct>(IButtonUI buttonUI) where TAct : class, IButtonAction
         {
-            return ClassExtensions.CreateInstance<TAct>(_resolver, buttonUI);
+            return ClassExtensions.CreateInstance<TAct>(_objectResolverContainer.ObjectResolver, buttonUI);
         }
 
         public TAnim CreateButtonAnimation<TAnim>(IButtonUI buttonUI) where TAnim : class, IButtonAnimation
         {
-            return ClassExtensions.CreateInstance<TAnim>(_resolver, buttonUI);
+            return ClassExtensions.CreateInstance<TAnim>(_objectResolverContainer.ObjectResolver, buttonUI);
         }
     }
 }

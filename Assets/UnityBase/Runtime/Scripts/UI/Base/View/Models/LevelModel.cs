@@ -18,7 +18,7 @@ namespace UnityBase.UI.Dynamic
         public void Dispose() {}
     }
     
-    public interface ILevelModel : IViewModel
+    public interface ILevelModel : IModel
     {
         public ILevelModel Initialize(TextMeshProUGUI levelTxt);
         public void UpdateLevelView(int value);

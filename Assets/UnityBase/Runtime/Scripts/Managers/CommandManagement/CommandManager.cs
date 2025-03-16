@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityBase.BootService;
 using UnityBase.Command;
 using UnityBase.Service;
 using UnityEngine;

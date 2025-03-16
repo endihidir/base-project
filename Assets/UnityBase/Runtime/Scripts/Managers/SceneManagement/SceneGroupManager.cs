@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
+using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.Service;

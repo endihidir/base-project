@@ -2,7 +2,7 @@
 
 namespace UnityBase.UI.ButtonCore
 {
-    public class SceneLoadAction : ButtonAction
+    public class SceneLoadAction : ButtonActionBase
     {
         private readonly ISceneGroupManager _sceneGroupManager;
         private SceneType _sceneType;

@@ -7,68 +7,99 @@ namespace UnityBase.UI.ViewCore
 {
     public class ViewBehaviourGroup : IViewBehaviourGroup
     {
-        private readonly IDictionary<Type, IViewAnimation> _viewAnimations = new Dictionary<Type, IViewAnimation>();
+        private readonly IDictionary<Type, IAnimation> _animations = new Dictionary<Type, IAnimation>();
         
-        private readonly IDictionary<Type, IViewModel> _viewModels = new Dictionary<Type, IViewModel>();
+        private readonly IDictionary<Type, IModel> _models = new Dictionary<Type, IModel>();
+        
+        private readonly IDictionary<Type, IView> _views = new Dictionary<Type, IView>();
 
         private readonly IObjectResolver _resolver;
         
         public ViewBehaviourGroup(IObjectResolver resolver) => _resolver = resolver;
 
-        public TAnim CreateAnimation<TAnim>() where TAnim : class, IViewAnimation
+        public TAnim CreateAnimation<TAnim>() where TAnim : class, IAnimation
         {
             var key = typeof(TAnim);
 
-            if (!_viewAnimations.TryGetValue(key, out var viewAnimation))
+            if (!_animations.TryGetValue(key, out var viewAnimation))
             {
                 viewAnimation = ClassExtensions.CreateInstance<TAnim>(_resolver);
                 
-                _viewAnimations[key] = viewAnimation;
+                _animations[key] = viewAnimation;
             }
 
             return viewAnimation as TAnim;
         }
 
-        public TModel CreateModel<TModel>() where TModel : class, IViewModel
+        public TModel CreateModel<TModel>() where TModel : class, IModel
         {
             var key = typeof(TModel);
 
-            if (!_viewModels.TryGetValue(key, out var viewModel))
+            if (!_models.TryGetValue(key, out var viewModel))
             {
                 viewModel = ClassExtensions.CreateInstance<TModel>(_resolver);
                 
-                _viewModels[key] = viewModel;
+                _models[key] = viewModel;
             }
 
             return viewModel as TModel;
         }
 
-        public bool TryGetAnimation<TAnim>(out TAnim animation) where TAnim : class, IViewAnimation
+        public TView CreateView<TView>() where TView : class, IView
+        {
+            var key = typeof(TView);
+
+            if (!_views.TryGetValue(key, out var view))
+            {
+                view = ClassExtensions.CreateInstance<TView>(_resolver);
+                
+                _views[key] = view;
+            }
+
+            return view as TView;
+        }
+
+        public bool TryGetAnimation<TAnim>(out TAnim value) where TAnim : class, IAnimation
         {
             var key = typeof(TAnim);
             
-            if (_viewAnimations.TryGetValue(key, out var viewAnimation))
+            if (_animations.TryGetValue(key, out var viewAnimation))
             {
-                animation = viewAnimation as TAnim;
+                value = viewAnimation as TAnim;
                 return true;
             }
 
-            animation = null;
+            value = null;
             
             return false;
         }
 
-        public bool TryGetModel<TModel>(out TModel model) where TModel : class, IViewModel
+        public bool TryGetModel<TModel>(out TModel value) where TModel : class, IModel
         {
             var key = typeof(TModel);
             
-            if (_viewModels.TryGetValue(key, out var viewModel))
+            if (_models.TryGetValue(key, out var model))
             {
-                model = viewModel as TModel;
+                value = model as TModel;
                 return true;
             }
 
-            model = null;
+            value = null;
+            
+            return false;
+        }
+
+        public bool TryGetView<TView>(out TView value) where TView : class, IView
+        {
+            var key = typeof(TView);
+            
+            if (_views.TryGetValue(key, out var view))
+            {
+                value = view as TView;
+                return true;
+            }
+
+            value = null;
             
             return false;
         }
