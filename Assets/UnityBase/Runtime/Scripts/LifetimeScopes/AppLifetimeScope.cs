@@ -1,9 +1,8 @@
-using UnityBase.Command;
+using UnityBase.BlackboardCore;
 using UnityBase.GameDataHolder;
 using UnityBase.Manager;
 using UnityBase.Presenter;
 using UnityBase.SceneManagement;
-using UnityBase.UI.ButtonCore;
 using UnityBase.UI.ViewCore;
 using UnityEngine;
 using VContainer;
@@ -24,10 +23,6 @@ namespace UnityBase.BaseLifetimeScope
             RegisterEntryPoints(builder);
 
             RegisterSingletonServices(builder);
-
-            RegisterScopedServices(builder);
-            
-            RegisterTransientServices(builder);
         }
         
         private void RegisterEntryPoints(IContainerBuilder builder)
@@ -49,23 +44,11 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<ObjectResolverContainer>(Lifetime.Singleton).AsImplementedInterfaces();
 
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<CoinManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<SwipeManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            
-            builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<ButtonBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-        }
+            builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
-        private void RegisterScopedServices(IContainerBuilder builder)
-        {
-            builder.Register<SaveManager>(Lifetime.Scoped).AsImplementedInterfaces();
-            builder.Register<CommandRecorder>(Lifetime.Scoped).AsImplementedInterfaces();
-        }
-        
-        private void RegisterTransientServices(IContainerBuilder builder)
-        {
-           
+            builder.Register<Blackboard>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<SaveManager>(Lifetime.Singleton).AsImplementedInterfaces();
         }
     }   
 }

@@ -93,7 +93,6 @@ namespace UnityBase.Command
             }
         }
 
-
         private void UpdateActiveCommand(Stack<ICommand> stack)
         {
             _activeCommand?.Cancel();

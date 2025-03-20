@@ -9,10 +9,7 @@ namespace UnityBase.UI.ButtonCore
         private bool _useLoadingScene;
         private float _progressMultiplier;
         
-        public SceneLoadAction(IButtonUI buttonUI, ISceneGroupManager sceneGroupManager) : base(buttonUI)
-        {
-            _sceneGroupManager = sceneGroupManager;
-        }
+        public SceneLoadAction(ISceneGroupManager sceneGroupManager) => _sceneGroupManager = sceneGroupManager;
 
         public IButtonAction Configure(SceneType sceneType, bool useLoadingScene, float progressMultiplier = 10f)
         {
@@ -42,6 +39,4 @@ namespace UnityBase.UI.ButtonCore
             
         }
     }
-    
-    
 }

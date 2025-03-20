@@ -1,4 +1,5 @@
 using NaughtyAttributes;
+using UnityBase.UI.ViewCore;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ using VContainer;
 namespace UnityBase.UI.ButtonCore
 {
     [DisallowMultipleComponent, RequireComponent(typeof(EventTrigger))]
-    public abstract class ButtonUI : MonoBehaviour, IButtonUI
+    public abstract class ButtonBase : MonoBehaviour
     {
         [SerializeField, ReadOnly] private Button _button;
         
@@ -15,8 +16,8 @@ namespace UnityBase.UI.ButtonCore
         
         protected IButtonAnimation _buttonAnimation;
         protected IButtonAction _buttonAction;
-        
-        public Button Button => _button;
+
+        protected Button Button => _button ??= GetComponentInChildren<Button>();
         
 #if UNITY_EDITOR
         private void OnValidate()
@@ -27,13 +28,13 @@ namespace UnityBase.UI.ButtonCore
 #endif
 
         [Inject]
-        public void Construct(IButtonBehaviourFactory buttonButtonBehaviourFactory)
+        public void Construct(IViewBehaviourFactory viewBehaviourFactory)
         {
-            Initialize(buttonButtonBehaviourFactory);
+            Initialize(viewBehaviourFactory);
             
             CreateEventTriggers();
         }
-        protected abstract void Initialize(IButtonBehaviourFactory buttonBehaviourFactory);
+        protected abstract void Initialize(IViewBehaviourFactory viewBehaviourFactory);
 
         private void OnEnable() => _button.onClick.AddListener(OnClickButton);
         private void OnDisable() => _button.onClick.RemoveListener(OnClickButton);
@@ -106,10 +107,5 @@ namespace UnityBase.UI.ButtonCore
             _buttonAction?.Dispose();
             _buttonAnimation?.Dispose();
         }
-    }
-    
-    public interface IButtonUI
-    {
-        public Button Button { get; }
     }
 }

@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CoinManager : ICoinManager, IAppBootService
+    public class CurrencyManager : ICurrencyManager, IAppBootService
     {
         private readonly IViewBehaviourFactory _viewBehaviourFactory;
-        public CoinManager(IViewBehaviourFactory viewBehaviourFactory)
+        public CurrencyManager(IViewBehaviourFactory viewBehaviourFactory)
         {
             _viewBehaviourFactory = viewBehaviourFactory;
         }
@@ -25,11 +25,11 @@ namespace UnityBase.Manager
             }
         }
 
-        public void SaveData(int coin)
+        public void SaveCoinData(int value)
         {
             if (_viewBehaviourFactory.TryGetModel<CoinViewUI, CoinModel>(out var coinViewModel))
             {
-                coinViewModel.Add(coin);
+                coinViewModel.Add(value);
             }
             else
             {
@@ -37,7 +37,7 @@ namespace UnityBase.Manager
             }
         }
 
-        public void UpdateView()
+        public void UpdateCoinView()
         {
             if (_viewBehaviourFactory.TryGetView<CoinViewUI, CoinView>(out var coinViewModel))
             {

@@ -1,25 +1,19 @@
-﻿
+﻿using UnityBase.UI.ViewCore;
+
 namespace UnityBase.UI.ButtonCore
 {
     public abstract class ButtonActionBase : IButtonAction
     {
-        protected readonly IButtonUI _buttonUI;
-        protected ButtonActionBase(IButtonUI buttonUI)
-        {
-            _buttonUI = buttonUI;
-        }
-        
         public abstract void OnClick();
         public abstract void OnPointerDown();
         public abstract void OnPointerUp();
         public abstract void Dispose();
     }
     
-    public interface IButtonAction
+    public interface IButtonAction : IAction
     {
         public void OnClick();
         public void OnPointerDown();
         public void OnPointerUp();
-        public void Dispose();
     }
 }

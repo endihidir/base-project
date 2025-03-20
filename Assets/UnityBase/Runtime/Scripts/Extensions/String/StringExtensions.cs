@@ -45,5 +45,17 @@ namespace UnityBase.Extensions
             >= 1000 => (num / 1000D).ToString("0.#k"),
             _ => num.ToString("0")
         };
+
+        public static int ComputeFnv1AHash(this string val)
+        {
+            uint hash = 2166136261;
+
+            foreach (var c in val)
+            {
+                hash = (hash ^ c) * 16777619;
+            }
+
+            return unchecked((int)hash);
+        }
     }
 }

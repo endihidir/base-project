@@ -12,6 +12,8 @@ namespace UnityBase.UI.ViewCore
         private readonly IDictionary<Type, IModel> _models = new Dictionary<Type, IModel>();
         
         private readonly IDictionary<Type, IView> _views = new Dictionary<Type, IView>();
+        
+        private readonly IDictionary<Type, IAction> _actions = new Dictionary<Type, IAction>();
 
         private readonly IObjectResolver _resolver;
         
@@ -59,6 +61,20 @@ namespace UnityBase.UI.ViewCore
             return view as TView;
         }
 
+        public TAct CreateAction<TAct>() where TAct : class, IAction
+        {
+            var key = typeof(TAct);
+
+            if (!_actions.TryGetValue(key, out var action))
+            {
+                action = ClassExtensions.CreateInstance<TAct>(_resolver);
+                
+                _actions[key] = action;
+            }
+
+            return action as TAct;
+        }
+
         public bool TryGetAnimation<TAnim>(out TAnim value) where TAnim : class, IAnimation
         {
             var key = typeof(TAnim);
@@ -101,6 +117,20 @@ namespace UnityBase.UI.ViewCore
 
             value = null;
             
+            return false;
+        }
+
+        public bool TryGetAction<TAct>(out TAct value) where TAct : class, IAction
+        {
+            var key = typeof(TAct);
+            
+            if (_actions.TryGetValue(key, out var action))
+            {
+                value = action as TAct;
+                return true;
+            }
+
+            value = null;
             return false;
         }
     }

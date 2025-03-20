@@ -7,7 +7,7 @@ namespace UnityBase.StateMachineCore
     public interface IState
     {
         public IState ParentState { get; set; }
-        public string StateName { get; }
+        public string StateID { get; }
         public bool HasInit { get; }
         public bool IsActive { get; }
         public bool IsRootState { get; }
@@ -26,21 +26,21 @@ namespace UnityBase.StateMachineCore
         public bool TryGetAllSubStates(out List<IState> subStateList);
         public bool TryGetSubStates(out List<IState> subStateList);
         public bool TryGetActiveSubState(out IState activeState);
+        public bool TryGetActiveSubStates(out List<IState> activeState);
     }
     
-    public sealed class StateBase<TStateID> : IState
+    public sealed class StateBase : IState
     {
-        private readonly IDictionary<TStateID, List<IState>> _subStates = new Dictionary<TStateID, List<IState>>();
+        private readonly IDictionary<string, List<IState>> _subStates = new Dictionary<string, List<IState>>();
         public IState ParentState { get; set; }
-        public TStateID StateID { get; private set; }
-        public string StateName => StateID.ToString();
         public bool HasInit { get; private set; }
         public bool IsActive { get; private set; }
+        public string StateID { get; }
         public bool IsRootState { get; }
         public bool NeedsExitTime { get; }
         public bool IsGhostState { get; }
 
-        public StateBase(TStateID stateID, bool isRootState, bool needsExitTime, bool isGhostState = false)
+        public StateBase(string stateID, bool isRootState, bool needsExitTime, bool isGhostState = false)
         {
             if (!_subStates.TryGetValue(stateID, out var states))
             {
@@ -73,7 +73,7 @@ namespace UnityBase.StateMachineCore
             }
             else
             {
-                Debug.LogError($"Cannot remove because {StateName} sub-state id has already removed!");
+                Debug.LogError($"Cannot remove because {StateID} sub-state id has already removed!");
             }
             
             return this;
@@ -116,7 +116,7 @@ namespace UnityBase.StateMachineCore
         {
             if (!_subStates.TryGetValue(StateID, out var subStateList))
             {
-                Debug.LogError($"Cannot change because {StateName} sub-state id is not exist!");
+                Debug.LogError($"Cannot change because {StateID} sub-state id is not exist!");
                 return;
             }
 
@@ -124,7 +124,7 @@ namespace UnityBase.StateMachineCore
 
             if (activeSubState == null)
             {
-                Debug.LogError($"{StateName} has no active sub state!");
+                Debug.LogError($"{StateID} has no active sub state!");
                 return;
             }
             
@@ -138,7 +138,7 @@ namespace UnityBase.StateMachineCore
             }
             else
             {
-                Debug.LogError($"{nextSubState.StateName} is not exist in the sub list!");
+                Debug.LogError($"{nextSubState.StateID} is not exist in the sub list!");
             }
         }
 
@@ -152,7 +152,7 @@ namespace UnityBase.StateMachineCore
             
             if (state == null)
             {
-                Debug.LogError($"{StateName} has no active sub state!");
+                Debug.LogError($"{StateID} has no active sub state!");
                 return false;
             }
 
@@ -161,20 +161,28 @@ namespace UnityBase.StateMachineCore
             return true;
         }
 
+        public bool TryGetActiveSubStates(out List<IState> activeState)
+        {
+            activeState = default;
+            
+            if (!_subStates.TryGetValue(StateID, out var subStateList)) return false;
+
+            var state = subStateList.Where(x => x.IsActive).ToList();
+
+            activeState = state;
+            
+            return true;
+        }
+
         public IState GetRootState()
         {
-            if (ParentState == null)
-            {
-                return this;
-            }
-
-            var parentState = ParentState;
+            if (!TryGetParentState(out var parentState)) return this;
             
             while (parentState.ParentState != null)
             {
                 parentState = parentState.ParentState;
             }
-
+                
             return parentState;
         }
 
@@ -211,7 +219,7 @@ namespace UnityBase.StateMachineCore
             {
                 IState currentState = stateQueue.Dequeue();
 
-                if (currentState is not StateBase<TStateID> stateBase) continue;
+                if (currentState is not StateBase stateBase) continue;
                 
                 foreach (var subStatePair in stateBase._subStates)
                 {

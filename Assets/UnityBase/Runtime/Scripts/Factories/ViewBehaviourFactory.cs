@@ -61,10 +61,25 @@ namespace UnityBase.UI.ViewCore
             return viewBehaviourGroup.CreateAnimation<TAnim>();
         }
 
-        public TView CreateLocalView<TView>() where TView : class, IView => ClassExtensions.CreateInstance<TView>(_resolverContainer);
-        public TModel CreateLocalModel<TModel>() where TModel : class, IModel => ClassExtensions.CreateInstance<TModel>(_resolverContainer);
-        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IAnimation => ClassExtensions.CreateInstance<TAnim>(_resolverContainer);
-        
+        public TAct CreateAction<TAct>(Component component) where TAct : class, IAction
+        {
+            var key = component.GetType();
+            
+            if (!_viewBehaviourGroup.TryGetValue(key, out var viewBehaviourGroup))
+            {
+                viewBehaviourGroup = new ViewBehaviourGroup(_resolverContainer.ObjectResolver);
+
+                _viewBehaviourGroup[key] = viewBehaviourGroup;
+            }
+            
+            return viewBehaviourGroup.CreateAction<TAct>();
+        }
+
+        public TView CreateLocalView<TView>() where TView : class, IView => ClassExtensions.CreateInstance<TView>(_resolverContainer.ObjectResolver);
+        public TModel CreateLocalModel<TModel>() where TModel : class, IModel => ClassExtensions.CreateInstance<TModel>(_resolverContainer.ObjectResolver);
+        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IAnimation => ClassExtensions.CreateInstance<TAnim>(_resolverContainer.ObjectResolver);
+        public TAct CreateViewLocalAction<TAct>() where TAct : class, IAction => ClassExtensions.CreateInstance<TAct>(_resolverContainer.ObjectResolver);
+
         public bool TryGetView<TViewUI, TView>(out TView view) where TViewUI : Component where TView : class, IView
         {
             var viewKey = typeof(TViewUI);
@@ -101,6 +116,19 @@ namespace UnityBase.UI.ViewCore
             }
 
             animation = null;
+            return false;
+        }
+
+        public bool TryGetViewAction<TViewUI, TAct>(out TAct action) where TViewUI : Component where TAct : class, IAction
+        {
+            var viewKey = typeof(TViewUI);
+            
+            if (_viewBehaviourGroup.TryGetValue(viewKey, out var viewBehaviourGroup))
+            {
+                return viewBehaviourGroup.TryGetAction(out action);
+            }
+
+            action = null;
             return false;
         }
     }

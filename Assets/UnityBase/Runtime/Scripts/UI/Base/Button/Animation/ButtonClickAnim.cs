@@ -15,13 +15,13 @@ namespace UnityBase.UI.ButtonCore
         private bool _isPointerUp;
 
         private Ease _ease;
-
-        public ButtonClickAnim(IButtonUI buttonUI) : base(buttonUI)
+        public ButtonClickAnim SetButtonTransform(Transform transform)
         {
-            _buttonTransform = _buttonUI.Button.transform;
+            _buttonTransform = transform;
+            return this;
         }
         
-        public IButtonAnimation Configure(float scaleUpValue, float duration, Ease ease)
+        public ButtonClickAnim Configure(float scaleUpValue, float duration, Ease ease)
         {
             _startScale = scaleUpValue;
             _duration = duration;

@@ -17,7 +17,7 @@ public static class UgsEnvironmentUtilityEditor
 
     private static void CreateFiles()
     {
-        if (!Directory.Exists(FolderPath))
+        /*if (!Directory.Exists(FolderPath))
         {
             Directory.CreateDirectory(FolderPath);
         }
@@ -29,7 +29,7 @@ public static class UgsEnvironmentUtilityEditor
             {
                 File.Delete(file);
             }
-        }
+        }*/
 
        // RemoteConfigWebApiClient.fetchEnvironmentsFinished += OnFetchEnvironmentFinished;
         
