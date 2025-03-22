@@ -12,22 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5ec51c2bebe4ad38b60240be98ff6b5, type: 3}
   m_Name: Blackboard Data
   m_EditorClassIdentifier: 
-  entries:
-  - keyName: 
-    valueType: 1
-    value:
-      type: 1
-      boolValue: 0
-      intValue: 0
-      floatValue: 0
-      stringValue: 
-      vector3Value: {x: 0, y: 0, z: 0}
-  - keyName: 
-    valueType: 1
-    value:
-      type: 1
-      boolValue: 0
-      intValue: 0
-      floatValue: 0
-      stringValue: 
-      vector3Value: {x: 0, y: 0, z: 0}
+  entries: []

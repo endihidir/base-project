@@ -1,5 +1,11 @@
 using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityBase.UI.ViewCore;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,12 +13,11 @@ using VContainer;
 
 namespace UnityBase.UI.ButtonCore
 {
-    [DisallowMultipleComponent, RequireComponent(typeof(EventTrigger))]
+    [DisallowMultipleComponent]
     public abstract class ButtonBase : MonoBehaviour
     {
         [SerializeField, ReadOnly] private Button _button;
-        
-        private EventTrigger _eventTrigger;
+        [SerializeField, ReadOnly] private EventTrigger _eventTrigger;
         
         protected IButtonAnimation _buttonAnimation;
         protected IButtonAction _buttonAction;
@@ -24,6 +29,11 @@ namespace UnityBase.UI.ButtonCore
         {
             TryGetComponent(out _button);
             TryGetComponent(out _eventTrigger);
+            
+            if (_button && _eventTrigger)
+            {
+                EditorUtility.SetDirty(this);
+            }
         }
 #endif
 
@@ -55,8 +65,11 @@ namespace UnityBase.UI.ButtonCore
         private void CreateEventTriggers()
         {
             var isThereEventTrigger = _eventTrigger ?? TryGetComponent(out _eventTrigger);
-            
-            if(!isThereEventTrigger) return;
+
+            if (!isThereEventTrigger)
+            {
+                _eventTrigger = transform.AddComponent<EventTrigger>();
+            }
             
             AddEventTrigger(EventTriggerType.PointerDown, OnPointerDown);
             AddEventTrigger(EventTriggerType.PointerUp, OnPointerUp);

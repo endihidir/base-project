@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityBase.BlackboardCore
 {
     [CreateAssetMenu(fileName = "New Blackboard Data", menuName = "Game/Blackboard/Blackboard Data")]
-    public class BlackboardData : ScriptableObject
+    public class BlackboardDataSO : ScriptableObject
     {
         public List<BlackboardEntryData> entries;
 
@@ -40,7 +40,14 @@ namespace UnityBase.BlackboardCore
         {
             var key = blackboard.GetOrRegisterKey(keyName);
             
-            _setValueDispatchTable[value.type](blackboard, key, value);
+            if (_setValueDispatchTable.TryGetValue(value.type, out var action))
+            {
+                action(blackboard, key, value);
+            }
+            else
+            {
+                Debug.LogError($"Unsupported value type: {value.type}");
+            }
         }
         
         public void OnBeforeSerialize()

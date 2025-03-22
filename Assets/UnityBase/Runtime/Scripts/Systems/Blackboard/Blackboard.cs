@@ -16,15 +16,10 @@ namespace UnityBase.BlackboardCore
             _hashedKey = name.ComputeFnv1AHash();
         }
         public bool Equals(BlackboardKey other) => _hashedKey.Equals(other._hashedKey);
-
         public override bool Equals(object obj) => obj is BlackboardKey other && Equals(other);
-
         public override int GetHashCode() => _hashedKey;
-
         public override string ToString() => _name;
-
         public static bool operator ==(BlackboardKey lhs, BlackboardKey rhs) => lhs._hashedKey.Equals(rhs._hashedKey);
-
         public static bool operator !=(BlackboardKey lhs, BlackboardKey rhs) => !(lhs == rhs);
     }
 
@@ -43,7 +38,6 @@ namespace UnityBase.BlackboardCore
         }
 
         public override bool Equals(object obj) => obj is BlackboardEntry<T> other && other.Key == Key;
-        
         public override int GetHashCode() => Key.GetHashCode();
     }
     
