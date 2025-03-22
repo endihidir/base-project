@@ -1,10 +1,10 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace DependencyInjection
+namespace UnityBase.DI
 {
     [CustomEditor(typeof(Injector))]
-    public class InjectorEditor : Editor {
+    public class InjectorEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() 
         {
             DrawDefaultInspector();

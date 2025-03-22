@@ -44,7 +44,11 @@ namespace UnityBase.BlackboardCore
     public class Blackboard : IBlackboard
     {
         private Dictionary<string, BlackboardKey> _keyRegistry = new();
+        
         private Dictionary<BlackboardKey, object> _entries = new();
+
+        public event Action<BlackboardKey> OnKeyAdded;
+        public event Action<BlackboardKey> OnKeyUpdated;
 
         public bool TryGetValue<T>(BlackboardKey key, out T value)
         {
@@ -61,6 +65,8 @@ namespace UnityBase.BlackboardCore
         public void SetValue<T>(BlackboardKey key, T value)
         {
             _entries[key] = new BlackboardEntry<T>(key, value);
+            
+            OnKeyUpdated?.Invoke(key);
         }
 
         public BlackboardKey GetOrRegisterKey(string keyName)
@@ -71,6 +77,7 @@ namespace UnityBase.BlackboardCore
             {
                 blackboardKey = new BlackboardKey(keyName);
                 _keyRegistry[keyName] = blackboardKey;
+                OnKeyAdded?.Invoke(blackboardKey);
             }
             
             return blackboardKey;
@@ -102,6 +109,8 @@ namespace UnityBase.BlackboardCore
 
     public interface IBlackboard
     {
+        public event Action<BlackboardKey> OnKeyAdded;
+        public event Action<BlackboardKey> OnKeyUpdated; 
         public bool TryGetValue<T>(BlackboardKey key, out T value);
         public void SetValue<T>(BlackboardKey key, T value);
         public BlackboardKey GetOrRegisterKey(string keyName);

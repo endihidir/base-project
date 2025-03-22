@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DependencyInjection
+namespace UnityBase.DI
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class ProvideAttribute : Attribute

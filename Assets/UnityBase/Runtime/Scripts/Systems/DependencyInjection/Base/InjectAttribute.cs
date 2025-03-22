@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DependencyInjection
+namespace UnityBase.DI
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property)]
     public sealed class InjectAttribute : PropertyAttribute

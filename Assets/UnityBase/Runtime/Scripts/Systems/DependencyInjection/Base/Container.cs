@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DependencyInjection
+namespace UnityBase.DI
 {
     public class Container : MonoBehaviour, IDependencyContainer
     {

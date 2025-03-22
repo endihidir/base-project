@@ -1286,6 +1286,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects:
   - {fileID: 975548291}
+  - {fileID: 1494721078}
   gameDataHolderSo: {fileID: 11400000, guid: 06d8434a855714a73821033bd9c78a4a, type: 2}
 --- !u!1 &1282725941
 GameObject:

@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityBase.Singleton;
 using UnityEngine;
 
-namespace DependencyInjection
+namespace UnityBase.DI
 {
     [DefaultExecutionOrder(-1000)]
     public class Injector : SingletonBehaviour<Injector>

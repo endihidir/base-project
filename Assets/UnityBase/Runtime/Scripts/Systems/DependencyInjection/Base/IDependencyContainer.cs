@@ -1,4 +1,4 @@
-﻿namespace DependencyInjection
+﻿namespace UnityBase.DI
 {
     public interface IDependencyContainer
     {

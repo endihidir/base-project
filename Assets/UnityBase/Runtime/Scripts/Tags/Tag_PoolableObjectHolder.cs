@@ -1,31 +1,42 @@
+using System;
 using NaughtyAttributes;
+using UnityBase.BlackboardCore;
 using UnityBase.StateMachineCore;
 using UnityEngine;
+using VContainer;
 
 namespace UnityBase.Tag
 {
     public class Tag_PoolableObjectHolder : MonoBehaviour
     {
-        private IState _test1 = new StateBase("Test1", true, false);
+        private ITreeState _test1 = new TreeState("Test1");
         
-        private IState _subTest1 = new StateBase("SubTest1", false, false);
-        private IState _subTest2 = new StateBase("SubState2", false, false); 
+        private ITreeState _subTest1 = new TreeState("SubTest1");
+        private ITreeState _subTest2 = new TreeState("SubState2"); 
         
-        private IState _newSubTest1 = new StateBase("NewSubTest1", false, false);
-        private IState _newSubTest2 = new StateBase("NewSubTest2", false, false);
+        private ITreeState _newSubTest1 = new TreeState("NewSubTest1");
+        private ITreeState _newSubTest2 = new TreeState("NewSubTest2");
 
         private void Awake()
         {
-           // Test();
+            _test1.Init().Enter();
+            
+            Test1();
         }
 
+        /*[Inject]
+        private void Init(IBlackboard blackboard)
+        {
+            _test1.InitWith(blackboard).Enter();
+            
+            Test1();
+        }*/
+        
         [Button]
         private void Test1()
         {
             _test1.AddSubState(_subTest1)?.AddSubState(_newSubTest1);
             _test1.AddSubState(_subTest2)?.AddSubState(_newSubTest2);
-            
-            _test1.Enter();
             
             Debug.LogError(_subTest1.GetRootState().StateID);
             
