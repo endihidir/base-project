@@ -64,33 +64,25 @@ namespace UnityBase.Command
             _isInProgress = true;
             
             CancellationTokenExtentions.Refresh(ref _cancellationTokenSource);
+            
+            var dir = (targetPosition - _moveEntity.Transform.position).normalized;
+            
+            BallBounceAnim(dir);
+            
+            var transform = _moveEntity.Transform;
 
-            try
+            while (transform.position.Distance(targetPosition) > 0.01f)
             {
-                var dir = (targetPosition - _moveEntity.Transform.position).normalized;
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, _moveEntity.Speed * Time.deltaTime);
                 
-                BallBounceAnim(dir);
-                
-                var transform = _moveEntity.Transform;
-
-                while (transform.position.Distance(targetPosition) > 0.01f)
-                {
-                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, _moveEntity.Speed * Time.deltaTime);
-                    
-                    await UniTask.WaitForSeconds(0f,false, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
-                }
-
-                transform.position = targetPosition;
-                
-                onComplete?.Invoke();
-
-                _isInProgress = false;
+                await UniTask.WaitForSeconds(0f,false, PlayerLoopTiming.Update, _cancellationTokenSource.Token);
             }
-            catch (Exception e)
-            {
-                //Debug.Log(e);
-                
-            }
+
+            transform.position = targetPosition;
+            
+            onComplete?.Invoke();
+
+            _isInProgress = false;
         }
 
         private void BallBounceAnim(Vector3 dir)

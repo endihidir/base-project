@@ -18,6 +18,7 @@ namespace __Funflare.Game.Scripts.UpgradeMenu
         
         private const string SAVED_DATE = "funflare_saved_date_time_for_midnight";
 
+        /*
         [RuntimeInitializeOnLoadMethod]
         private static async void Init()
         {
@@ -25,12 +26,13 @@ namespace __Funflare.Game.Scripts.UpgradeMenu
             {
                 await Task.Yield();
             }
-            */
+            #1#
             
            // InvokeMidnightPassing();
             
            // FunflareUpdateProvider.RegisterUpdate(OnUpdate);
         }
+        */
         
         private static void InvokeMidnightPassing()
         {

@@ -14,7 +14,8 @@ namespace UnityBase.StateMachineCore
         public void Update(float deltaTime);
         public void FixedUpdate(float deltaTime);
         public void LateUpdate(float deltaTime);
-        public void Exit();
+        public bool Exit();
+        public void OnExit();
     }
     
     public abstract class StateBase : IState
@@ -23,7 +24,7 @@ namespace UnityBase.StateMachineCore
         public bool HasInit { get; private set; }
         public bool IsActive { get; private set; }
         protected IBlackboard Blackboard { get; private set; }
-
+        
         public IState Init()
         {
             if (HasInit) return this;
@@ -57,9 +58,13 @@ namespace UnityBase.StateMachineCore
             }
 
             if(IsActive) return;
+
+            var canActivate = OnBeforeEnter();
+
+            if (!canActivate) return;
             
             IsActive = true;
-            
+                
             OnEnter();
         }
         
@@ -83,21 +88,25 @@ namespace UnityBase.StateMachineCore
             
             OnLateUpdate(deltaTime);
         }
-        
-        public void Exit()
+
+        public bool Exit() => TryExit();
+
+        public void OnExit()
         {
             if(!IsActive) return;
             
             IsActive = false;
-            
-            OnExit();
+                
+            OnExitComplete();
         }
-        
+
         protected abstract void OnInit();
+        protected abstract bool OnBeforeEnter();
         protected abstract void OnEnter();
         protected abstract void OnUpdate(float deltaTime);
         protected abstract void OnFixedUpdate(float deltaTime);
         protected abstract void OnLateUpdate(float deltaTime);
-        protected abstract void OnExit();
+        protected abstract bool TryExit();
+        protected abstract void OnExitComplete();
     }
 }

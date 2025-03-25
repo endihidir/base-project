@@ -8,6 +8,7 @@ namespace UnityBase.BlackboardCore
     public readonly struct BlackboardKey : IEquatable<BlackboardKey>
     {
         private readonly string _name;
+        
         private readonly int _hashedKey;
 
         public BlackboardKey(string name)
@@ -84,7 +85,6 @@ namespace UnityBase.BlackboardCore
         }
 
         public bool ContainsKey(BlackboardKey key) => _entries.ContainsKey(key);
-
         public void Remove(BlackboardKey key) => _entries.Remove(key);
 
         public void Debug()

@@ -37,9 +37,9 @@ namespace __Funflare.Scripts.Editor
         private string selectedPrefabName;
         private GameObject selectedPrefab;
         private Vector2 scrollPosition;
-        private int gridSize = 100;
-        private int cellSize = 10;
-        private bool showGrid = true;
+       // private int gridSize = 100;
+        //private int cellSize = 10;
+        //private bool showGrid = true;
         private int storeTileIndex;
 
         [MenuItem("Tools/Tile Editor Window")]
@@ -48,11 +48,11 @@ namespace __Funflare.Scripts.Editor
             GetWindow<TileEditorWindow>("Tile Editor Window");
         }
 
-        private void OnEnable() => LoadPrefabsFromFolders();
+       // private void OnEnable() => LoadPrefabsFromFolders();
         private void OnBecameVisible() => TilePlacementManager.SetWindowVisibility(true);
         private void OnBecameInvisible() => TilePlacementManager.SetWindowVisibility(false);
 
-        private void OnGUI()
+        /*private void OnGUI()
         {
             GUILayout.Label("Tile Editor", EditorStyles.boldLabel);
             GUILayout.Label($"(C) Free Placement Toggle");
@@ -71,12 +71,12 @@ namespace __Funflare.Scripts.Editor
             GUILayout.BeginHorizontal();
             
             //float buttonY = 95;
-            float buttonY = 0;
+            //float buttonY = 0;
             
             /*if (GUILayout.Button( "Clear Prefabs"))
             {
                 TilePlacementManager.ClearPrefabs();
-            }*/
+            }#1#
             
             //buttonY += 40; 
             
@@ -125,7 +125,7 @@ namespace __Funflare.Scripts.Editor
             {
                 LoadPrefabsFromFolders();
             }
-        }
+        }*/
 
         private string[] GetTabNames()
         {

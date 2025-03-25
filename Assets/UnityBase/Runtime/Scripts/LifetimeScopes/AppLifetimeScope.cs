@@ -3,6 +3,7 @@ using UnityBase.GameDataHolder;
 using UnityBase.Manager;
 using UnityBase.Presenter;
 using UnityBase.SceneManagement;
+using UnityBase.StateMachineCore;
 using UnityBase.UI.ViewCore;
 using UnityEngine;
 using VContainer;
@@ -49,6 +50,9 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<Blackboard>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SaveManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            
+            builder.Register<GlobalStateMachine>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<StateMachineFactory>(Lifetime.Singleton).AsImplementedInterfaces();
         }
     }   
 }

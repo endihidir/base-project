@@ -1,9 +1,6 @@
-using System;
 using NaughtyAttributes;
-using UnityBase.BlackboardCore;
 using UnityBase.StateMachineCore;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.Tag
 {
@@ -17,34 +14,45 @@ namespace UnityBase.Tag
         private ITreeState _newSubTest1 = new TreeState("NewSubTest1");
         private ITreeState _newSubTest2 = new TreeState("NewSubTest2");
 
+        private TransitionBase _transitionBase;
+
         private void Awake()
         {
-            _test1.Init().Enter();
+            //_transitionBase = new TransitionBase(new TreeState("A"), new TreeState("B"), OnSuccess);
             
             Test1();
         }
 
-        /*[Inject]
-        private void Init(IBlackboard blackboard)
+        private bool OnSuccess()
         {
-            _test1.InitWith(blackboard).Enter();
-            
-            Test1();
-        }*/
+            return Input.GetMouseButtonDown(1);
+        }
         
         [Button]
         private void Test1()
         {
+            _test1.Init();
             _test1.AddSubState(_subTest1)?.AddSubState(_newSubTest1);
             _test1.AddSubState(_subTest2)?.AddSubState(_newSubTest2);
+            _newSubTest2.Enter();
+            _newSubTest1.Enter();
             
-            Debug.LogError(_subTest1.GetRootState().StateID);
+            Log();
             
-            if (_subTest1.GetRootState().TryGetAllSubStates(out var subStateList))
+            _subTest2.Exit();
+            
+            Log();
+        }
+
+        private void Log()
+        {
+            Debug.LogError($"{_test1.StateID} : {_test1.IsActive}");
+
+            if (_subTest1.GetRootState().TryGetAllStatesInChildren(out var subStateList))
             {
                 foreach (var state in subStateList)
                 {
-                    Debug.LogError(state.StateID);
+                    Debug.LogError($"{state.StateID} : {state.IsActive}");
                 }
             }
         }

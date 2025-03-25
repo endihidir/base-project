@@ -8,226 +8,315 @@ namespace UnityBase.StateMachineCore
     public interface ITreeState : IState
     {
         public bool IsRootState { get; }
-        public ITreeState ParentState { get; set; }
-        public ITreeState GetRootState();
         public ITreeState AddSubState(ITreeState subState);
         public ITreeState RemoveSubState(ITreeState subState);
-        public bool TryGetSubStates(out List<ITreeState> subStateList);
-        public bool TryGetAllSubStates(out List<ITreeState> subStateList);
-        public bool TryGetActiveSubState(out ITreeState activeState);
-        public bool TryGetActiveSubStates(out List<ITreeState> activeState);
-        public ITreeState OnInit(Action act);
-        public ITreeState OnEnter(Action act);
-        public ITreeState OnUpdate(Action<float> act);
-        public ITreeState OnFixedUpdate(Action<float> act);
-        public ITreeState OnLateUpdate(Action<float> act);
-        public ITreeState OnExit(Action act);
+        public ITreeState GetRootState();
+        public List<ITreeState> GetParentChain(ITreeState state);
+        public List<ITreeState> GetPathToAncestor(ITreeState from, ITreeState ancestor);
+        public bool TryGetStateInParent(string stateID, out ITreeState subState);
+        public bool TryGetStateInChildren(string stateID, out ITreeState subState);
+        public bool TryGetParentAtDepthLevel(int depthLevel, out ITreeState subState);
+        public bool TryGetStatesInChildren(out List<ITreeState> subStateList);
+        public bool TryGetAllStatesInChildren(out List<ITreeState> subStateList);
+        public bool TryGetActiveChild(out ITreeState activeState);
+        public bool TryGetActiveChildren(out List<ITreeState> activeStates);
+        public bool HasMoreThanOneActiveChildren();
+        public bool TryGetStatePathList(string fromID, string toID, out List<ITreeState> list, bool exceptFirst = false);
+        public bool TryExitIfNoActiveSiblings();
+        public bool TryExitChain();
+        public ITreeState GetParentState();
+        protected internal void SetParentState(ITreeState value);
+        public int GetDepthLevel();
+        protected internal void SetDepthLevel(int value);
     }
-    
+
     public sealed class TreeState : StateBase, ITreeState
     {
-        private readonly IDictionary<string, List<ITreeState>> _subStates = new Dictionary<string, List<ITreeState>>();
-        public ITreeState ParentState { get; set; }
-        public override string StateID { get; }
+        private readonly Dictionary<string, ITreeState> _subStateLookup = new();
+        
+        private readonly List<ITreeState> _subStates = new();
 
+        private ITreeState ParentState { get; set; }
+        public override string StateID { get; }
+        private int DepthLevel { get; set; }
         public bool IsRootState => ParentState == null;
-        
+
         private event Action OnInitState;
-        
+        private event Action OnBeforeEnterState;
         private event Action OnEnterState;
-        
         private event Action<float> OnUpdateState;
-        
         private event Action<float> OnFixedUpdateState;
-        
         private event Action<float> OnLateUpdateState;
-        
+        private event Action OnAllExitsComplete;
         private event Action OnExitState;
 
-        public TreeState(string stateID)
-        {
-            if (_subStates.TryGetValue(stateID, out var states)) return;
-            
-            StateID = stateID;
-            
-            states = new List<ITreeState>();
-            
-            _subStates[stateID] = states;
-        }
+        public TreeState(string stateID) => StateID = stateID;
 
         public ITreeState AddSubState(ITreeState subState)
         {
-            if (!HasInit)
+            if (_subStateLookup.ContainsKey(subState.StateID))
             {
-                Debug.LogError($"You need to init root state first to add Sub-state to : '{StateID}' state!");
+                UnityEngine.Debug.LogError($"State with ID '{subState.StateID}' already exists under '{this.StateID}'.");
                 return this;
             }
 
-            if (!_subStates.TryGetValue(StateID, out var states)) return this;
-
-            if (states.Contains(subState))
-            {
-                Debug.LogError($"{subState.StateID} state has already added to : '{StateID}' state!");
-                return this;
-            }
-            
-            subState.ParentState = this;
-            
+            subState.SetParentState(this);
+            subState.SetDepthLevel(DepthLevel + 1);
             subState.Init();
-            
-            states.Add(subState);
-
-            return this;
+            _subStates.Add(subState);
+            _subStateLookup[subState.StateID] = subState;
+            return subState;
         }
-        
+
         public ITreeState RemoveSubState(ITreeState subState)
         {
-            if (_subStates.ContainsKey(StateID))
-            {
-                _subStates.Remove(StateID);
-            }
-            else
-            {
-                Debug.LogError($"Cannot remove because {StateID} sub-state id not exist!");
-            }
-            
+            _subStates.Remove(subState);
+            _subStateLookup.Remove(subState.StateID);
             return this;
         }
 
-        public bool TryGetActiveSubState(out ITreeState activeState)
+        public bool TryGetStateInParent(string stateID, out ITreeState subState)
         {
-            activeState = default;
-            
-            if (!_subStates.TryGetValue(StateID, out var subStateList)) return false;
+            subState = null;
 
-            var state = subStateList.FirstOrDefault(x => x.IsActive);
+            var parent = ParentState;
             
-            if (state == null)
+            while (parent != null)
             {
-                Debug.LogError($"{StateID} has no active sub state!");
-                return false;
+                if (parent.StateID == stateID)
+                {
+                    subState = parent;
+                    
+                    return true;
+                }
+                
+                parent = parent.GetParentState();
             }
 
-            activeState = state;
-            
-            return true;
+            return false;
         }
 
-        public bool TryGetActiveSubStates(out List<ITreeState> activeState)
+        public bool TryGetStateInChildren(string stateID, out ITreeState subState) => _subStateLookup.TryGetValue(stateID, out subState);
+
+        public bool TryGetParentAtDepthLevel(int depthLevel, out ITreeState subState)
         {
-            activeState = default;
-            
-            if (!_subStates.TryGetValue(StateID, out var subStateList)) return false;
+            subState = this;
 
-            var state = subStateList.Where(x => x.IsActive).ToList();
+            if (DepthLevel < depthLevel) return false;
 
-            activeState = state;
-            
+            while (subState.GetDepthLevel() > depthLevel)
+            {
+                subState = subState.GetParentState();
+            }
+
             return true;
         }
+
+        public bool TryGetActiveChild(out ITreeState activeState)
+        {
+            activeState = _subStates.FirstOrDefault(s => s.IsActive);
+            
+            return activeState != null;
+        }
+
+        public bool TryGetActiveChildren(out List<ITreeState> activeStates)
+        {
+            activeStates = _subStates.Where(s => s.IsActive).ToList();
+            
+            return activeStates.Count > 0;
+        }
+
+        public bool HasMoreThanOneActiveChildren() => _subStates.Count(s => s.IsActive) > 1;
+
+        public bool TryExitChain()
+        {
+            foreach (var child in _subStates.ToList())
+            {
+                if (child.IsActive)
+                {
+                    child.TryExitChain();
+                }
+            }
+
+            if (IsActive)
+            {
+                OnExit();
+            }
+
+            return TryExitIfNoActiveSiblings();
+        }
+
+        public bool TryExitIfNoActiveSiblings()
+        {
+            if (ParentState is not TreeState parentTree) return false;
+
+            var hasOtherActive = parentTree._subStates.Any(s => s != this && s.IsActive);
+
+            if (hasOtherActive || !ParentState.IsActive) return false;
+
+            ParentState.OnExit();
+            
+            return ParentState.TryExitIfNoActiveSiblings();
+        }
+
+        public ITreeState GetParentState() => ParentState;
+        void ITreeState.SetParentState(ITreeState value) => ParentState = value;
+        public int GetDepthLevel() => DepthLevel;
+        void ITreeState.SetDepthLevel(int value) => DepthLevel = value;
 
         public ITreeState GetRootState()
         {
             ITreeState current = this;
 
-            while (current.ParentState != null)
+            while (current.GetParentState() != null)
             {
-                current = current.ParentState;
+                current = current.GetParentState();
             }
 
             return current;
         }
 
-        public bool TryGetSubStates(out List<ITreeState> subStateList) 
+        public bool TryGetStatesInChildren(out List<ITreeState> subStateList)
         {
-            subStateList = new List<ITreeState>();
-            
-            if (!_subStates.TryGetValue(StateID, out var subStates)) return false;
-            
-            foreach (var subState in subStates)
-            {
-                subStateList.Add(subState);
-            }
+            subStateList = new List<ITreeState>(_subStates);
             
             return subStateList.Count > 0;
         }
-        
-        public bool TryGetAllSubStates(out List<ITreeState> subStateList)
+
+        public bool TryGetAllStatesInChildren(out List<ITreeState> allStates)
         {
-            subStateList = new List<ITreeState>();
+            allStates = new List<ITreeState>();
 
-            if (!_subStates.TryGetValue(StateID, out var directSubStates)) return false;
-            
-            var stateQueue = new Queue<ITreeState>();
-            
-            foreach (var subState in directSubStates)
-            {
-                subStateList.Add(subState);
-                
-                stateQueue.Enqueue(subState);
-            }
-            
-            while (stateQueue.Count > 0)
-            {
-                var currentState = stateQueue.Dequeue();
+            var queue = new Queue<ITreeState>(_subStates);
 
-                if (currentState is not TreeState stateBase) continue;
+            while (queue.Count > 0)
+            {
+                var state = queue.Dequeue();
                 
-                foreach (var subStatePair in stateBase._subStates)
+                allStates.Add(state);
+
+                if (state is not TreeState tree) continue;
+
+                foreach (var sub in tree._subStates)
                 {
-                    foreach (var subState in subStatePair.Value)
-                    {
-                        subStateList.Add(subState);
-                        
-                        stateQueue.Enqueue(subState);
-                    }
+                    queue.Enqueue(sub);
                 }
             }
 
-            return subStateList.Count > 0;
+            return allStates.Count > 0;
+        }
+
+        public List<ITreeState> GetParentChain(ITreeState state)
+        {
+            var list = new List<ITreeState>();
+
+            while (state != null)
+            {
+                list.Add(state);
+                
+                state = state.GetParentState();
+            }
+
+            return list;
+        }
+
+        public List<ITreeState> GetPathToAncestor(ITreeState from, ITreeState ancestor)
+        {
+            var list = new List<ITreeState>();
+
+            var current = from;
+
+            while (current != null)
+            {
+                list.Add(current);
+
+                if (current == ancestor) break;
+
+                current = current.GetParentState();
+            }
+
+            return list;
+        }
+
+        public bool TryGetStatePathList(string fromID, string toID, out List<ITreeState> list, bool exceptFirst = false)
+        {
+            list = new List<ITreeState>();
+
+            if (!GetRootState().TryGetAllStatesInChildren(out var allStates)) return false;
+
+            var from = allStates.FirstOrDefault(s => s.StateID == fromID);
+            var to = allStates.FirstOrDefault(s => s.StateID == toID);
+
+            if (from == null || to == null) return false;
+
+            var fromChain = GetParentChain(from);
+            var toChain = GetParentChain(to);
+            var common = fromChain.Intersect(toChain).FirstOrDefault();
+
+            if (common == null) return false;
+
+            if (from == to)
+            {
+                list.Add(from);
+                return true;
+            }
+
+            var a = GetPathToAncestor(from, common);
+            var b = GetPathToAncestor(to, common);
+
+            if (exceptFirst && a.Count > 0) a.RemoveAt(0);
+
+            b.Reverse();
+            list.AddRange(a);
+            list.AddRange(b.Skip(1));
+            list = list.OrderBy(x => x.GetDepthLevel()).ToList();
+
+            return true;
         }
 
         protected override void OnInit() => OnInitState?.Invoke();
+
+        protected override bool OnBeforeEnter()
+        {
+            var chain = GetParentChain(this).OrderBy(x => x.GetDepthLevel()).Where(x => !x.IsActive).ToList();
+
+            chain.Remove(this);
+          
+            foreach (var node in chain)
+            {
+                node.Enter();
+            }
+
+            OnBeforeEnterState?.Invoke();
+            
+            return true;
+        }
+
         protected override void OnEnter() => OnEnterState?.Invoke();
-        protected override void OnUpdate(float deltaTime) => OnUpdateState?.Invoke(deltaTime);
-        protected override void OnFixedUpdate(float deltaTime) => OnFixedUpdateState?.Invoke(deltaTime);
-        protected override void OnLateUpdate(float deltaTime) => OnLateUpdateState?.Invoke(deltaTime);
-        protected override void OnExit() => OnExitState?.Invoke();
+        protected override void OnUpdate(float dt) => OnUpdateState?.Invoke(dt);
+        protected override void OnFixedUpdate(float dt) => OnFixedUpdateState?.Invoke(dt);
+        protected override void OnLateUpdate(float dt) => OnLateUpdateState?.Invoke(dt);
 
-        public ITreeState OnInit(Action act)
+        protected override bool TryExit()
         {
-            OnInitState = act;
-            return this;
+            var onChainExitComplete = TryExitChain();
+
+            if (onChainExitComplete)
+            {
+                OnAllExitsComplete?.Invoke();
+            }
+
+            return onChainExitComplete;
         }
 
-        public ITreeState OnEnter(Action act)
-        {
-            OnEnterState = act;
-            return this;
-        }
-
-        public ITreeState OnUpdate(Action<float> act)
-        {
-            OnUpdateState = act;
-            return this;
-        }
-
-        public ITreeState OnFixedUpdate(Action<float> act)
-        {
-            OnFixedUpdateState = act;
-            return this;
-        }
-
-        public ITreeState OnLateUpdate(Action<float> act)
-        {
-            OnLateUpdateState = act;
-            return this;
-        }
-
-        public ITreeState OnExit(Action act)
-        {
-            OnExitState = act;
-            return this;
-        }
+        protected override void OnExitComplete() => OnExitState?.Invoke();
+        public ITreeState OnInit(Action act) { OnInitState = act; return this; }
+        public ITreeState OnEnterBeforeActivation(Action act) { OnBeforeEnterState = act; return this; }
+        public ITreeState OnEnter(Action act) { OnEnterState = act; return this; }
+        public ITreeState OnUpdate(Action<float> act) { OnUpdateState = act; return this; }
+        public ITreeState OnFixedUpdate(Action<float> act) { OnFixedUpdateState = act; return this; }
+        public ITreeState OnLateUpdate(Action<float> act) { OnLateUpdateState = act; return this; }
+        public ITreeState OnExit(Action act) { OnExitState = act; return this; }
+        public ITreeState OnAllExit(Action act) { OnAllExitsComplete = act; return this; }
     }
 }
