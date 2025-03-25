@@ -56,22 +56,29 @@ namespace UnityBase.StateMachineCore
         {
             if (_subStateLookup.ContainsKey(subState.StateID))
             {
-                UnityEngine.Debug.LogError($"State with ID '{subState.StateID}' already exists under '{this.StateID}'.");
+                Debug.LogError($"State with ID '{subState.StateID}' already exists under '{StateID}'.");
                 return this;
             }
 
             subState.SetParentState(this);
+            
             subState.SetDepthLevel(DepthLevel + 1);
+            
             subState.Init();
+            
             _subStates.Add(subState);
+            
             _subStateLookup[subState.StateID] = subState;
+            
             return subState;
         }
 
         public ITreeState RemoveSubState(ITreeState subState)
         {
             _subStates.Remove(subState);
+            
             _subStateLookup.Remove(subState.StateID);
+            
             return this;
         }
 
@@ -185,27 +192,29 @@ namespace UnityBase.StateMachineCore
 
         public bool TryGetAllStatesInChildren(out List<ITreeState> allStates)
         {
-            allStates = new List<ITreeState>();
-
+            var visited = new HashSet<ITreeState>();
+            
             var queue = new Queue<ITreeState>(_subStates);
 
             while (queue.Count > 0)
             {
                 var state = queue.Dequeue();
                 
-                allStates.Add(state);
+                if (!visited.Add(state)) continue;
 
                 if (state is not TreeState tree) continue;
-
+                
                 foreach (var sub in tree._subStates)
                 {
                     queue.Enqueue(sub);
                 }
             }
 
+            allStates = visited.ToList();
+            
             return allStates.Count > 0;
         }
-
+        
         public List<ITreeState> GetParentChain(ITreeState state)
         {
             var list = new List<ITreeState>();
@@ -311,7 +320,7 @@ namespace UnityBase.StateMachineCore
 
         protected override void OnExitComplete() => OnExitState?.Invoke();
         public ITreeState OnInit(Action act) { OnInitState = act; return this; }
-        public ITreeState OnEnterBeforeActivation(Action act) { OnBeforeEnterState = act; return this; }
+        public ITreeState OnBeforeEnter(Action act) { OnBeforeEnterState = act; return this; }
         public ITreeState OnEnter(Action act) { OnEnterState = act; return this; }
         public ITreeState OnUpdate(Action<float> act) { OnUpdateState = act; return this; }
         public ITreeState OnFixedUpdate(Action<float> act) { OnFixedUpdateState = act; return this; }
