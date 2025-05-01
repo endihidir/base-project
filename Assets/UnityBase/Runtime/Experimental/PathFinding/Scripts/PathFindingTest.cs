@@ -140,7 +140,6 @@ namespace UnityBase.PathFinding
             {
                 _previousRot = transform.eulerAngles;
                 UpdateVisual();
-                Debug.LogError("Update");
             }
         }
 
