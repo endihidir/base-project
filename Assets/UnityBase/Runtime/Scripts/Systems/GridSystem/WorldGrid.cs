@@ -305,7 +305,7 @@ namespace UnityBase.GridSystem
                                                  (k.Item2 || (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) + Mathf.Abs(offset.z)) <= 1)).ToArray());
         }
         
-        public bool IsInRange2(Vector3Int pos)
+        public bool IsInRange2(Vector2Int pos)
         {
             return pos is { x: >= 0, y: >= 0} && pos.x < _gridWidth && pos.y < _gridHeight;
         }
@@ -317,7 +317,7 @@ namespace UnityBase.GridSystem
         public bool IsInRange2(Vector3 worldPos)
         {
             var gridPos = WorldToGrid2(worldPos, false);
-            return IsInRange2((Vector3Int)gridPos);
+            return IsInRange2(gridPos);
         }
         
         public bool IsInRange3(Vector3 worldPos)
@@ -484,7 +484,7 @@ namespace UnityBase.GridSystem
         Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
         Vector3Int WorldToGrid3(Vector3 position, bool clamp = true);
 
-        bool IsInRange2(Vector3Int pos);
+        bool IsInRange2(Vector2Int pos);
         bool IsInRange3(Vector3Int pos);
         bool IsInRange2(Vector3 worldPos);
         bool IsInRange3(Vector3 worldPos);

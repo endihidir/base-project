@@ -96,7 +96,7 @@ namespace UnityBase.PathFinding
                 var endNode = _grid.GetFirst(gridPos);
                 if (!endNode.isWalkable || endNode.gridPos == _startNode.gridPos) return;
 
-                var path = _pathFinding.FindPath(_startNode.gridPos, endNode.gridPos);
+                var path = _pathFinding.FindPathJobs(_startNode.gridPos, endNode.gridPos);
 
                 if (path.Length > 0)
                 {
