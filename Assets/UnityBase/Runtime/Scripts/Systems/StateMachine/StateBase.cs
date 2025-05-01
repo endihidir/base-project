@@ -15,7 +15,6 @@ namespace UnityBase.StateMachineCore
         public void FixedUpdate(float deltaTime);
         public void LateUpdate(float deltaTime);
         public bool Exit();
-        public void OnExit();
     }
     
     public abstract class StateBase : IState
@@ -89,15 +88,22 @@ namespace UnityBase.StateMachineCore
             OnLateUpdate(deltaTime);
         }
 
-        public bool Exit() => TryExit();
+        public virtual bool Exit()
+        {
+            if (!IsActive) return false;
 
-        public void OnExit()
+            PerformExit();
+            
+            return true;
+        }
+
+        protected void PerformExit()
         {
             if(!IsActive) return;
             
             IsActive = false;
                 
-            OnExitComplete();
+            OnExit();
         }
 
         protected abstract void OnInit();
@@ -106,7 +112,6 @@ namespace UnityBase.StateMachineCore
         protected abstract void OnUpdate(float deltaTime);
         protected abstract void OnFixedUpdate(float deltaTime);
         protected abstract void OnLateUpdate(float deltaTime);
-        protected abstract bool TryExit();
-        protected abstract void OnExitComplete();
+        protected abstract void OnExit();
     }
 }

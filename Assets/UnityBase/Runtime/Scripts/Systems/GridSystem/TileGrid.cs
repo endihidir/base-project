@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityBase.GridSystem
 {
     [Serializable]
-    public sealed class Grid<T> where T : new()
+    public sealed class TileGrid<T>
     {
         #region VARIABLES
 
@@ -26,14 +26,14 @@ namespace UnityBase.GridSystem
 
         #endregion
 
-        public Grid(IGridEntity gridEntity)
+        public TileGrid(IGridEntity gridEntity)
         {
             _gridEntity = gridEntity;
             
             _gridArray = new T[Width, Height];
         }
 
-        ~Grid() => _gridEntity = null;
+        ~TileGrid() => _gridEntity = null;
 
         public float3 GetWorldPosition(int x, int y, int z)
         {

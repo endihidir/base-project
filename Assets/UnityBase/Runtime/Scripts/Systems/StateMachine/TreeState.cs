@@ -30,7 +30,7 @@ namespace UnityBase.StateMachineCore
         protected internal void SetDepthLevel(int value);
     }
 
-    public sealed class TreeState : StateBase, ITreeState
+    public class TreeState : StateBase, ITreeState
     {
         private readonly Dictionary<string, ITreeState> _subStateLookup = new();
         
@@ -147,7 +147,39 @@ namespace UnityBase.StateMachineCore
 
             if (IsActive)
             {
-                OnExit();
+                PerformExit();
+            }
+
+            return TryExitIfNoActiveSiblings();
+        }
+        
+        public bool TryExitChainIterative()
+        {
+            var stack = new Stack<ITreeState>();
+            
+            stack.Push(this);
+
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+
+                if (current is TreeState tree)
+                {
+                    for (int i = 0; i < tree._subStates.Count; i++)
+                    {
+                        var child = tree._subStates[i];
+                        
+                        if (child.IsActive)
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
+
+                if (current.IsActive && current is TreeState concreteState)
+                {
+                    concreteState.PerformExit();
+                }
             }
 
             return TryExitIfNoActiveSiblings();
@@ -159,11 +191,11 @@ namespace UnityBase.StateMachineCore
 
             var hasOtherActive = parentTree._subStates.Any(s => s != this && s.IsActive);
 
-            if (hasOtherActive || !ParentState.IsActive) return false;
+            if (hasOtherActive || !parentTree.IsActive) return false;
 
-            ParentState.OnExit();
+            parentTree.PerformExit();
             
-            return ParentState.TryExitIfNoActiveSiblings();
+            return parentTree.TryExitIfNoActiveSiblings();
         }
 
         public ITreeState GetParentState() => ParentState;
@@ -306,19 +338,21 @@ namespace UnityBase.StateMachineCore
         protected override void OnFixedUpdate(float dt) => OnFixedUpdateState?.Invoke(dt);
         protected override void OnLateUpdate(float dt) => OnLateUpdateState?.Invoke(dt);
 
-        protected override bool TryExit()
+        public override bool Exit()
         {
-            var onChainExitComplete = TryExitChain();
+            if (!IsActive) return false;
 
-            if (onChainExitComplete)
+            var success = TryExitChain();
+
+            if (success)
             {
                 OnAllExitsComplete?.Invoke();
             }
 
-            return onChainExitComplete;
+            return success;
         }
 
-        protected override void OnExitComplete() => OnExitState?.Invoke();
+        protected override void OnExit() => OnExitState?.Invoke();
         public ITreeState OnInit(Action act) { OnInitState = act; return this; }
         public ITreeState OnBeforeEnter(Action act) { OnBeforeEnterState = act; return this; }
         public ITreeState OnEnter(Action act) { OnEnterState = act; return this; }

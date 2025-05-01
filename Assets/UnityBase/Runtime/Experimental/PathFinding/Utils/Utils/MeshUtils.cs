@@ -160,4 +160,33 @@ public static class MeshUtils
 		triangles[tIndex+4] = vIndex3;
 		triangles[tIndex+5] = vIndex2;
     }
+    
+    public static void AddToMeshArrays2(Vector3[] vertices, Vector2[] uvs, int[] triangles, int index, Vector3 pos, Vector3 baseSize, Vector2 uv00, Vector2 uv11, Transform transform)
+    {
+	    int vIndex = index * 4;
+
+	    Vector3 forward = transform.forward;
+	    Vector3 right = transform.right;
+
+	    baseSize *= 0.5f;
+	    
+	    vertices[vIndex + 0] = pos + (-right - forward) * baseSize.x;
+	    vertices[vIndex + 1] = pos + (-right + forward) * baseSize.x;
+	    vertices[vIndex + 2] = pos + (right + forward) * baseSize.x;
+	    vertices[vIndex + 3] = pos + (right - forward) * baseSize.x;
+	    
+	    uvs[vIndex + 0] = new Vector2(uv00.x, uv11.y);
+	    uvs[vIndex + 1] = new Vector2(uv00.x, uv00.y);
+	    uvs[vIndex + 2] = new Vector2(uv11.x, uv00.y);
+	    uvs[vIndex + 3] = new Vector2(uv11.x, uv11.y);
+	    
+	    int tIndex = index * 6;
+	    triangles[tIndex + 0] = vIndex + 0;
+	    triangles[tIndex + 1] = vIndex + 1;
+	    triangles[tIndex + 2] = vIndex + 2;
+
+	    triangles[tIndex + 3] = vIndex + 0;
+	    triangles[tIndex + 4] = vIndex + 2;
+	    triangles[tIndex + 5] = vIndex + 3;
+    }
 }

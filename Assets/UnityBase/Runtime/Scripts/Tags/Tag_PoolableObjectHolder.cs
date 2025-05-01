@@ -14,11 +14,11 @@ namespace UnityBase.Tag
         private ITreeState _newSubTest1 = new TreeState("NewSubTest1");
         private ITreeState _newSubTest2 = new TreeState("NewSubTest2");
 
-        private TransitionBase _transitionBase;
+        private ITransition _transition;
 
         private void Awake()
         {
-            //_transitionBase = new TransitionBase(new TreeState("A"), new TreeState("B"), OnSuccess);
+            //_transition = new Transition(new TreeState("A"), new TreeState("B"), OnSuccess);
             
             Test1();
         }

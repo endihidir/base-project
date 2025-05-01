@@ -87,12 +87,3 @@ namespace UnityBase.Manager
         };
     }
 }
-
-public enum Direction
-{
-    None,
-    Up,
-    Down,
-    Right,
-    Left
-}

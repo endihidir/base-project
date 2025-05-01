@@ -30,7 +30,7 @@ namespace UnityBase.StateMachineCore
     {
         private readonly Dictionary<string, ITreeState> _states = new();
         
-        private readonly List<TransitionBase> _transitions = new();
+        private readonly List<ITransition> _transitions = new();
         
         private readonly List<ITreeState> _activeStates = new();
 
@@ -103,7 +103,7 @@ namespace UnityBase.StateMachineCore
                 return;
             }
 
-            _transitions.Add(new TransitionBase(fromState, toState, condition));
+            _transitions.Add(new Transition(fromState, toState, condition));
         }
 
         public void SetInitialState(string targetStateID)
@@ -165,9 +165,7 @@ namespace UnityBase.StateMachineCore
         }
 
         public void Tick() => Tick(Time.deltaTime);
-        
         public void FixedTick() => FixedTick(Time.fixedDeltaTime);
-
         public void LateTick() => LateTick(Time.deltaTime);
     }
 }

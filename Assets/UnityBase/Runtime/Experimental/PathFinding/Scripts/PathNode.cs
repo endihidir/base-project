@@ -1,15 +1,13 @@
 using System;
 using Unity.Mathematics;
+using UnityBase.GridSystem;
+using UnityEngine;
 
 [Serializable]
 public struct PathNode
 {
-    public int x;
-    public int y;
-    public int index;
+    public Vector3Int gridPos;
     public bool isWalkable;
-    
-    public int2 Pos => new int2(x,y);
 
     public int gCost;
     public int hCost;
@@ -19,16 +17,8 @@ public struct PathNode
 
     public override string ToString()
     {
-        return x + "," + y;
+        return gridPos.x + "," + gridPos.y + "," + gridPos.z;
     }
 
-    public void SetWalkable(bool isWalkable)
-    {
-        this.isWalkable = isWalkable;
-    }
-
-    public void CalculateFCost()
-    {
-        fCost = gCost + hCost;
-    }
+    public void CalculateFCost() => fCost = gCost + hCost;
 }

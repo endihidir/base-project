@@ -10,13 +10,13 @@ namespace UnityBase.StateMachineCore
         public bool CheckTrigger();
     }
 
-    public class TransitionBase : ITransition
+    public class Transition : ITransition
     {
         public IState From { get; }
         public IState To { get; }
         private event Func<bool> Condition;
 
-        public TransitionBase(IState from, IState to, Func<bool> onSuccess)
+        public Transition(IState from, IState to, Func<bool> onSuccess)
         {
             From = from;
             To = to;
@@ -34,29 +34,29 @@ namespace UnityBase.StateMachineCore
             
             if (!From.IsActive) return false;
 
-            if (From is not ITreeState fromTree || To is not ITreeState toTree)
+            if (From is ITreeState fromTree && To is ITreeState toTree)
             {
-                From.Exit();
+                if (CanTransition(fromTree, toTree))
+                {
+                    fromTree.Exit();
 
-                To.Enter();
+                    toTree.Enter();
 
-                return true;
+                    return true;
+                }
+
+                Debug.LogError($"Cannot force transition from '{fromTree.StateID}' to '{toTree.StateID}': different root states.");
+
+                return false;
             }
 
-            if (IsInSameHierarchy(fromTree, toTree))
-            {
-                fromTree.Exit();
-                
-                toTree.Enter();
-                    
-                return true;
-            }
+            From.Exit();
 
-            Debug.LogError($"Cannot force transition from '{fromTree.StateID}' to '{toTree.StateID}': different root states.");
-                
-            return false;
+            To.Enter();
+
+            return true;
         }
 
-        private bool IsInSameHierarchy(ITreeState from, ITreeState to) => from.GetRootState() == to.GetRootState();
+        private bool CanTransition(ITreeState from, ITreeState to) => (from.GetRootState() == to.GetRootState()) || from.IsRootState;
     }
 }

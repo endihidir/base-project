@@ -47,7 +47,7 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
-            builder.Register<Blackboard>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GlobalBlackboard>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SaveManager>(Lifetime.Singleton).AsImplementedInterfaces();
             

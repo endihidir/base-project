@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityBase.GridSystem
 {
     [Serializable]
-    public sealed class HexGrid<T> where T : new()
+    public sealed class HexGrid<T>
     {
         public static readonly float2 DefaultOffsetMultiplier = new(0.82f, 0.708f);
 

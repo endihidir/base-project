@@ -42,7 +42,7 @@ namespace UnityBase.BlackboardCore
         public override int GetHashCode() => Key.GetHashCode();
     }
     
-    public class Blackboard : IBlackboard
+    public class GlobalBlackboard : IBlackboard
     {
         private Dictionary<string, BlackboardKey> _keyRegistry = new();
         

@@ -36,7 +36,7 @@ namespace UnityBase.StateMachineCore
             
             ToID = to;
             
-            _transition = new TransitionBase(fromState, toState, condition);
+            _transition = new Transition(fromState, toState, condition);
             
             Mode = mode;
         }

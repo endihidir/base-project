@@ -12,47 +12,23 @@ namespace UnityBase.PathFinding
         private const int MOVE_STRAIGHT_COST = 10;
         private const int MOVE_DIAGONAL_COST = 14;
 
-        private Grid<PathNode> _grid;
+        private readonly IWorldGrid<PathNode> _grid;
+        public PathFinding(IWorldGrid<PathNode> grid) => _grid = grid;
 
-        private int _width;
-        private int _height;
-
-        public PathFinding(IGridEntity gridEntity)
+        public NativeList<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
-            _grid = new Grid<PathNode>(gridEntity);
-            
-            _width = _grid.Width;
-            _height = _grid.Height;
+            NativeArray<PathNode> pathNodeArray = ResetPathNodeArray(endPos);
 
+            NativeList<Vector3Int> calculatedPath = new NativeList<Vector3Int>(Allocator.TempJob);
 
-            for (int x = 0; x < _width; x++)
-            {
-                for (int y = 0; y < _height; y++)
-                {
-                    var nodeData = new PathNode { x = x, y = y, index = CalculateIndex(x, y, _height), isWalkable = true };
-                    
-                    _grid.SetGridObject(x, y, nodeData);
-                }
-            }
-            
-            // FindPath(int2.zero, int2.zero);
-        }
-
-        public Grid<PathNode> GetGrid() => _grid;
-
-        public NativeList<int2> FindPath(int2 startNodePos, int2 endNodePos)
-        {
-            NativeArray<PathNode> pathNodeArray = ResetPathNodeArray(endNodePos);
-
-            NativeList<int2> calculatedPath = new NativeList<int2>(Allocator.TempJob);
-
-            FindPathJob findPathJob = new FindPathJob()
+            FindPathJob findPathJob = new FindPathJob
             {
                 pathNodeArray = pathNodeArray,
-                gridSize = new int2(_width, _height),
-                startPos = startNodePos,
-                endPos = endNodePos,
+                gridSize = new int2(_grid.Width, _grid.Height),
+                startPos = startPos,
+                endPos = endPos,
                 calculatedPathList = calculatedPath,
+                allowDiagonalCornerCutting = allowDiagonalCornerCutting
             };
 
             JobHandle fpHandle = findPathJob.Schedule();
@@ -64,44 +40,48 @@ namespace UnityBase.PathFinding
             return calculatedPath;
         }
 
-        private NativeArray<PathNode> ResetPathNodeArray(int2 endNodePos)
+        private NativeArray<PathNode> ResetPathNodeArray(Vector3Int endNodePos)
         {
-            NativeArray<PathNode> pathNodeArray = new NativeArray<PathNode>(_width * _height, Allocator.TempJob);
+            NativeArray<PathNode> pathNodeArray = new NativeArray<PathNode>(_grid.Width * _grid.Height, Allocator.TempJob);
 
-            for (int x = 0; x < _width; x++)
+            for (int x = 0; x < _grid.Width; x++)
             {
-                for (int y = 0; y < _height; y++)
+                for (int y = 0; y < _grid.Height; y++)
                 {
+                    var pos = new Vector3Int(x, y, 0);
+
+                    var node = _grid.GetFirst(pos);
+
                     PathNode pathNode = new PathNode
                     {
-                        x = x,
-                        y = y,
-                        index = CalculateIndex(x, y, _height),
+                        gridPos = pos,
                         gCost = int.MaxValue,
-                        hCost = CalculateDistanceCost(new int2(x, y), endNodePos),
-                        isWalkable = _grid.GetGridObject(x, y).isWalkable,
+                        hCost = CalculateDistanceCost(pos, endNodePos),
+                        isWalkable = node.isWalkable,
                         cameFromNodeIndex = -1
                     };
 
-                    pathNodeArray[pathNode.index] = pathNode;
+                    pathNode.CalculateFCost();
+
+                    var index = CalculateIndex(x, y, _grid.Height);
+                    pathNodeArray[index] = pathNode;
                 }
             }
 
             return pathNodeArray;
         }
 
-        private static int CalculateDistanceCost(int2 aPos, int2 bPos)
+        private static int CalculateDistanceCost(Vector3Int aPos, Vector3Int bPos)
         {
-            int xDistance = Mathf.Abs(aPos.x - bPos.x);
-            int yDistance = Mathf.Abs(aPos.y - bPos.y);
-            int remaining = Mathf.Abs(xDistance - yDistance);
+            var xDistance = Mathf.Abs(aPos.x - bPos.x);
+            var yDistance = Mathf.Abs(aPos.y - bPos.y);
+            var remaining = Mathf.Abs(xDistance - yDistance);
             return MOVE_DIAGONAL_COST * Mathf.Min(xDistance, yDistance) + MOVE_STRAIGHT_COST * remaining;
         }
 
         private static int CalculateIndex(int x, int y, int gridHeight)
         {
-            var val = y + gridHeight * x;
-            return val;
+            return y + gridHeight * x;
         }
 
         [BurstCompile]
@@ -111,36 +91,35 @@ namespace UnityBase.PathFinding
 
             public NativeArray<PathNode> pathNodeArray;
 
-            public int2 startPos, endPos;
+            public Vector3Int startPos, endPos;
 
-            public NativeList<int2> calculatedPathList;
+            public NativeList<Vector3Int> calculatedPathList;
+            
+            public bool allowDiagonalCornerCutting;
 
             public void Execute()
             {
-                NativeArray<int2> neighbourOffsetArray = GetNeighBorOffsetsArray();
+                var neighbourOffsetArray = GetNeighBorOffsetsArray();
 
-                int endNodeIndex = CalculateIndex(endPos.x, endPos.y, gridSize.y);
+                var endNodeIndex = CalculateIndex(endPos.x, endPos.y, gridSize.y);
 
-                PathNode startNode = pathNodeArray[CalculateIndex(startPos.x, startPos.y, gridSize.y)];
+                var startNode = pathNodeArray[CalculateIndex(startPos.x, startPos.y, gridSize.y)];
                 startNode.gCost = 0;
                 startNode.CalculateFCost();
-                pathNodeArray[startNode.index] = startNode;
+                pathNodeArray[CalculateIndex(startPos.x, startPos.y, gridSize.y)] = startNode;
 
-                NativeList<int> openList = new NativeList<int>(Allocator.Temp);
-                NativeList<int> closedList = new NativeList<int>(Allocator.Temp);
+                var openList = new NativeList<int>(Allocator.Temp);
+                var closedList = new NativeList<int>(Allocator.Temp);
 
-                openList.Add(startNode.index);
+                openList.Add(CalculateIndex(startPos.x, startPos.y, gridSize.y));
 
                 while (openList.Length > 0)
                 {
-                    int currentNodeIndex = GetLowestCostFNodeIndex(openList, pathNodeArray);
+                    var currentNodeIndex = GetLowestCostFNodeIndex(openList, pathNodeArray);
 
-                    PathNode currentNode = pathNodeArray[currentNodeIndex];
+                    var currentNode = pathNodeArray[currentNodeIndex];
 
-                    if (currentNodeIndex == endNodeIndex)
-                    {
-                        break;
-                    }
+                    if (currentNodeIndex == endNodeIndex) break;
 
                     for (int i = 0; i < openList.Length; i++)
                     {
@@ -155,39 +134,46 @@ namespace UnityBase.PathFinding
 
                     for (int i = 0; i < neighbourOffsetArray.Length; i++)
                     {
-                        int2 neighborOffset = neighbourOffsetArray[i];
+                        var offset = neighbourOffsetArray[i];
+                        var neighbourPos = currentNode.gridPos + new Vector3Int(offset.x, offset.y, 0);
 
-                        int2 neighbourPosition = new int2(currentNode.x + neighborOffset.x,
-                            currentNode.y + neighborOffset.y);
-
-                        if (!IsPositionInsideGrid(neighbourPosition, gridSize)) continue;
-
-                        int neighborNodeIndex = CalculateIndex(neighbourPosition.x, neighbourPosition.y, gridSize.y);
-
-                        if (closedList.Contains(neighborNodeIndex)) continue;
-
-                        PathNode neighborNode = pathNodeArray[neighborNodeIndex];
-
-                        if (!neighborNode.isWalkable) continue;
-
-                        int2 currentNodePosition = new int2(currentNode.x, currentNode.y);
-
-                        int tentativeGCost = currentNode.gCost +
-                                             CalculateDistanceCost(currentNodePosition, neighbourPosition);
-
-                        if (tentativeGCost < neighborNode.gCost)
+                        if (!IsPositionInsideGrid(neighbourPos, gridSize)) continue;
+                        
+                        if (!allowDiagonalCornerCutting && math.abs(offset.x) == 1 && math.abs(offset.y) == 1)
                         {
-                            neighborNode.cameFromNodeIndex = currentNodeIndex;
+                            var nodeA = currentNode.gridPos + new Vector3Int(offset.x, 0, 0);
+                            var nodeB = currentNode.gridPos + new Vector3Int(0, offset.y, 0);
 
-                            neighborNode.gCost = tentativeGCost;
+                            if (!IsPositionInsideGrid(nodeA, gridSize) || !IsPositionInsideGrid(nodeB, gridSize)) continue;
 
-                            neighborNode.CalculateFCost();
+                            var indexA = CalculateIndex(nodeA.x, nodeA.y, gridSize.y);
+                            var indexB = CalculateIndex(nodeB.x, nodeB.y, gridSize.y);
 
-                            pathNodeArray[neighborNodeIndex] = neighborNode;
-
-                            if (!openList.Contains(neighborNode.index))
+                            if (!pathNodeArray[indexA].isWalkable || !pathNodeArray[indexB].isWalkable)
                             {
-                                openList.Add(neighborNode.index);
+                                continue;
+                            }
+                        }
+
+                        var neighbourIndex = CalculateIndex(neighbourPos.x, neighbourPos.y, gridSize.y);
+
+                        if (closedList.Contains(neighbourIndex)) continue;
+
+                        var neighbourNode = pathNodeArray[neighbourIndex];
+                        if (!neighbourNode.isWalkable) continue;
+
+                        var tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode.gridPos, neighbourNode.gridPos);
+
+                        if (tentativeGCost < neighbourNode.gCost)
+                        {
+                            neighbourNode.cameFromNodeIndex = currentNodeIndex;
+                            neighbourNode.gCost = tentativeGCost;
+                            neighbourNode.CalculateFCost();
+                            pathNodeArray[neighbourIndex] = neighbourNode;
+
+                            if (!openList.Contains(neighbourIndex))
+                            {
+                                openList.Add(neighbourIndex);
                             }
                         }
                     }
@@ -206,17 +192,15 @@ namespace UnityBase.PathFinding
 
                 if (endNode.cameFromNodeIndex != -1)
                 {
-                    calculatedPathList.Add(new int2(endNode.x, endNode.y));
+                    calculatedPathList.Add(endNode.gridPos);
 
                     PathNode currentNode = endNode;
 
                     while (currentNode.cameFromNodeIndex != -1)
                     {
-                        PathNode cameFromNode = pathNodeArray[currentNode.cameFromNodeIndex];
-
-                        calculatedPathList.Add(new int2(cameFromNode.x, cameFromNode.y));
-
-                        currentNode = cameFromNode;
+                        PathNode cameFrom = pathNodeArray[currentNode.cameFromNodeIndex];
+                        calculatedPathList.Add(cameFrom.gridPos);
+                        currentNode = cameFrom;
                     }
                 }
             }
@@ -225,39 +209,37 @@ namespace UnityBase.PathFinding
             {
                 NativeArray<int2> neighbourOffsetArray = new NativeArray<int2>(8, Allocator.Temp);
 
-                neighbourOffsetArray[0] = new int2(-1, 0); // Left
-                neighbourOffsetArray[1] = new int2(+1, 0); // Right
-                neighbourOffsetArray[2] = new int2(0, +1); // Up
-                neighbourOffsetArray[3] = new int2(0, -1); // Down
-                neighbourOffsetArray[4] = new int2(-1, -1); // Left Down
-                neighbourOffsetArray[5] = new int2(-1, +1); // Left Up
-                neighbourOffsetArray[6] = new int2(+1, -1); // Right Down
-                neighbourOffsetArray[7] = new int2(+1, +1); // Right Up
+                neighbourOffsetArray[0] = new int2(-1, 0);
+                neighbourOffsetArray[1] = new int2(+1, 0);
+                neighbourOffsetArray[2] = new int2(0, +1);
+                neighbourOffsetArray[3] = new int2(0, -1);
+                neighbourOffsetArray[4] = new int2(-1, -1);
+                neighbourOffsetArray[5] = new int2(-1, +1);
+                neighbourOffsetArray[6] = new int2(+1, -1);
+                neighbourOffsetArray[7] = new int2(+1, +1);
 
                 return neighbourOffsetArray;
             }
 
-            private int GetLowestCostFNodeIndex(NativeList<int> openList, NativeArray<PathNode> pathNodeArray)
+            private int GetLowestCostFNodeIndex(NativeList<int> openList, NativeArray<PathNode> nodeArray)
             {
-                PathNode lowestCostPathNode = pathNodeArray[openList[0]];
+                PathNode lowest = nodeArray[openList[0]];
 
                 for (int i = 1; i < openList.Length; i++)
                 {
-                    PathNode testPathNode = pathNodeArray[openList[i]];
-
-                    if (testPathNode.fCost < lowestCostPathNode.fCost)
+                    PathNode test = nodeArray[openList[i]];
+                    if (test.fCost < lowest.fCost)
                     {
-                        lowestCostPathNode = testPathNode;
+                        lowest = test;
                     }
                 }
 
-                return lowestCostPathNode.index;
+                return lowest.gridPos.y + gridSize.y * lowest.gridPos.x;
             }
 
-            private bool IsPositionInsideGrid(int2 gridPosition, int2 gridSize)
+            private bool IsPositionInsideGrid(Vector3Int pos, int2 size)
             {
-                return gridPosition.x >= 0 && gridPosition.y >= 0 && gridPosition.x < gridSize.x &&
-                       gridPosition.y < gridSize.y;
+                return pos.x >= 0 && pos.y >= 0 && pos.x < size.x && pos.y < size.y;
             }
         }
     }
