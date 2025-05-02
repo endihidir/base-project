@@ -16,11 +16,11 @@ namespace UnityBase.PathFinding
         [SerializeField] private bool _drawGizmos;
         [SerializeField] private Color _gizmosColor = Color.yellow;
         [SerializeField] private MeshFilter _meshFilter;
+        [SerializeField][Range(0, 10)] private int _activeDepth = 0; 
         
         private IWorldGrid<PathNode> _grid;
 
         private PathNode _startNode;
-        private PathFinding _pathFinding;
 
         private Vector3 _previousRot;
 
@@ -56,12 +56,12 @@ namespace UnityBase.PathFinding
 
                         var nodeData = new PathNode
                         {
-                            gridPos = pos,
-                            isWalkable = true,
-                            gCost = int.MaxValue,
-                            hCost = 0,
-                            fCost = 0,
-                            cameFromNodeIndex = -1
+                            GridPos = pos,
+                            IsWalkable = true,
+                            GCost = int.MaxValue,
+                            HCost = 0,
+                            FCost = 0,
+                            CameFromNodeIndex = -1
                         };
 
                         _grid.SetFirst(pos, nodeData);
@@ -69,8 +69,7 @@ namespace UnityBase.PathFinding
                 }
             }
             
-            _pathFinding = new PathFinding(_grid);
-            _startNode = _grid.GetFirst(new Vector3Int(0,0,0));
+            _startNode = _grid.GetFirst(new Vector3Int(0,0,_activeDepth));
         }
         
         private void Update()
@@ -81,7 +80,6 @@ namespace UnityBase.PathFinding
             
             if (Input.GetMouseButtonDown(0))
             {
-
                 var ray = _cam.ScreenPointToRay(Input.mousePosition);
                 var plane = new Plane(transform.up, transform.position);
 
@@ -89,18 +87,29 @@ namespace UnityBase.PathFinding
                 
                 var point = ray.GetPoint(enter);
                 
-                if (!_grid.IsInRange2(point)) return;
+                if (!_grid.IsInRange3(point)) return;
                 
-                var gridPos = _grid.WorldToGrid3(point);
+                var grid2D = _grid.WorldToGrid2(point); 
+                
+                var gridPos = new Vector3Int(grid2D.x, grid2D.y, _activeDepth);
                     
                 var endNode = _grid.GetFirst(gridPos);
-                if (!endNode.isWalkable || endNode.gridPos == _startNode.gridPos) return;
+                if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
 
-                var path = _pathFinding.FindPathJobs(_startNode.gridPos, endNode.gridPos);
-
+                var endNodePos = new Vector3Int(endNode.GridPos.x, endNode.GridPos.y, _activeDepth);
+                var path = _grid.FindPathWithJobs(_startNode.GridPos, endNodePos);
+                
                 if (path.Length > 0)
                 {
-                    _startNode = endNode;
+                    _startNode = new PathNode()
+                    {
+                        GridPos = endNodePos,
+                        IsWalkable = endNode.IsWalkable,
+                        GCost = int.MaxValue,
+                        HCost = 0,
+                        FCost = 0,
+                        CameFromNodeIndex = -1
+                    };
 
                     for (int i = 0; i < path.Length - 1; i++)
                     {
@@ -121,14 +130,15 @@ namespace UnityBase.PathFinding
                 if (!plane.Raycast(ray, out var enter)) return;
 
                 var point = ray.GetPoint(enter);
-
-                if (!_grid.IsInRange2(point)) return;
+          
+                if (!_grid.IsInRange3(point)) return;
                 
-                var gridPos = _grid.WorldToGrid3(point);
+                var grid2D = _grid.WorldToGrid2(point); 
+                var gridPos = new Vector3Int(grid2D.x, grid2D.y, _activeDepth);
                 
                 var pathNode = _grid.GetFirst(gridPos);
 
-                pathNode.isWalkable = !pathNode.isWalkable;
+                pathNode.IsWalkable = !pathNode.IsWalkable;
                 _grid.SetFirst(gridPos, pathNode);
                 
                 UpdateVisual();
@@ -161,10 +171,10 @@ namespace UnityBase.PathFinding
                         var pos = new Vector3Int(x, y, z);
                         var grid = _grid.GetFirst(pos);
 
-                        var quadSize = grid.isWalkable ? Vector3.zero : new Vector3(1, 1, 0) * _grid.CellSize;
+                        var quadSize = grid.IsWalkable ? Vector3.zero : Vector3.one * _grid.CellSize;
                         var worldPos = _grid.GridToWorld(pos);
-
-                        int index = x + y * width + z * width * height;
+                        
+                       var index = _grid.CalculateIndex(pos);
 
                         MeshUtils.AddToMeshArrays2(vertices, uv, triangles, index, worldPos, quadSize, Vector2.zero, Vector2.zero, transform);
                     }
@@ -179,8 +189,28 @@ namespace UnityBase.PathFinding
         private void OnDrawGizmos()
         {
             if (!Application.isPlaying || _grid is not { DrawGizmos: true }) return;
-            
+
             _grid.DrawGrid();
+            
+           // HighlightCell();
+        }
+
+        private void HighlightCell()
+        {
+            var ray = _cam.ScreenPointToRay(Input.mousePosition);
+            var plane = new Plane(transform.up, transform.position);
+
+            if (!plane.Raycast(ray, out var enter)) return;
+
+            var point = ray.GetPoint(enter);
+
+            if (!_grid.IsInRange3(point)) return;
+
+            var grid2D = _grid.WorldToGrid2(point);
+
+            var gridPos = new Vector3Int(grid2D.x, grid2D.y, _activeDepth);
+            
+            _grid.DrawHighlightedCell(gridPos, Color.blue);
         }
     }
 }

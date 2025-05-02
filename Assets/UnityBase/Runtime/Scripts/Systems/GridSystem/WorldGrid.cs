@@ -2,12 +2,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
+using UnityBase.PathFinding;
 using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
-    [Serializable]
-    public class WorldGrid<T> : IWorldGrid<T> where T : struct 
+    public partial class WorldGrid<T> : IWorldGrid<T> where T : struct, IPathNodeData
     {
         private int _gridWidth;
         private int _gridHeight;
@@ -50,11 +53,6 @@ namespace UnityBase.GridSystem
         public bool DrawGizmos => _drawGizmos;
 
         public Transform Transform => _transform;
-
-        public WorldGrid(Transform coreTransform)
-        {
-            _transform = coreTransform;
-        }
         
         public WorldGrid(Transform coreTransform, int width, int height, int depth, float cellSize, float cellDepth, Vector3 offset, bool drawGizmos, Color gizmosColor)
         {
@@ -79,85 +77,6 @@ namespace UnityBase.GridSystem
             _gridOffset = offset;
             _drawGizmos = drawGizmos;
             _gizmosColor = gizmosColor;
-        }
-        
-        public Vector3 GridToWorld(Vector2Int gridPos, int depth = 0)
-        {
-            var x = (gridPos.x - (_gridWidth / 2f)) * _gridCellSize + _gridOffset.x;
-
-            var y = (depth - _gridDepth / 2f) * _gridCellDepth + _gridOffset.y;
-
-            var z = (gridPos.y - (_gridHeight / 2f)) * _gridCellSize + _gridOffset.z;
-
-            return _transform.TransformPoint(new Vector3(x, y, z));
-        }
-
-        public Vector3 GridToWorld(Vector3Int gridPos)
-        {
-            var x = (gridPos.x - (_gridWidth / 2f)) * _gridCellSize + _gridOffset.x;
-
-            var y = (gridPos.z - _gridDepth / 2f) * _gridCellDepth + _gridOffset.y;
-
-            var z = (gridPos.y - (_gridHeight / 2f)) * _gridCellSize + _gridOffset.z;
-
-            return _transform.TransformPoint(new Vector3(x, y, z));
-        }
-
-        public Vector2Int WorldToGrid2(Vector3 position, bool clamp = true)
-        {
-            var pos = WorldToGrid3(position, clamp);
-            return new Vector2Int(pos.x, pos.y);
-        }
-
-        public Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
-        {
-            position = _transform.InverseTransformPoint(position);
-            
-            var cellOffsetX = _gridWidth % 2 == 0 ? _gridCellSize * .5f : 0;
-            var cellOffsetY = _gridHeight % 2 == 0 ? _gridCellSize * .5f : 0;
-            var cellOffsetD = _gridCellDepth % 2 == 0 ? _gridCellDepth * .5f : 0;
-
-            var x = _gridWidth - Mathf.CeilToInt(_gridWidth / 2f - ((position.x - (_gridOffset.x) + cellOffsetX) / _gridCellSize));
-            var y = _gridHeight - Mathf.CeilToInt(_gridHeight / 2f - ((position.z - (_gridOffset.z) + cellOffsetY) / _gridCellSize));
-            var d = _gridDepth - Mathf.CeilToInt(_gridDepth / 2f - ((position.y - (_gridOffset.y) + cellOffsetD) / _gridCellDepth));
-
-            if (clamp)
-            {
-                x = Mathf.Clamp(x, 0, _gridWidth - 1);
-                y = Mathf.Clamp(y, 0, _gridHeight - 1);
-                d = Mathf.Clamp(d, 0, _gridDepth - 1);
-            }
-
-            return new Vector3Int(x, y, d);
-        }
-
-        public T GetFirst(Vector3Int gridPos)
-        {
-            if (_itemList.TryGetValue(gridPos, out var result) && result.Count > 0)
-            {
-                return result[0];
-            }
-
-            return default;
-        }
-        
-        public T GetFirst(Vector3 worldPos)
-        {
-            var worldToGrid3 = WorldToGrid3(worldPos);
-            
-            return GetFirst(worldToGrid3);
-        }
-
-        public void SetFirst(Vector3Int gridPos, T item)
-        {
-            if (_itemList.TryGetValue(gridPos, out var result) && result.Count > 0)
-            {
-                result[0] = item;
-            }
-            else
-            {
-                _itemList.Add(gridPos, new List<T>() { item });
-            }
         }
 
         public int TryGetNeighbors(Vector3Int gridPos, int size, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true)
@@ -304,34 +223,74 @@ namespace UnityBase.GridSystem
                 _neighborOffsets.Where(offset => (k.Item1 || offset.z == 0) && 
                                                  (k.Item2 || (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) + Mathf.Abs(offset.z)) <= 1)).ToArray());
         }
-        
-        public bool IsInRange2(Vector2Int pos)
+    }
+    
+    public partial class WorldGrid<T> where T : struct, IPathNodeData
+    {
+        public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
-            return pos is { x: >= 0, y: >= 0} && pos.x < _gridWidth && pos.y < _gridHeight;
-        }
-        public bool IsInRange3(Vector3Int pos)
-        {
-            return pos is { x: >= 0, y: >= 0, z: >= 0 } && pos.x < _gridWidth && pos.y < _gridHeight && pos.z < _gridDepth;
-        }
+            var totalSize = Width * Height * Depth;
+            var pathNodeArray = new T[totalSize];
 
-        public bool IsInRange2(Vector3 worldPos)
-        {
-            var gridPos = WorldToGrid2(worldPos, false);
-            return IsInRange2(gridPos);
-        }
-        
-        public bool IsInRange3(Vector3 worldPos)
-        {
-            var gridPos = WorldToGrid3(worldPos, false);
-            return IsInRange3(gridPos);
-        }
-        
-        private int CalculateIndex(Vector3Int pos)
-        {
-            return (pos.z * _gridWidth * _gridHeight) + (pos.y * _gridWidth) + pos.x;
-        }
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int z = 0; z < Depth; z++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        pathNodeArray[CalculateIndex(pos)] = GetFirst(pos);
+                    }
+                }
+            }
 
-        private Vector3Int ReverseCalculateIndex(int index)
+            var pathFinder = new FindPath<T>
+            {
+                GridSize = new int3(Width, Height, Depth),
+                PathNodeArray = pathNodeArray,
+                StartPos = startPos,
+                EndPos = endPos,
+                AllowDiagonalCornerCutting = allowDiagonalCornerCutting
+            };
+
+            return pathFinder.Execute();
+        }
+        public NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        {
+            var totalSize = Width * Height * Depth;
+            var pathNodeArray = new NativeArray<T>(totalSize, Allocator.TempJob);
+            var result = new NativeList<Vector3Int>(Allocator.TempJob);
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int z = 0; z < Depth; z++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        pathNodeArray[CalculateIndex(new Vector3Int(x,y,z))] = GetFirst(pos);
+                    }
+                }
+            }
+
+            var job = new FindPathJob<T>
+            {
+                pathNodeArray = pathNodeArray,
+                gridSize = new int3(Width, Height, Depth),
+                startPos = startPos,
+                endPos = endPos,
+                calculatedPathList = result,
+                allowDiagonalCornerCutting = allowDiagonalCornerCutting
+            };
+
+            job.Schedule().Complete();
+            pathNodeArray.Dispose();
+            return result;
+        }
+        
+        public int CalculateIndex(Vector3Int pos) => (pos.z * _gridWidth * _gridHeight) + (pos.y * _gridWidth) + pos.x;
+
+        public Vector3Int ReverseCalculateIndex(int index)
         {
             var x = index % _gridWidth;
             
@@ -340,6 +299,135 @@ namespace UnityBase.GridSystem
             var z = index / (_gridWidth * _gridHeight);
             
             return new Vector3Int(x, y, z);
+        }
+    }
+    
+    public partial class WorldGrid<T> where T : struct, IPathNodeData
+    {
+        public void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
+        {
+            var center = GridToWorld(gridPos);
+            var prevColor = Gizmos.color;
+    
+            Gizmos.color = highlightColor;
+            DrawCellGizmo(center, _gridCellSize * 0.55f);
+    
+            Gizmos.color = prevColor;
+        }
+        
+        public void DrawGrid()
+        {
+            if (!DrawGizmos || !Application.isPlaying) return;
+
+            Gizmos.color = _gizmosColor;
+            var halfSize = _gridCellSize * 0.5f;
+    
+            for (int d = 0; d < _gridDepth; d++)
+            {
+                for (int y = 0; y < _gridHeight; y++)
+                {
+                    for (int x = 0; x < _gridWidth; x++)
+                    {
+                        var center = GridToWorld(new Vector2Int(x, y), d);
+                        DrawCellGizmo(center, halfSize);
+                    }
+                }
+            }
+        }
+
+        private void DrawCellGizmo(Vector3 center, float halfSize)
+        {
+            var forward = _transform.forward * halfSize;
+            var right = _transform.right * halfSize;
+    
+            var p1 = center - right - forward;
+            var p2 = center - right + forward;
+            var p3 = center + right + forward;
+            var p4 = center + right - forward;
+
+            Gizmos.DrawLine(p1, p2);
+            Gizmos.DrawLine(p2, p3);
+            Gizmos.DrawLine(p3, p4);
+            Gizmos.DrawLine(p4, p1);
+        }
+    }
+    
+    public partial class WorldGrid<T> where T : struct, IPathNodeData
+    {
+        public Vector3 GridToWorld(Vector2Int gridPos, int depth = 0)
+        {
+            var x = (gridPos.x - (Width / 2f)) * CellSize + _gridOffset.x;
+            var y = (depth - Depth / 2f) * CellDepth + _gridOffset.y;
+            var z = (gridPos.y - (Height / 2f)) * CellSize + _gridOffset.z;
+            return Transform.TransformPoint(new Vector3(x, y, z));
+        }
+
+        public Vector3 GridToWorld(Vector3Int gridPos)
+        {
+            var x = (gridPos.x - (Width / 2f)) * CellSize + _gridOffset.x;
+            var y = (gridPos.z - Depth / 2f) * CellDepth + _gridOffset.y;
+            var z = (gridPos.y - (Height / 2f)) * CellSize + _gridOffset.z;
+            return Transform.TransformPoint(new Vector3(x, y, z));
+        }
+
+        public Vector2Int WorldToGrid2(Vector3 position, bool clamp = true) => new(WorldToGrid3(position, clamp).x, WorldToGrid3(position, clamp).y);
+
+        public Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
+        {
+            position = Transform.InverseTransformPoint(position);
+            var cellOffsetX = Width % 2 == 0 ? CellSize * .5f : 0;
+            var cellOffsetY = Height % 2 == 0 ? CellSize * .5f : 0;
+            var cellOffsetD = CellDepth % 2 == 0 ? CellDepth * .5f : 0;
+
+            var x = Width - Mathf.CeilToInt(Width / 2f - ((position.x - (_gridOffset.x) + cellOffsetX) / CellSize));
+            var y = Height - Mathf.CeilToInt(Height / 2f - ((position.z - (_gridOffset.z) + cellOffsetY) / CellSize));
+            var d = Depth - Mathf.CeilToInt(Depth / 2f - ((position.y - (_gridOffset.y) + cellOffsetD) / CellDepth));
+
+            if (clamp)
+            {
+                x = Mathf.Clamp(x, 0, Width - 1);
+                y = Mathf.Clamp(y, 0, Height - 1);
+                d = Mathf.Clamp(d, 0, Depth - 1);
+            }
+
+            return new Vector3Int(x, y, d);
+        }
+
+        public bool IsInRange2(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
+        public bool IsInRange3(Vector3Int pos) => pos is { x: >= 0, y: >= 0, z: >= 0 } && pos.x < Width && pos.y < Height && pos.z < Depth;
+        public bool IsInRange2(Vector3 worldPos) => IsInRange2(WorldToGrid2(worldPos, false));
+        public bool IsInRange3(Vector3 worldPos) => IsInRange3(WorldToGrid3(worldPos, false));
+    }
+    
+    public partial class WorldGrid<T> where T : struct, IPathNodeData
+    {
+        public T GetFirst(Vector3Int gridPos)
+        {
+            if (_itemList.TryGetValue(gridPos, out var result) && result.Count > 0)
+            {
+                return result[0];
+            }
+
+            return default;
+        }
+        
+        public T GetFirst(Vector3 worldPos)
+        {
+            var worldToGrid3 = WorldToGrid3(worldPos);
+            
+            return GetFirst(worldToGrid3);
+        }
+
+        public void SetFirst(Vector3Int gridPos, T item)
+        {
+            if (_itemList.TryGetValue(gridPos, out var result) && result.Count > 0)
+            {
+                result[0] = item;
+            }
+            else
+            {
+                _itemList.Add(gridPos, new List<T>() { item });
+            }
         }
         
         public bool TryGet(Vector3Int gridPos, out IReadOnlyList<T> result)
@@ -397,53 +485,6 @@ namespace UnityBase.GridSystem
         {
             return Remove(WorldToGrid3(worldPos), item);
         }
-        
-        public void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
-        {
-            var center = GridToWorld(gridPos);
-            var prevColor = Gizmos.color;
-    
-            Gizmos.color = highlightColor;
-            DrawCellGizmo(center, _gridCellSize * 0.55f);
-    
-            Gizmos.color = prevColor;
-        }
-        
-        public void DrawGrid()
-        {
-            if (!DrawGizmos || !Application.isPlaying) return;
-
-            Gizmos.color = _gizmosColor;
-            var halfSize = _gridCellSize * 0.5f;
-    
-            for (int d = 0; d < _gridDepth; d++)
-            {
-                for (int y = 0; y < _gridHeight; y++)
-                {
-                    for (int x = 0; x < _gridWidth; x++)
-                    {
-                        var center = GridToWorld(new Vector2Int(x, y), d);
-                        DrawCellGizmo(center, halfSize);
-                    }
-                }
-            }
-        }
-
-        private void DrawCellGizmo(Vector3 center, float halfSize)
-        {
-            var forward = _transform.forward * halfSize;
-            var right = _transform.right * halfSize;
-    
-            var p1 = center - right - forward;
-            var p2 = center - right + forward;
-            var p3 = center + right + forward;
-            var p4 = center + right - forward;
-
-            Gizmos.DrawLine(p1, p2);
-            Gizmos.DrawLine(p2, p3);
-            Gizmos.DrawLine(p3, p4);
-            Gizmos.DrawLine(p4, p1);
-        }
 
         public void ClearAll() => _itemList.Clear();
     }
@@ -489,8 +530,15 @@ namespace UnityBase.GridSystem
         bool IsInRange2(Vector3 worldPos);
         bool IsInRange3(Vector3 worldPos);
         
+        int CalculateIndex(Vector3Int pos);
+        Vector3Int ReverseCalculateIndex(int index);
+        
         void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor);
         void DrawGrid();
+
+        public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
+        public NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
         void ClearAll();
+
     }
 }
