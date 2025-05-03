@@ -10,6 +10,61 @@ using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
+     public interface IWorldGrid<T> where T : struct
+    {
+        float CellSize { get; }
+        float CellDepth { get; }
+        int Width { get; }
+        int Height { get; }
+        int Depth { get; }
+        bool DrawGizmos { get; }
+        Transform Transform { get; }
+
+        void Initialize(Func<Vector3Int, T> generator);
+        void Update(int width, int height, int depth, float cellSize, float cellDepth, Vector3 offset, bool drawGizmos, Color gizmosColor);
+
+        void Add(Vector3Int gridPos, T item);
+        bool Remove(Vector3Int gridPos, T item);
+        void Add(Vector3 worldPos, T item);
+        bool Remove(Vector3 worldPos, T item);
+
+        void SetFirst(Vector3Int gridPos, T item);
+        T GetFirst(Vector3Int gridPos);
+        T GetFirst(Vector3 worldPos);
+
+        bool TryGet(Vector3Int gridPos, out IReadOnlyList<T> result);
+        bool TryGet(Vector3 worldPos, out IReadOnlyList<T> result);
+        bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos);
+
+        int TryGetNeighbors(Vector3Int gridPos, int size, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
+        int TryGetImmediateNeighborsNonAlloc(Vector3Int gridPos, Span<T> resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
+
+        bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false);
+
+        Vector3 GridToWorld(Vector2Int gridPos, int depth = 0);
+        Vector3 GridToWorld(Vector3Int gridPos);
+        Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
+        Vector3Int WorldToGrid3(Vector3 position, bool clamp = true);
+
+        bool IsInRange2(Vector2Int pos);
+        bool IsInRange3(Vector3Int pos);
+        bool IsInRange2(Vector3 worldPos);
+        bool IsInRange3(Vector3 worldPos);
+        
+        int CalculateIndex(Vector3Int pos);
+        Vector3Int ReverseCalculateIndex(int index);
+        
+        void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor);
+        void DrawGrid();
+        public void DebugDrawPath(List<Vector3Int> path, float duration, Color color);
+        void DebugDrawPath(NativeList<Vector3Int> path, float duration, Color color);
+        void RebuildMeshVisual(Mesh mesh);
+
+        List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
+        NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
+        void ClearAll();
+    }
+    
     public partial class WorldGrid<T> : IWorldGrid<T> where T : struct, IPathNodeData
     {
         private int _gridWidth;
@@ -65,6 +120,19 @@ namespace UnityBase.GridSystem
             _gridOffset = offset;
             _drawGizmos = drawGizmos;
             _gizmosColor = gizmosColor;
+        }
+        
+        public void Initialize(Func<Vector3Int, T> generator)
+        {
+            _itemList.Clear();
+            for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+            for (int z = 0; z < Depth; z++)
+            {
+                var pos = new Vector3Int(x, y, z);
+                var data = generator.Invoke(pos);
+                SetFirst(pos, data);
+            }
         }
 
         public void Update(int width, int height, int depth, float cellSize, float cellDepth, Vector3 offset, bool drawGizmos, Color gizmosColor)
@@ -223,6 +291,29 @@ namespace UnityBase.GridSystem
                 _neighborOffsets.Where(offset => (k.Item1 || offset.z == 0) && 
                                                  (k.Item2 || (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) + Mathf.Abs(offset.z)) <= 1)).ToArray());
         }
+        
+        public bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos)
+        {
+            var plane = new Plane(Transform.up, Transform.position);
+            
+            if (plane.Raycast(ray, out var enter))
+            {
+                var point = ray.GetPoint(enter);
+                
+                if (IsInRange3(point))
+                {
+                    var grid2D = WorldToGrid2(point);
+                    
+                    gridPos = new Vector3Int(grid2D.x, grid2D.y, activeDepth);
+                    
+                    return true;
+                }
+            }
+            
+            gridPos = default;
+            
+            return false;
+        }
     }
     
     public partial class WorldGrid<T> where T : struct, IPathNodeData
@@ -350,6 +441,50 @@ namespace UnityBase.GridSystem
             Gizmos.DrawLine(p3, p4);
             Gizmos.DrawLine(p4, p1);
         }
+        
+        public void DebugDrawPath(List<Vector3Int> path, float duration, Color color)
+        {
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var start = GridToWorld(path[i]);
+                var end = GridToWorld(path[i + 1]);
+                Debug.DrawLine(start, end, color, duration);
+            }
+        }
+        
+        public void DebugDrawPath(NativeList<Vector3Int> path, float duration, Color color)
+        {
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                var start = GridToWorld(path[i]);
+                var end = GridToWorld(path[i + 1]);
+                Debug.DrawLine(start, end, color, duration);
+            }
+        }
+        
+        public void RebuildMeshVisual(Mesh mesh)
+        {
+            var cellCount = Width * Height * Depth;
+            
+            MeshUtils.CreateEmptyMeshArrays(cellCount, out var vertices, out var uv, out var triangles);
+
+            for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+            for (int z = 0; z < Depth; z++)
+            {
+                var pos = new Vector3Int(x, y, z);
+                var node = GetFirst(pos);
+                var size = node.IsWalkable ? Vector3.zero : Vector3.one * CellSize;
+                var worldPos = GridToWorld(pos);
+                int index = CalculateIndex(pos);
+                MeshUtils.AddToMeshArrays2(vertices, uv, triangles, index, worldPos, size, Vector2.zero, Vector2.zero, Transform);
+            }
+
+            mesh.vertices = vertices;
+            mesh.uv = uv;
+            mesh.triangles = triangles;
+        }
+        
     }
     
     public partial class WorldGrid<T> where T : struct, IPathNodeData
@@ -489,56 +624,30 @@ namespace UnityBase.GridSystem
         public void ClearAll() => _itemList.Clear();
     }
     
-    public interface IWorldGrid<T> where T : struct
+    public class WorldGridBuilder<T> where T : struct, IPathNodeData
     {
-        float CellSize { get; }
-        float CellDepth { get; }
+        private Transform _transform;
+        private int? _width, _height, _depth;
+        private float? _cellSize, _cellDepth;
+        private Vector3 _offset;
+        private bool _drawGizmos;
+        private Color _gizmosColor = Color.white;
 
-        int Width { get; }
-        int Height { get; }
-        int Depth { get; }
-        bool DrawGizmos { get; }
+        public WorldGridBuilder<T> WithTransform(Transform transform) { _transform = transform; return this; }
+        public WorldGridBuilder<T> WithSize(int width, int height, int depth) { _width = width; _height = height; _depth = depth; return this; }
+        public WorldGridBuilder<T> WithCellSize(float size, float depth) { _cellSize = size; _cellDepth = depth; return this; }
+        public WorldGridBuilder<T> WithOffset(Vector3 offset) { _offset = offset; return this; }
+        public WorldGridBuilder<T> WithGizmos(bool draw, Color color) { _drawGizmos = draw; _gizmosColor = color; return this; }
 
-        Transform Transform { get; }
+        public WorldGrid<T> Build()
+        {
+            if (!_transform || !_width.HasValue || !_height.HasValue || !_depth.HasValue || !_cellSize.HasValue || !_cellDepth.HasValue)
+            {
+                Debug.LogError("WorldGridBuilder: Missing required parameters.");
+                return default;
+            }
 
-        public void Update(int width, int height, int depth, float cellSize, float cellDepth, Vector3 offset, bool drawGizmos, Color gizmosColor);
-
-        void Add(Vector3Int gridPos, T item);
-        bool Remove(Vector3Int gridPos, T item);
-        void Add(Vector3 worldPos, T item);
-        bool Remove(Vector3 worldPos, T item);
-
-        void SetFirst(Vector3Int gridPos, T item);
-        T GetFirst(Vector3Int gridPos);
-        T GetFirst(Vector3 worldPos);
-
-        bool TryGet(Vector3Int gridPos, out IReadOnlyList<T> result);
-        bool TryGet(Vector3 worldPos, out IReadOnlyList<T> result);
-
-        int TryGetNeighbors(Vector3Int gridPos, int size, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
-        int TryGetImmediateNeighborsNonAlloc(Vector3Int gridPos, Span<T> resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
-
-        bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false);
-
-        Vector3 GridToWorld(Vector2Int gridPos, int depth = 0);
-        Vector3 GridToWorld(Vector3Int gridPos);
-        Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
-        Vector3Int WorldToGrid3(Vector3 position, bool clamp = true);
-
-        bool IsInRange2(Vector2Int pos);
-        bool IsInRange3(Vector3Int pos);
-        bool IsInRange2(Vector3 worldPos);
-        bool IsInRange3(Vector3 worldPos);
-        
-        int CalculateIndex(Vector3Int pos);
-        Vector3Int ReverseCalculateIndex(int index);
-        
-        void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor);
-        void DrawGrid();
-
-        public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
-        public NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false);
-        void ClearAll();
-
+            return new WorldGrid<T>(_transform, _width.Value, _height.Value, _depth.Value, _cellSize.Value, _cellDepth.Value, _offset, _drawGizmos, _gizmosColor);
+        }
     }
 }
