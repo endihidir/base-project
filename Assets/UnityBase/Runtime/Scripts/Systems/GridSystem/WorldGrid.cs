@@ -556,6 +556,7 @@ namespace UnityBase.GridSystem
                 }
             }
 
+            mesh.Clear();
             mesh.vertices = vertices;
             mesh.uv = uv;
             mesh.triangles = triangles;
