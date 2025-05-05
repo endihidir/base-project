@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
@@ -9,8 +9,7 @@ namespace UnityBase.GridSystem
     public sealed class TileGrid<T>
     {
         #region VARIABLES
-
-        private IGridEntity _gridEntity;
+        
 
         [ShowNonSerializedField] private T[,] _gridArray;
         
@@ -142,4 +141,4 @@ namespace UnityBase.GridSystem
             return vIndex;
         }
     }
-}
+}*/

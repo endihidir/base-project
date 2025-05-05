@@ -280,11 +280,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f210dc5414a711438e15d72c29e75f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridWidth: 20
-  _gridHeight: 10
+  _gridWidth: 10
+  _gridHeight: 5
   _gridDepth: 1
-  _gridCellSize: 5
-  _gridCellDepth: 1
+  _cellSize: {x: 7, y: 7, z: 7}
+  _cellOffset: {x: 0, y: 0, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

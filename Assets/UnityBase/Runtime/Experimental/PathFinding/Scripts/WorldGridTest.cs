@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityBase.GridSystem;
 
@@ -10,8 +11,8 @@ namespace UnityBase.PathFinding
         [SerializeField] private int _gridWidth;
         [SerializeField] private int _gridHeight;
         [SerializeField] private int _gridDepth;
-        [SerializeField] private float _gridCellSize;
-        [SerializeField] private float _gridCellDepth;
+        [SerializeField] private Vector3 _cellSize;
+        [SerializeField] private Vector3 _cellOffset;
         [SerializeField] private Vector3 _gridOffset;
         [SerializeField] private bool _drawGizmos;
         [SerializeField] private Color _gizmosColor = Color.yellow;
@@ -45,11 +46,11 @@ namespace UnityBase.PathFinding
             
             _grid = new WorldGridBuilder<PathNode>().WithTransform(transform)
                 .WithSize(_gridWidth, _gridHeight, _gridDepth)
-                .WithCellSize(_gridCellSize, _gridCellDepth)
+                .WithCellSize(_cellSize)
                 .WithOffset(_gridOffset)
                 .WithGizmos(_drawGizmos, _gizmosColor)
                 .Build();
-            
+
             _grid.Initialize(pos => new PathNode
             {
                 GridPos = pos,
@@ -59,7 +60,7 @@ namespace UnityBase.PathFinding
                 FCost = 0,
                 CameFromNodeIndex = -1
             });
-
+            
             _startNode = _grid.GetFirst(new Vector3Int(0, 0, _activeDepth));
         }
         
@@ -67,7 +68,7 @@ namespace UnityBase.PathFinding
         {
             if (_grid == null) return;
             
-            _grid.Update(_gridWidth, _gridHeight, _gridDepth, _gridCellSize, _gridCellDepth, _gridOffset, _drawGizmos, _gizmosColor);
+            _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
             
             if (Input.GetMouseButtonDown(0))
             {

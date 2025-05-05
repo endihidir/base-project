@@ -42,6 +42,13 @@ public static class MeshUtils
 		uvs = new Vector2[4 * quadCount];
 		triangles = new int[6 * quadCount];
     }
+    
+    public static void CreateEmptyMeshArrays3D(int cubeCount, out Vector3[] vertices, out Vector2[] uvs, out int[] triangles)
+    {
+	    vertices = new Vector3[8 * cubeCount];
+	    uvs = new Vector2[8 * cubeCount];
+	    triangles = new int[36 * cubeCount];
+    }
         
     public static Mesh CreateMesh(Vector3 pos, float rot, Vector3 baseSize, Vector2 uv00, Vector2 uv11) 
     {
@@ -188,5 +195,45 @@ public static class MeshUtils
 	    triangles[tIndex + 3] = vIndex + 0;
 	    triangles[tIndex + 4] = vIndex + 2;
 	    triangles[tIndex + 5] = vIndex + 3;
+    }
+    
+    public static void AddToMeshArrays3D(Vector3[] vertices, Vector2[] uvs, int[] triangles, int index, Vector3 pos, Vector3 size, Vector2 uv00, Vector2 uv11, Transform transform)
+    {
+	    int vIndex = index * 8;
+	    int tIndex = index * 36;
+
+	    Vector3[] corners = new Vector3[8];
+
+	    Vector3 halfSize = size * 0.5f;
+
+	    corners[0] = pos + transform.TransformDirection(new Vector3(-halfSize.x, -halfSize.z, -halfSize.y));
+	    corners[1] = pos + transform.TransformDirection(new Vector3(-halfSize.x, -halfSize.z,  halfSize.y));
+	    corners[2] = pos + transform.TransformDirection(new Vector3(-halfSize.x,  halfSize.z, -halfSize.y));
+	    corners[3] = pos + transform.TransformDirection(new Vector3(-halfSize.x,  halfSize.z,  halfSize.y));
+	    corners[4] = pos + transform.TransformDirection(new Vector3( halfSize.x, -halfSize.z, -halfSize.y));
+	    corners[5] = pos + transform.TransformDirection(new Vector3( halfSize.x, -halfSize.z,  halfSize.y));
+	    corners[6] = pos + transform.TransformDirection(new Vector3( halfSize.x,  halfSize.z, -halfSize.y));
+	    corners[7] = pos + transform.TransformDirection(new Vector3( halfSize.x,  halfSize.z,  halfSize.y));
+	    
+	    // Assign vertices
+	    for (int i = 0; i < 8; i++)
+		    vertices[vIndex + i] = corners[i];
+
+	    // Dummy UVs (adjust as needed)
+	    for (int i = 0; i < 8; i++)
+		    uvs[vIndex + i] = uv00;
+
+	    // Triangles
+	    int[] cubeTris = {
+		    0, 2, 1, 2, 3, 1, // -X
+		    4, 5, 6, 6, 5, 7, // +X
+		    0, 1, 5, 0, 5, 4, // -Y
+		    2, 6, 3, 3, 6, 7, // +Y
+		    0, 4, 2, 2, 4, 6, // -Z
+		    1, 3, 5, 5, 3, 7  // +Z
+	    };
+
+	    for (int i = 0; i < 36; i++)
+		    triangles[tIndex + i] = vIndex + cubeTris[i];
     }
 }

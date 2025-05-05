@@ -28,7 +28,7 @@ public struct PathNode : IPathNodeData
 
 public interface IPathNodeData
 {
-    bool IsWalkable { get; }
+    bool IsWalkable { get; set; }
     Vector3Int GridPos { get; set; }
 
     int GCost { get; set; }
