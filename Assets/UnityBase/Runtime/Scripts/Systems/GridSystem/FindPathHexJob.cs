@@ -30,8 +30,7 @@ namespace UnityBase.GridSystem
             pathNodeArray[startIndex] = startNode;
 
             openList.Add(startIndex);
-            
-            
+
             while (openList.Length > 0)
             {
                 int currentIndex = GetLowestCostFNodeIndex(openList);
@@ -43,39 +42,69 @@ namespace UnityBase.GridSystem
                 closedList.Add(currentIndex);
 
                 var neighborOffsets = GetHexNeighborOffsets(currentNode.GridPos.y, isPointyTopped);
+
                 foreach (var offset in neighborOffsets)
                 {
-                    Vector3Int neighborPos = currentNode.GridPos + offset;
-                    if (!IsPositionInsideGrid(neighborPos)) continue;
-
-                    int neighborIndex = CalculateIndex(neighborPos.x, neighborPos.y, neighborPos.z);
-                    if (closedList.Contains(neighborIndex)) continue;
-
-                    TNode neighborNode = pathNodeArray[neighborIndex];
-                    if (!neighborNode.IsWalkable) continue;
-
-                    int tentativeGCost = currentNode.GCost + 10;
-
-                    if (tentativeGCost < neighborNode.GCost)
+                    for (int dz = -1; dz <= 1; dz++)
                     {
-                        neighborNode.CameFromNodeIndex = currentIndex;
-                        neighborNode.GCost = tentativeGCost;
-                        neighborNode.HCost = CalculateHexHeuristic(neighborPos, endPos);
-                        neighborNode.CalculateFCost();
-                        pathNodeArray[neighborIndex] = neighborNode;
+                        var neighborPos = currentNode.GridPos + new Vector3Int(offset.x, offset.y, dz);
+                        if (!IsPositionInsideGrid(neighborPos)) continue;
 
-                        if (!openList.Contains(neighborIndex))
-                            openList.Add(neighborIndex);
+                        int neighborIndex = CalculateIndex(neighborPos.x, neighborPos.y, neighborPos.z);
+                        if (closedList.Contains(neighborIndex)) continue;
+
+                        TNode neighborNode = pathNodeArray[neighborIndex];
+                        if (!neighborNode.IsWalkable) continue;
+
+                        int moveCost = 10 + math.abs(dz) * 10;
+                        int tentativeGCost = currentNode.GCost + moveCost;
+
+                        if (tentativeGCost < neighborNode.GCost)
+                        {
+                            neighborNode.CameFromNodeIndex = currentIndex;
+                            neighborNode.GCost = tentativeGCost;
+                            neighborNode.HCost = CalculateHexHeuristic(neighborPos, endPos);
+                            neighborNode.CalculateFCost();
+                            pathNodeArray[neighborIndex] = neighborNode;
+
+                            if (!openList.Contains(neighborIndex))
+                                openList.Add(neighborIndex);
+                        }
                     }
                 }
-                
-                neighborOffsets.Dispose();
             }
 
             ConstructPath(endIndex);
 
             openList.Dispose();
             closedList.Dispose();
+        }
+
+        private NativeArray<Vector3Int> GetHexNeighborOffsets(int y, bool pointyTopped)
+        {
+            bool isEven = y % 2 == 0;
+            var offsets = new NativeArray<Vector3Int>(6, Allocator.Temp);
+
+            if (pointyTopped)
+            {
+                offsets[0] = new Vector3Int(+1, 0, 0);
+                offsets[1] = new Vector3Int(-1, 0, 0);
+                offsets[2] = new Vector3Int(isEven ? 0 : +1, +1, 0);
+                offsets[3] = new Vector3Int(isEven ? -1 : 0, +1, 0);
+                offsets[4] = new Vector3Int(isEven ? 0 : +1, -1, 0);
+                offsets[5] = new Vector3Int(isEven ? -1 : 0, -1, 0);
+            }
+            else
+            {
+                offsets[0] = new Vector3Int(0, +1, 0);
+                offsets[1] = new Vector3Int(0, -1, 0);
+                offsets[2] = new Vector3Int(+1, isEven ? 0 : +1, 0);
+                offsets[3] = new Vector3Int(+1, isEven ? -1 : 0, 0);
+                offsets[4] = new Vector3Int(-1, isEven ? 0 : +1, 0);
+                offsets[5] = new Vector3Int(-1, isEven ? -1 : 0, 0);
+            }
+
+            return offsets;
         }
 
         private void ConstructPath(int endIndex)
@@ -91,45 +120,14 @@ namespace UnityBase.GridSystem
             }
         }
 
-        private NativeArray<Vector3Int> GetHexNeighborOffsets(int y, bool pointyTopped)
+        private int CalculateHexHeuristic(Vector3Int a, Vector3Int b)
         {
-            var list = new NativeList<Vector3Int>(6, Allocator.Temp);
-            bool isEven = y % 2 == 0;
+            int dx = a.x - b.x;
+            int dy = a.y - b.y;
+            int dz = -a.x - a.y - (-b.x - b.y);
+            int horizontal = (math.abs(dx) + math.abs(dy) + math.abs(dz)) / 2;
 
-            if (pointyTopped)
-            {
-                list.Add(new Vector3Int(+1, 0, 0));
-                list.Add(new Vector3Int(-1, 0, 0));
-                list.Add(new Vector3Int(isEven ? 0 : +1, +1, 0));
-                list.Add(new Vector3Int(isEven ? -1 : 0, +1, 0));
-                list.Add(new Vector3Int(isEven ? 0 : +1, -1, 0));
-                list.Add(new Vector3Int(isEven ? -1 : 0, -1, 0));
-            }
-            else
-            {
-                list.Add(new Vector3Int(0, +1, 0));
-                list.Add(new Vector3Int(0, -1, 0));
-                list.Add(new Vector3Int(+1, isEven ? 0 : +1, 0));
-                list.Add(new Vector3Int(+1, isEven ? -1 : 0, 0));
-                list.Add(new Vector3Int(-1, isEven ? 0 : +1, 0));
-                list.Add(new Vector3Int(-1, isEven ? -1 : 0, 0));
-            }
-
-            var array = new NativeArray<Vector3Int>(list.Length, Allocator.Temp);
-            NativeArray<Vector3Int>.Copy(list.AsArray(), array);
-            list.Dispose();
-            return array;
-        }
-
-        private int CalculateIndex(int x, int y, int z)
-        {
-            return x + y * gridSize.x + z * gridSize.x * gridSize.y;
-        }
-
-        private bool IsPositionInsideGrid(Vector3Int pos)
-        {
-            return pos.x >= 0 && pos.y >= 0 && pos.z >= 0 &&
-                   pos.x < gridSize.x && pos.y < gridSize.y && pos.z < gridSize.z;
+            return 10 * horizontal + 10 * math.abs(a.z - b.z); 
         }
 
         private int GetLowestCostFNodeIndex(NativeList<int> openList)
@@ -151,12 +149,15 @@ namespace UnityBase.GridSystem
             return bestIndex;
         }
 
-        private int CalculateHexHeuristic(Vector3Int a, Vector3Int b)
+        private int CalculateIndex(int x, int y, int z)
         {
-            int dx = a.x - b.x;
-            int dy = a.y - b.y;
-            int dz = -a.x - a.y - (-b.x - b.y);
-            return 10 * (math.abs(dx) + math.abs(dy) + math.abs(dz)) / 2;
+            return x + y * gridSize.x + z * gridSize.x * gridSize.y;
+        }
+
+        private bool IsPositionInsideGrid(Vector3Int pos)
+        {
+            return pos.x >= 0 && pos.y >= 0 && pos.z >= 0 &&
+                   pos.x < gridSize.x && pos.y < gridSize.y && pos.z < gridSize.z;
         }
     }
 }

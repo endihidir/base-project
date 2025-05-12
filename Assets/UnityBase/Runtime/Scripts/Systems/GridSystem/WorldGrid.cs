@@ -321,8 +321,7 @@ namespace UnityBase.GridSystem
             return false;
         }
 
-        protected virtual IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth,
-            bool includeDiagonal)
+        protected virtual IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
         {
             var key = (includeDepth, includeDiagonal);
             
@@ -534,7 +533,7 @@ namespace UnityBase.GridSystem
             }
         }
 
-        public void RebuildMeshVisual(Mesh mesh)
+        public virtual void RebuildMeshVisual(Mesh mesh)
         {
             var cellCount = Width * Height * Depth;
 

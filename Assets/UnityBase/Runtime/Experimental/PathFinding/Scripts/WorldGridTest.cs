@@ -131,8 +131,3 @@ namespace UnityBase.GridSystem
         }
     }
 }
-
-
-namespace UnityBase.GridSystem
-{
-}

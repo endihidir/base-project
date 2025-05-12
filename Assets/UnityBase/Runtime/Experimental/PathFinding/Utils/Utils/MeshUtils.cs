@@ -49,6 +49,13 @@ public static class MeshUtils
 	    uvs = new Vector2[8 * cubeCount];
 	    triangles = new int[36 * cubeCount];
     }
+    
+    public static void CreateEmptyMeshArraysHex3D(int hexCount, out Vector3[] vertices, out Vector2[] uvs, out int[] triangles)
+    {
+	    vertices = new Vector3[14 * hexCount];
+	    uvs = new Vector2[14 * hexCount];
+	    triangles = new int[72 * hexCount];
+    }
         
     public static Mesh CreateMesh(Vector3 pos, float rot, Vector3 baseSize, Vector2 uv00, Vector2 uv11) 
     {
@@ -236,4 +243,65 @@ public static class MeshUtils
 	    for (int i = 0; i < 36; i++)
 		    triangles[tIndex + i] = vIndex + cubeTris[i];
     }
+    
+    public static void AddToMeshArraysHex3D(Vector3[] vertices, Vector2[] uvs, int[] triangles, int index, Vector3 center, float radius, float height, Transform transform, bool isPointyTopped)
+    {
+	    int vIndex = index * 14;
+	    int tIndex = index * 72;
+
+	    Vector3 up = transform.up * (height / 2f);
+	    Vector3 down = -up;
+
+	    for (int i = 0; i < 6; i++)
+	    {
+		    float angleDeg = isPointyTopped ? 60 * i : 60 * i - 30;
+		    float angleRad = Mathf.Deg2Rad * angleDeg;
+
+		    float x = Mathf.Cos(angleRad) * radius;
+		    float z = Mathf.Sin(angleRad) * radius;
+
+		    Vector3 offset = transform.right * x + transform.forward * z;
+
+		    vertices[vIndex + i] = center + offset + up;
+		    vertices[vIndex + i + 6] = center + offset + down;
+
+		    uvs[vIndex + i] = Vector2.zero;
+		    uvs[vIndex + i + 6] = Vector2.zero;
+	    }
+
+	    vertices[vIndex + 12] = center + up;
+	    vertices[vIndex + 13] = center + down;
+	    uvs[vIndex + 12] = Vector2.zero;
+	    uvs[vIndex + 13] = Vector2.zero;
+
+	    for (int i = 0; i < 6; i++)
+	    {
+		    int next = (i + 1) % 6;
+		    triangles[tIndex + i * 3 + 0] = vIndex + i;
+		    triangles[tIndex + i * 3 + 1] = vIndex + next;
+		    triangles[tIndex + i * 3 + 2] = vIndex + 12;
+	    }
+
+	    for (int i = 0; i < 6; i++)
+	    {
+		    int next = (i + 1) % 6;
+		    triangles[tIndex + 18 + i * 3 + 0] = vIndex + next + 6;
+		    triangles[tIndex + 18 + i * 3 + 1] = vIndex + i + 6;
+		    triangles[tIndex + 18 + i * 3 + 2] = vIndex + 13;
+	    }
+
+	    for (int i = 0; i < 6; i++)
+	    {
+		    int next = (i + 1) % 6;
+
+		    triangles[tIndex + 36 + i * 6 + 0] = vIndex + i;
+		    triangles[tIndex + 36 + i * 6 + 1] = vIndex + i + 6;
+		    triangles[tIndex + 36 + i * 6 + 2] = vIndex + next;
+
+		    triangles[tIndex + 36 + i * 6 + 3] = vIndex + next;
+		    triangles[tIndex + 36 + i * 6 + 4] = vIndex + i + 6;
+		    triangles[tIndex + 36 + i * 6 + 5] = vIndex + next + 6;
+	    }
+    }
+
 }

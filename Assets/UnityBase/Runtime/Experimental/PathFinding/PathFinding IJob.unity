@@ -471,8 +471,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1af318a589f74f9aa45c8918b4ceb862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridWidth: 5
-  _gridHeight: 5
+  _gridWidth: 7
+  _gridHeight: 7
   _gridDepth: 1
   _cellSize: {x: 7, y: 7, z: 7}
   _cellOffset: {x: 0, y: 0, z: 0}

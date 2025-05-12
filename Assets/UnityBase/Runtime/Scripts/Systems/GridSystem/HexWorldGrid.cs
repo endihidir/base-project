@@ -43,7 +43,7 @@ namespace UnityBase.GridSystem
 
         private Vector3 CalculateLocalPosition(Vector3Int gridPos)
         {
-            if (_isPointyTopped)
+            if (!_isPointyTopped)
             {
                 var xSpacing = (CellSize.x + CellOffset.x) * Mathf.Sqrt(3f) / 2f;
                 var ySpacing = (CellSize.y + CellOffset.y);
@@ -76,7 +76,7 @@ namespace UnityBase.GridSystem
 
             int x, y, z;
 
-            if (_isPointyTopped)
+            if (!_isPointyTopped)
             {
                 xSpacing *= Mathf.Sqrt(3f) / 2f;
                 var q = localPos.x / xSpacing;
@@ -99,7 +99,7 @@ namespace UnityBase.GridSystem
                 y = Mathf.RoundToInt(rounded.y);
             }
 
-            z = Mathf.RoundToInt(localPos.y / zStep);
+            z = Mathf.FloorToInt(localPos.y / zStep);
 
             if (clamp)
             {
@@ -136,10 +136,9 @@ namespace UnityBase.GridSystem
 
         protected override IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
         {
-            
             if (!includeDepth)
             {
-                return _isPointyTopped
+                return !_isPointyTopped
                     ? (gridPos.x & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd
                     : (gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd;
             }
@@ -175,7 +174,7 @@ namespace UnityBase.GridSystem
 
             for (int i = 0; i < 6; i++)
             {
-                var angle = !_isPointyTopped ? Mathf.Deg2Rad * (60 * i - 30) : Mathf.Deg2Rad * (60 * i);
+                var angle = _isPointyTopped ? Mathf.Deg2Rad * (60 * i - 30) : Mathf.Deg2Rad * (60 * i);
                 var cos = Mathf.Cos(angle);
                 var sin = Mathf.Sin(angle);
 
@@ -193,7 +192,38 @@ namespace UnityBase.GridSystem
             }
         }
 
-        public override NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        public override void RebuildMeshVisual(Mesh mesh)
+        {
+            var cellCount = Width * Height * Depth;
+
+            MeshUtils.CreateEmptyMeshArraysHex3D(cellCount, out var vertices, out var uv, out var triangles);
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int z = 0; z < Depth; z++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var node = GetFirst(pos);
+                        if (node.Equals(default(T))) continue;
+                        var size = node.IsWalkable ? Vector3.zero : CellSize;
+                        var worldPos = GridToWorld3(pos);
+                        int index = CalculateIndex(pos);
+                        MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, (size.x + CellOffset.x) / Mathf.Sqrt(3f),size.y, Transform, !_isPointyTopped);
+                    }
+                }
+            }
+
+            mesh.Clear();
+            mesh.vertices = vertices;
+            mesh.uv = uv;
+            mesh.triangles = triangles;
+        }
+
+        // Classic path finding works better!!!
+        
+        /*public override NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
             var totalSize = Width * Height * Depth;
             var pathNodeArray = new NativeArray<T>(totalSize, Allocator.TempJob);
@@ -217,12 +247,13 @@ namespace UnityBase.GridSystem
                 gridSize = new int3(Width, Height, Depth),
                 startPos = startPos,
                 endPos = endPos,
-                calculatedPathList = result
+                calculatedPathList = result,
+                isPointyTopped = _isPointyTopped
             };
 
             job.Schedule().Complete();
             pathNodeArray.Dispose();
             return result;
-        }
+        }*/
     }
 }
