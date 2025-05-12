@@ -24,7 +24,7 @@ namespace UnityBase.PathFinding
 
             var startNode = PathNodeArray[startIndex];
             startNode.GCost = 0;
-            startNode.HCost = startNode.CalculateHeuristic(StartPos, EndPos);
+            startNode.HCost = CalculateHeuristic(StartPos, EndPos);
             startNode.CalculateFCost();
             PathNodeArray[startIndex] = startNode;
 
@@ -66,7 +66,7 @@ namespace UnityBase.PathFinding
                     {
                         neighbourNode.CameFromNodeIndex = currentIndex;
                         neighbourNode.GCost = tentativeGCost;
-                        neighbourNode.HCost = neighbourNode.CalculateHeuristic(neighbourPos, EndPos);
+                        neighbourNode.HCost = CalculateHeuristic(neighbourPos, EndPos);
                         neighbourNode.CalculateFCost();
                         PathNodeArray[neighbourIndex] = neighbourNode;
 
@@ -153,5 +153,24 @@ namespace UnityBase.PathFinding
         private bool IsPositionInsideGrid(Vector3Int pos)
             => pos.x >= 0 && pos.y >= 0 && pos.z >= 0 &&
                pos.x < GridSize.x && pos.y < GridSize.y && pos.z < GridSize.z;
+        
+        private int CalculateHeuristic(Vector3Int from, Vector3Int to)
+        {
+            var dx = math.abs(from.x - to.x);
+            var dy = math.abs(from.y - to.y);
+            var dz = math.abs(from.z - to.z);
+            var min = math.min(dx, math.min(dy, dz));
+            var max = math.max(dx, math.max(dy, dz));
+            var mid = dx + dy + dz - min - max;
+            return 14 * min + 10 * (mid + max - min);
+        }
+        
+        private int CalculateHeuristicHex(Vector3Int from, Vector3Int to)
+        {
+            var dx = from.x - to.x;
+            var dy = from.y - to.y;
+            var dz = -dx - dy;
+            return (math.abs(dx) + math.abs(dy) + math.abs(dz)) / 2 * 10;
+        }
     }
 }

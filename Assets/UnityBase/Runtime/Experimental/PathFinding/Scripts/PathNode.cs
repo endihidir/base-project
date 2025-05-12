@@ -1,6 +1,5 @@
 using System;
 using Unity.Mathematics;
-using UnityBase.GridSystem;
 using UnityEngine;
 
 [Serializable]
@@ -14,16 +13,6 @@ public struct PathNode : IPathNodeData
     public int CameFromNodeIndex { get; set; }
 
     public void CalculateFCost() => FCost = GCost + HCost;
-    public int CalculateHeuristic(Vector3Int from, Vector3Int to)
-    {
-        int dx = math.abs(from.x - to.x);
-        int dy = math.abs(from.y - to.y);
-        int dz = math.abs(from.z - to.z);
-        int min = math.min(dx, math.min(dy, dz));
-        int max = math.max(dx, math.max(dy, dz));
-        int mid = dx + dy + dz - min - max;
-        return 14 * min + 10 * (mid + max - min);
-    }
 }
 
 public interface IPathNodeData
@@ -38,6 +27,4 @@ public interface IPathNodeData
     int CameFromNodeIndex { get; set; }
 
     void CalculateFCost();
-
-    int CalculateHeuristic(Vector3Int from, Vector3Int to);
 }

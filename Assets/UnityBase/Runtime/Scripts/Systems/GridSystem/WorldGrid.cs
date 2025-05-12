@@ -37,8 +37,8 @@ namespace UnityBase.GridSystem
 
         bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false);
 
-        Vector3 GridToWorld(Vector2Int gridPos, int depth = 0);
-        Vector3 GridToWorld(Vector3Int gridPos);
+        Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0);
+        Vector3 GridToWorld3(Vector3Int gridPos);
         Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
         Vector3Int WorldToGrid3(Vector3 position, bool clamp = true);
 
@@ -70,7 +70,7 @@ namespace UnityBase.GridSystem
         private Vector3 _gridCellSize;
         private Vector3 _gridOffset;
         private Vector3 _cellOffset;
-        private Color _gizmosColor;
+        protected Color _gizmosColor;
         
         private readonly Dictionary<Vector3Int, List<T>> _itemList = new();
         
@@ -258,7 +258,7 @@ namespace UnityBase.GridSystem
         {
             var count = 0;
 
-            foreach (var offset in GetFilteredOffsets(includeDepth, includeDiagonal))
+            foreach (var offset in GetFilteredOffsets(gridPos, includeDepth, includeDiagonal))
             {
                 var neighborPos = gridPos + offset;
 
@@ -303,7 +303,7 @@ namespace UnityBase.GridSystem
                 }
             }
 
-            foreach (var offset in GetFilteredOffsets(includeDepth, includeDiagonal))
+            foreach (var offset in GetFilteredOffsets(pos, includeDepth, includeDiagonal))
             {
                 var neighborPos = pos + offset;
 
@@ -321,7 +321,8 @@ namespace UnityBase.GridSystem
             return false;
         }
 
-        private IEnumerable<Vector3Int> GetFilteredOffsets(bool includeDepth, bool includeDiagonal)
+        protected virtual IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth,
+            bool includeDiagonal)
         {
             var key = (includeDepth, includeDiagonal);
             
@@ -358,7 +359,7 @@ namespace UnityBase.GridSystem
     
     public partial class WorldGrid<T> where T : struct, IPathNodeData
     {
-        public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        public virtual List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
             var totalSize = Width * Height * Depth;
             var pathNodeArray = new T[totalSize];
@@ -386,7 +387,7 @@ namespace UnityBase.GridSystem
 
             return pathFinder.Execute();
         }
-        public NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        public virtual NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
             var totalSize = Width * Height * Depth;
             var pathNodeArray = new NativeArray<T>(totalSize, Allocator.TempJob);
@@ -435,9 +436,9 @@ namespace UnityBase.GridSystem
     
     public partial class WorldGrid<T> where T : struct, IPathNodeData
     {
-        public void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
+        public virtual void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
         {
-            var center = GridToWorld(gridPos);
+            var center = GridToWorld3(gridPos);
             var prevColor = Gizmos.color;
 
             Gizmos.color = highlightColor;
@@ -452,7 +453,7 @@ namespace UnityBase.GridSystem
             Gizmos.color = prevColor;
         }
 
-        public void DrawGrid()
+        public virtual void DrawGrid()
         {
             if (!DrawGizmos || !Application.isPlaying) return;
 
@@ -470,7 +471,7 @@ namespace UnityBase.GridSystem
                     for (int x = 0; x < Width; x++)
                     {
                         var pos = new Vector3Int(x, y, d);
-                        var center = GridToWorld(pos);
+                        var center = GridToWorld3(pos);
                         DrawCellGizmo(center, halfSize);
                     }
                 }
@@ -517,8 +518,8 @@ namespace UnityBase.GridSystem
         {
             for (int i = 0; i < path.Count - 1; i++)
             {
-                var start = GridToWorld(path[i]);
-                var end = GridToWorld(path[i + 1]);
+                var start = GridToWorld3(path[i]);
+                var end = GridToWorld3(path[i + 1]);
                 Debug.DrawLine(start, end, color, duration);
             }
         }
@@ -527,8 +528,8 @@ namespace UnityBase.GridSystem
         {
             for (int i = 0; i < path.Length - 1; i++)
             {
-                var start = GridToWorld(path[i]);
-                var end = GridToWorld(path[i + 1]);
+                var start = GridToWorld3(path[i]);
+                var end = GridToWorld3(path[i + 1]);
                 Debug.DrawLine(start, end, color, duration);
             }
         }
@@ -549,7 +550,7 @@ namespace UnityBase.GridSystem
                         var node = GetFirst(pos);
                         if (node.Equals(default(T))) continue;
                         var size = node.IsWalkable ? Vector3.zero : CellSize;
-                        var worldPos = GridToWorld(pos);
+                        var worldPos = GridToWorld3(pos);
                         int index = CalculateIndex(pos);
                         MeshUtils.AddToMeshArrays3D(vertices, uv, triangles, index, worldPos, size, Vector2.zero, Vector2.zero, Transform);
                     }
@@ -565,7 +566,7 @@ namespace UnityBase.GridSystem
     
     public partial class WorldGrid<T> where T : struct, IPathNodeData
     {
-        public Vector3 GridToWorld(Vector2Int gridPos, int depth = 0)
+        public Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0)
         {
             var x = (gridPos.x - ((Width - 1) / 2f)) * (CellSize.x + CellOffset.x) + GridOffset.x;
             var y = (depth + 0.5f) * (CellSize.z + CellOffset.z) + GridOffset.z;
@@ -573,7 +574,7 @@ namespace UnityBase.GridSystem
             return Transform.TransformPoint(new Vector3(x, y, z));
         }
 
-        public Vector3 GridToWorld(Vector3Int gridPos)
+        public virtual Vector3 GridToWorld3(Vector3Int gridPos)
         {
             var x = (gridPos.x - ((Width - 1) / 2f)) * (CellSize.x + CellOffset.x) + GridOffset.x;
             var y = (gridPos.z + 0.5f) * (CellSize.z + CellOffset.z) + GridOffset.z;
@@ -587,7 +588,7 @@ namespace UnityBase.GridSystem
             return grid.x == -1 ? new Vector2Int(-1, -1) : new Vector2Int(grid.x, grid.y);
         }
 
-        public Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
+        public virtual Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
         {
             position = Transform.InverseTransformPoint(position);
 
@@ -608,7 +609,7 @@ namespace UnityBase.GridSystem
             if (!IsInRange3(gridPos))
                 return new Vector3Int(-1, -1, -1);
 
-            var center = GridToWorld(gridPos);
+            var center = GridToWorld3(gridPos);
             var localCenter = Transform.InverseTransformPoint(center);
             var localDelta = position - localCenter;
      

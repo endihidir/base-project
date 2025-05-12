@@ -26,7 +26,7 @@ namespace UnityBase.PathFinding
 
             TNode startNode = pathNodeArray[startIndex];
             startNode.GCost = 0;
-            startNode.HCost = startNode.CalculateHeuristic(startPos, endPos);
+            startNode.HCost = CalculateHeuristic(startPos, endPos);
             startNode.CalculateFCost();
             pathNodeArray[startIndex] = startNode;
 
@@ -69,7 +69,7 @@ namespace UnityBase.PathFinding
                     {
                         neighbourNode.CameFromNodeIndex = currentIndex;
                         neighbourNode.GCost = tentativeGCost;
-                        neighbourNode.HCost = neighbourNode.CalculateHeuristic(neighbourPos, endPos);
+                        neighbourNode.HCost = CalculateHeuristic(neighbourPos, endPos);
                         neighbourNode.CalculateFCost();
                         pathNodeArray[neighbourIndex] = neighbourNode;
 
@@ -172,6 +172,17 @@ namespace UnityBase.PathFinding
             }
 
             return bestIndex;
+        }
+        
+        private int CalculateHeuristic(Vector3Int from, Vector3Int to)
+        {
+            var dx = math.abs(from.x - to.x);
+            var dy = math.abs(from.y - to.y);
+            var dz = math.abs(from.z - to.z);
+            var min = math.min(dx, math.min(dy, dz));
+            var max = math.max(dx, math.max(dy, dz));
+            var mid = dx + dy + dz - min - max;
+            return 14 * min + 10 * (mid + max - min);
         }
     }
 }
