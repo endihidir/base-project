@@ -728,13 +728,13 @@ namespace UnityBase.GridSystem
     
     public class WorldGridBuilder<T> where T : struct, IPathNodeData
     {
-        private Transform _transform;
-        private int? _width, _height, _depth;
-        private Vector3? _cellSize;
-        private Vector3 _offset;
-        private bool _drawGizmos;
-        private Color _gizmosColor = Color.white;
-        private Vector3 _cellOffset = Vector3.one;
+        protected Transform _transform;
+        protected int? _width, _height, _depth;
+        protected Vector3? _cellSize;
+        protected Vector3 _offset;
+        protected bool _drawGizmos;
+        protected Color _gizmosColor = Color.white;
+        protected Vector3 _cellOffset = Vector3.one;
 
         public WorldGridBuilder<T> WithTransform(Transform transform) { _transform = transform; return this; }
         public WorldGridBuilder<T> WithSize(int width, int height, int depth) { _width = width; _height = height; _depth = depth; return this; }
@@ -743,7 +743,7 @@ namespace UnityBase.GridSystem
         public WorldGridBuilder<T> WithGizmos(bool draw, Color color) { _drawGizmos = draw; _gizmosColor = color; return this; }
         public WorldGridBuilder<T> WithCellOffset(Vector3 cellSpace) { _cellOffset = cellSpace; return this; }
 
-        public WorldGrid<T> Build()
+        public virtual IWorldGrid<T> Build()
         {
             if (!_transform || !_width.HasValue || !_height.HasValue || !_depth.HasValue || !_cellSize.HasValue)
             {

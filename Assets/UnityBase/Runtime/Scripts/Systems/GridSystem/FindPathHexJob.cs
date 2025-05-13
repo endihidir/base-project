@@ -13,7 +13,7 @@ namespace UnityBase.GridSystem
         public NativeArray<TNode> pathNodeArray;
         public Vector3Int startPos, endPos;
         public NativeList<Vector3Int> calculatedPathList;
-        public bool isPointyTopped;
+        public bool isPointyTopped, allowDiagonalCornerCutting;
 
         public void Execute()
         {
@@ -41,14 +41,19 @@ namespace UnityBase.GridSystem
                 openList.RemoveAtSwapBack(openList.IndexOf(currentIndex));
                 closedList.Add(currentIndex);
 
-                var neighborOffsets = GetHexNeighborOffsets(currentNode.GridPos.y, isPointyTopped);
+                var neighborOffsets = GetHexNeighborOffsets(currentNode.GridPos.x, currentNode.GridPos.y, isPointyTopped);
 
                 foreach (var offset in neighborOffsets)
                 {
                     for (int dz = -1; dz <= 1; dz++)
                     {
+                        if (gridSize.z == 1 && dz != 0) continue;
+
                         var neighborPos = currentNode.GridPos + new Vector3Int(offset.x, offset.y, dz);
                         if (!IsPositionInsideGrid(neighborPos)) continue;
+                        
+                        if (!allowDiagonalCornerCutting && !IsAxisWalkable(currentNode.GridPos, offset.x, offset.y, dz)) 
+                            continue;
 
                         int neighborIndex = CalculateIndex(neighborPos.x, neighborPos.y, neighborPos.z);
                         if (closedList.Contains(neighborIndex)) continue;
@@ -56,7 +61,7 @@ namespace UnityBase.GridSystem
                         TNode neighborNode = pathNodeArray[neighborIndex];
                         if (!neighborNode.IsWalkable) continue;
 
-                        int moveCost = 10 + math.abs(dz) * 10;
+                        int moveCost = (math.abs(offset.x) + math.abs(offset.y) + math.abs(dz)) == 1 ? 10 : 14;
                         int tentativeGCost = currentNode.GCost + moveCost;
 
                         if (tentativeGCost < neighborNode.GCost)
@@ -75,14 +80,13 @@ namespace UnityBase.GridSystem
             }
 
             ConstructPath(endIndex);
-
             openList.Dispose();
             closedList.Dispose();
         }
 
-        private NativeArray<Vector3Int> GetHexNeighborOffsets(int y, bool pointyTopped)
+        private NativeArray<Vector3Int> GetHexNeighborOffsets(int x, int y, bool pointyTopped)
         {
-            bool isEven = y % 2 == 0;
+            bool isEven = pointyTopped ? y % 2 == 0 : x % 2 == 0;
             var offsets = new NativeArray<Vector3Int>(6, Allocator.Temp);
 
             if (pointyTopped)
@@ -107,6 +111,37 @@ namespace UnityBase.GridSystem
             return offsets;
         }
 
+        private bool IsAxisWalkable(Vector3Int origin, int dx, int dy, int dz)
+        {
+            int axisCount = math.abs(dx) + math.abs(dy) + math.abs(dz);
+            if (axisCount <= 1) return true;
+            
+            if (dz == 0) return true;
+
+            if (dx != 0)
+            {
+                var pos = origin + new Vector3Int(dx, 0, 0);
+                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                    return false;
+            }
+
+            if (dy != 0)
+            {
+                var pos = origin + new Vector3Int(0, dy, 0);
+                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                    return false;
+            }
+
+            if (dz != 0)
+            {
+                var pos = origin + new Vector3Int(0, 0, dz);
+                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                    return false;
+            }
+
+            return true;
+        }
+
         private void ConstructPath(int endIndex)
         {
             TNode currentNode = pathNodeArray[endIndex];
@@ -126,8 +161,7 @@ namespace UnityBase.GridSystem
             int dy = a.y - b.y;
             int dz = -a.x - a.y - (-b.x - b.y);
             int horizontal = (math.abs(dx) + math.abs(dy) + math.abs(dz)) / 2;
-
-            return 10 * horizontal + 10 * math.abs(a.z - b.z); 
+            return 10 * horizontal + 10 * math.abs(a.z - b.z);
         }
 
         private int GetLowestCostFNodeIndex(NativeList<int> openList)

@@ -26,7 +26,6 @@ namespace UnityBase.GridSystem
         {
             _isPointyTopped = isPointyTopped;
         }
-
    
         public override Vector3 GridToWorld3(Vector3Int gridPos)
         {
@@ -169,8 +168,10 @@ namespace UnityBase.GridSystem
         {
             var center = GridToWorld3(gridPos);
             var radius = (CellSize.x + CellOffset.x) / Mathf.Sqrt(3f);
+            var halfHeight = (CellSize.z + CellOffset.z) * 0.5f;
 
-            var corners = new Vector3[6];
+            var cornersTop = new Vector3[6];
+            var cornersBottom = new Vector3[6];
 
             for (int i = 0; i < 6; i++)
             {
@@ -178,18 +179,21 @@ namespace UnityBase.GridSystem
                 var cos = Mathf.Cos(angle);
                 var sin = Mathf.Sin(angle);
 
-                var right = Transform.right;
-                var forward = Transform.forward;
-
-                corners[i] = center + (radius * cos * right) + (radius * sin * forward);
+                var offset = (radius * cos * Transform.right) + (radius * sin * Transform.forward);
+                cornersTop[i] = center + offset + (Transform.up * halfHeight);
+                cornersBottom[i] = center + offset - (Transform.up * halfHeight);
             }
 
             Gizmos.color = highlightColor;
             
             for (int i = 0; i < 6; i++)
-            {
-                Gizmos.DrawLine(corners[i], corners[(i + 1) % 6]);
-            }
+                Gizmos.DrawLine(cornersTop[i], cornersTop[(i + 1) % 6]);
+            
+            for (int i = 0; i < 6; i++)
+                Gizmos.DrawLine(cornersBottom[i], cornersBottom[(i + 1) % 6]);
+            
+            for (int i = 0; i < 6; i++)
+                Gizmos.DrawLine(cornersTop[i], cornersBottom[i]);
         }
 
         public override void RebuildMeshVisual(Mesh mesh)
@@ -220,10 +224,8 @@ namespace UnityBase.GridSystem
             mesh.uv = uv;
             mesh.triangles = triangles;
         }
-
-        // Classic path finding works better!!!
         
-        /*public override NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        public override NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
             var totalSize = Width * Height * Depth;
             var pathNodeArray = new NativeArray<T>(totalSize, Allocator.TempJob);
@@ -248,12 +250,46 @@ namespace UnityBase.GridSystem
                 startPos = startPos,
                 endPos = endPos,
                 calculatedPathList = result,
+                allowDiagonalCornerCutting = allowDiagonalCornerCutting,
                 isPointyTopped = _isPointyTopped
             };
 
             job.Schedule().Complete();
             pathNodeArray.Dispose();
             return result;
-        }*/
+        }
+    }
+    
+    public class HexWorldGridBuilder<T> : WorldGridBuilder<T> where T : struct, IPathNodeData
+    {
+        private bool _isPointyTopped = true;
+
+        public HexWorldGridBuilder<T> WithIsPointyTopped(bool isPointyTopped)
+        {
+            _isPointyTopped = isPointyTopped;
+            return this;
+        }
+
+        public override IWorldGrid<T> Build()
+        {
+            if (_transform == null || !_width.HasValue || !_height.HasValue || !_depth.HasValue || !_cellSize.HasValue)
+            {
+                Debug.LogError("HexWorldGridBuilder: Missing required parameters.");
+                return default;
+            }
+
+            return new HexWorldGrid<T>(
+                _transform,
+                _width.Value,
+                _height.Value,
+                _depth.Value,
+                _cellSize.Value,
+                _offset,
+                _cellOffset,
+                _drawGizmos,
+                _gizmosColor,
+                _isPointyTopped
+            );
+        }
     }
 }
