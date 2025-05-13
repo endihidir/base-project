@@ -10,16 +10,16 @@ namespace UnityBase.GridSystem
     {
         private readonly bool _isPointyTopped;
 
-        private static readonly Vector3Int[] _hexOffsetsEven = new[]
+        private static readonly Vector3Int[] _hexOffsetsEven =
         {
-            new Vector3Int(+1, 0, 0), new Vector3Int(0, +1, 0), new Vector3Int(-1, +1, 0),
-            new Vector3Int(-1, 0, 0), new Vector3Int(-1, -1, 0), new Vector3Int(0, -1, 0)
+            new (+1, 0, 0), new (0, +1, 0), new (-1, +1, 0),
+            new (-1, 0, 0), new (-1, -1, 0), new (0, -1, 0)
         };
 
-        private static readonly Vector3Int[] _hexOffsetsOdd = new[]
+        private static readonly Vector3Int[] _hexOffsetsOdd =
         {
-            new Vector3Int(+1, 0, 0), new Vector3Int(+1, +1, 0), new Vector3Int(0, +1, 0),
-            new Vector3Int(-1, 0, 0), new Vector3Int(0, -1, 0), new Vector3Int(+1, -1, 0)
+            new (+1, 0, 0), new (+1, +1, 0), new (0, +1, 0),
+            new (-1, 0, 0), new (0, -1, 0), new (+1, -1, 0)
         };
 
         public HexWorldGrid(Transform coreTransform, int width, int height, int depth, Vector3 cellSize, Vector3 offset, Vector3 cellOffset, bool drawGizmos, Color gizmosColor, bool isPointyTopped = false) : base(coreTransform, width, height, depth, cellSize, offset, cellOffset, drawGizmos, gizmosColor)
@@ -147,20 +147,20 @@ namespace UnityBase.GridSystem
         
         public override void DrawGrid()
         {
-            if (!DrawGizmos || !Application.isPlaying) return;
+            if (!DrawGizmos) return;
 
             Gizmos.color = _gizmosColor;
 
-            for (int d = 0; d < Depth; d++)
+            int total = Width * Height * Depth;
+
+            for (int i = 0; i < total; i++)
             {
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        var pos = new Vector3Int(x, y, d);
-                        DrawHighlightedCell(pos, _gizmosColor);
-                    }
-                }
+                int x = i % Width;
+                int y = (i / Width) % Height;
+                int z = i / (Width * Height);
+
+                var pos = new Vector3Int(x, y, z);
+                DrawHighlightedCell(pos, _gizmosColor);
             }
         }
 
@@ -224,7 +224,37 @@ namespace UnityBase.GridSystem
             mesh.uv = uv;
             mesh.triangles = triangles;
         }
-        
+
+        public override List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
+        {
+            var totalSize = Width * Height * Depth;
+            var pathNodeArray = new T[totalSize];
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int z = 0; z < Depth; z++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        pathNodeArray[CalculateIndex(pos)] = GetFirst(pos);
+                    }
+                }
+            }
+
+            var pathFinder = new FindPathHex<T>
+            {
+                GridSize = new int3(Width, Height, Depth),
+                PathNodeArray = pathNodeArray,
+                StartPos = startPos,
+                EndPos = endPos,
+                AllowDiagonalCornerCutting = allowDiagonalCornerCutting,
+                IsPointyTopped = _isPointyTopped
+            };
+
+            return pathFinder.Execute();
+        }
+
         public override NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonalCornerCutting = false)
         {
             var totalSize = Width * Height * Depth;

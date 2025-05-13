@@ -6,6 +6,7 @@ namespace UnityBase.GridSystem
     {
         #region VARIABLES
 
+        [SerializeField] private bool _useJobSystem;
         [SerializeField] protected int _gridWidth;
         [SerializeField] protected int _gridHeight;
         [SerializeField] protected int _gridDepth;
@@ -17,7 +18,6 @@ namespace UnityBase.GridSystem
         [SerializeField] protected MeshFilter _meshFilter;
         [SerializeField][Range(0, 10)] protected int _activeDepth = 0;
         [SerializeField] private bool _allowDiagonalCornerCutting;
-        
         
         private PathNode _startNode;
         private Vector3 _previousRot;
@@ -85,24 +85,46 @@ namespace UnityBase.GridSystem
                 
                 if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
 
-                var path = _grid.FindPathWithJobs(_startNode.GridPos, gridPos, _allowDiagonalCornerCutting);
-                
-                if (path.Length > 0)
+                if (_useJobSystem)
                 {
-                    _startNode = new PathNode()
+                    var path = _grid.FindPathWithJobs(_startNode.GridPos, gridPos, _allowDiagonalCornerCutting);
+                    
+                    if (path.Length > 0)
                     {
-                        GridPos = gridPos,
-                        IsWalkable = endNode.IsWalkable,
-                        GCost = int.MaxValue,
-                        HCost = 0,
-                        FCost = 0,
-                        CameFromNodeIndex = -1
-                    };
+                        _startNode = new PathNode()
+                        {
+                            GridPos = gridPos,
+                            IsWalkable = endNode.IsWalkable,
+                            GCost = int.MaxValue,
+                            HCost = 0,
+                            FCost = 0,
+                            CameFromNodeIndex = -1
+                        };
 
-                    _grid.DebugDrawPath(path, 3f, Color.green);
+                        _grid.DebugDrawPath(path, 3f, Color.green);
+                    }
+                    
+                    path.Dispose();
                 }
+                else
+                {
+                    var path = _grid.FindPath(_startNode.GridPos, gridPos, _allowDiagonalCornerCutting);
+                    
+                    if (path.Count > 0)
+                    {
+                        _startNode = new PathNode()
+                        {
+                            GridPos = gridPos,
+                            IsWalkable = endNode.IsWalkable,
+                            GCost = int.MaxValue,
+                            HCost = 0,
+                            FCost = 0,
+                            CameFromNodeIndex = -1
+                        };
 
-                path.Dispose();
+                        _grid.DebugDrawPath(path, 3f, Color.green);
+                    }
+                }
             }
             else if (Input.GetMouseButtonDown(1))
             {
@@ -130,9 +152,18 @@ namespace UnityBase.GridSystem
 
         private void UpdateVisual() => _grid.RebuildMeshVisual(_mesh);
 
-        private void OnDrawGizmos()
+        protected virtual void OnDrawGizmos()
         {
-            if (!Application.isPlaying || _grid is not { DrawGizmos: true }) return;
+            if (!Application.isPlaying)
+            {
+                if (_grid is not { DrawGizmos: true })
+                {
+                    Init();
+                    return;
+                }
+                
+                _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
+            }
             
             _grid.DrawGrid();
         }

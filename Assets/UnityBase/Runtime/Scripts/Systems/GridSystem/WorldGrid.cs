@@ -454,7 +454,7 @@ namespace UnityBase.GridSystem
 
         public virtual void DrawGrid()
         {
-            if (!DrawGizmos || !Application.isPlaying) return;
+            if (!DrawGizmos) return;
 
             Gizmos.color = _gizmosColor;
 
@@ -463,17 +463,17 @@ namespace UnityBase.GridSystem
                 CellSize.y * 0.5f,
                 CellSize.z * 0.5f);
 
-            for (int d = 0; d < Depth; d++)
+            int total = Width * Height * Depth;
+
+            for (int i = 0; i < total; i++)
             {
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        var pos = new Vector3Int(x, y, d);
-                        var center = GridToWorld3(pos);
-                        DrawCellGizmo(center, halfSize);
-                    }
-                }
+                int x = i % Width;
+                int y = (i / Width) % Height;
+                int z = i / (Width * Height);
+
+                var pos = new Vector3Int(x, y, z);
+                var center = GridToWorld3(pos);
+                DrawCellGizmo(center, halfSize);
             }
         }
 
@@ -493,20 +493,17 @@ namespace UnityBase.GridSystem
             corners[5] = center + right - up + forward;
             corners[6] = center + right + up - forward;
             corners[7] = center + right + up + forward;
-
-            // Bottom
+            
             Gizmos.DrawLine(corners[0], corners[1]);
             Gizmos.DrawLine(corners[1], corners[5]);
             Gizmos.DrawLine(corners[5], corners[4]);
             Gizmos.DrawLine(corners[4], corners[0]);
-
-            // Top
+            
             Gizmos.DrawLine(corners[2], corners[3]);
             Gizmos.DrawLine(corners[3], corners[7]);
             Gizmos.DrawLine(corners[7], corners[6]);
             Gizmos.DrawLine(corners[6], corners[2]);
-
-            // Sides
+            
             Gizmos.DrawLine(corners[0], corners[2]);
             Gizmos.DrawLine(corners[1], corners[3]);
             Gizmos.DrawLine(corners[4], corners[6]);
