@@ -7,7 +7,7 @@ using UnityEngine;
 namespace UnityBase.GridSystem
 {
     [BurstCompile]
-    public struct FindPathHexJob<TNode> : IJob where TNode : struct, IPathNodeData
+    public struct FindPathHexJob<TNode> : IJob where TNode : struct, IGridNodeData
     {
         public int3 gridSize;
         public NativeArray<TNode> pathNodeArray;

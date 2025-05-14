@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c5ec51c2bebe4ad38b60240be98ff6b5, type: 3}
-  m_Name: Blackboard Data
+  m_Name: BlackboardData
   m_EditorClassIdentifier: 
   entries: []

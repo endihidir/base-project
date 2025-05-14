@@ -19,10 +19,10 @@ namespace UnityBase.GridSystem
         [SerializeField][Range(0, 10)] protected int _activeDepth = 0;
         [SerializeField] private bool _allowDiagonalCornerCutting;
         
-        private PathNode _startNode;
+        private GridNode _startNode;
         private Vector3 _previousRot;
 
-        protected IWorldGrid<PathNode> _grid;
+        protected IWorldGrid<GridNode> _grid;
 
         #endregion
 
@@ -46,7 +46,7 @@ namespace UnityBase.GridSystem
             
             Init();
 
-            _grid.Initialize(pos => new PathNode
+            _grid.Initialize(pos => new GridNode
             {
                 GridPos = pos,
                 IsWalkable = true,
@@ -61,7 +61,7 @@ namespace UnityBase.GridSystem
 
         protected virtual void Init()
         {
-            _grid = new WorldGridBuilder<PathNode>().WithTransform(transform)
+            _grid = new WorldGridBuilder<GridNode>().WithTransform(transform)
                 .WithSize(_gridWidth, _gridHeight, _gridDepth)
                 .WithCellSize(_cellSize)
                 .WithOffset(_gridOffset)
@@ -91,7 +91,7 @@ namespace UnityBase.GridSystem
                     
                     if (path.Length > 0)
                     {
-                        _startNode = new PathNode()
+                        _startNode = new GridNode()
                         {
                             GridPos = gridPos,
                             IsWalkable = endNode.IsWalkable,
@@ -112,7 +112,7 @@ namespace UnityBase.GridSystem
                     
                     if (path.Count > 0)
                     {
-                        _startNode = new PathNode()
+                        _startNode = new GridNode()
                         {
                             GridPos = gridPos,
                             IsWalkable = endNode.IsWalkable,

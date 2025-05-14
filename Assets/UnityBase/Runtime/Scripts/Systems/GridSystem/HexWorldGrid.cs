@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
-    public class HexWorldGrid<T> : WorldGrid<T> where T : struct, IPathNodeData
+    public class HexWorldGrid<T> : WorldGrid<T> where T : struct, IGridNodeData
     {
         private readonly bool _isPointyTopped;
 
@@ -312,7 +312,7 @@ namespace UnityBase.GridSystem
         }
     }
     
-    public class HexWorldGridBuilder<T> : WorldGridBuilder<T> where T : struct, IPathNodeData
+    public class HexWorldGridBuilder<T> : WorldGridBuilder<T> where T : struct, IGridNodeData
     {
         private bool _isPointyTopped = true;
 
@@ -330,18 +330,7 @@ namespace UnityBase.GridSystem
                 return default;
             }
 
-            return new HexWorldGrid<T>(
-                _transform,
-                _width.Value,
-                _height.Value,
-                _depth.Value,
-                _cellSize.Value,
-                _offset,
-                _cellOffset,
-                _drawGizmos,
-                _gizmosColor,
-                _isPointyTopped
-            );
+            return new HexWorldGrid<T>(_transform, _width.Value, _height.Value, _depth.Value, _cellSize.Value, _offset, _cellOffset, _drawGizmos, _gizmosColor, _isPointyTopped);
         }
     }
 }

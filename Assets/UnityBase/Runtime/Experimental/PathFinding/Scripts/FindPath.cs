@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityBase.PathFinding
 {
-    public struct FindPath<T> where T : struct, IPathNodeData
+    public struct FindPath<T> where T : struct, IGridNodeData
     {
         public int3 GridSize;
         public T[] PathNodeArray;

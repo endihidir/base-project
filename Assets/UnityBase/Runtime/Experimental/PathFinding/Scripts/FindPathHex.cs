@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
-    public struct FindPathHex<T> where T : struct, IPathNodeData
+    public struct FindPathHex<T> where T : struct, IGridNodeData
     {
         public int3 GridSize;
         public T[] PathNodeArray;

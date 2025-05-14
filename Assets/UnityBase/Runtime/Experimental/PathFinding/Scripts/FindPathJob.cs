@@ -7,7 +7,7 @@ using UnityEngine;
 namespace UnityBase.PathFinding
 {
     [BurstCompile]
-    public struct FindPathJob<TNode> : IJob where TNode : struct, IPathNodeData
+    public struct FindPathJob<TNode> : IJob where TNode : struct, IGridNodeData
     {
         public int3 gridSize;
         public NativeArray<TNode> pathNodeArray;

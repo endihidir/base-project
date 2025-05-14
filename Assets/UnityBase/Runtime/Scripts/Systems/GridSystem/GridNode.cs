@@ -1,9 +1,8 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 [Serializable]
-public struct PathNode : IPathNodeData
+public struct GridNode : IGridNodeData
 {
     public bool IsWalkable { get; set; }
     public Vector3Int GridPos { get; set; }
@@ -15,7 +14,7 @@ public struct PathNode : IPathNodeData
     public void CalculateFCost() => FCost = GCost + HCost;
 }
 
-public interface IPathNodeData
+public interface IGridNodeData
 {
     bool IsWalkable { get; set; }
     Vector3Int GridPos { get; set; }

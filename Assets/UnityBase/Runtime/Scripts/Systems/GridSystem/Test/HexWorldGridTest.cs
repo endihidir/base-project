@@ -8,7 +8,7 @@ namespace UnityBase.GridSystem
         
         protected override void Init()
         {
-            _grid = new HexWorldGridBuilder<PathNode>()
+            _grid = new HexWorldGridBuilder<GridNode>()
                 .WithIsPointyTopped(_isPointyTopped)
                 .WithTransform(transform)
                 .WithSize(_gridWidth, _gridHeight, _gridDepth)
