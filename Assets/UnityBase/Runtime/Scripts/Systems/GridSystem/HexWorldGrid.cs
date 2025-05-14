@@ -106,6 +106,15 @@ namespace UnityBase.GridSystem
                 y = Mathf.Clamp(y, 0, Height - 1);
                 z = Mathf.Clamp(z, 0, Depth - 1);
             }
+            
+            var estimatedPos = GridToWorld3(new Vector3Int(x, y, z));
+            
+            var radius = CellSize.x / Mathf.Sqrt(3f);
+
+            if (Vector3.Distance(position, estimatedPos) > radius)
+            {
+                return new Vector3Int(-1, -1, -1);
+            }
 
             return new Vector3Int(x, y, z);
         }
@@ -167,8 +176,8 @@ namespace UnityBase.GridSystem
         public override void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
         {
             var center = GridToWorld3(gridPos);
-            var radius = (CellSize.x + CellOffset.x) / Mathf.Sqrt(3f);
-            var halfHeight = (CellSize.z + CellOffset.z) * 0.5f;
+            var radius = CellSize.x / Mathf.Sqrt(3f);
+            var halfHeight = CellSize.z * 0.5f;
 
             var cornersTop = new Vector3[6];
             var cornersBottom = new Vector3[6];
@@ -214,7 +223,7 @@ namespace UnityBase.GridSystem
                         var size = node.IsWalkable ? Vector3.zero : CellSize;
                         var worldPos = GridToWorld3(pos);
                         int index = CalculateIndex(pos);
-                        MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, (size.x + CellOffset.x) / Mathf.Sqrt(3f),size.y, Transform, !_isPointyTopped);
+                        MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, size.x / Mathf.Sqrt(3f),size.y, Transform, !_isPointyTopped);
                     }
                 }
             }
