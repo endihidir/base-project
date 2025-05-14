@@ -27,45 +27,58 @@ namespace UnityBase.GridSystem
             _isPointyTopped = isPointyTopped;
         }
    
+        private (float xSpacing, float ySpacing, float zSpacing) GetSpacings()
+        {
+            var x = CellSize.x + CellOffset.x;
+            var y = CellSize.y + CellOffset.y;
+            var z = CellSize.z + CellOffset.z;
+
+            return !_isPointyTopped ? (x * Mathf.Sqrt(3f) / 2f, y, z) : (x, y * Mathf.Sqrt(3f) / 2f, z);
+        }
+
+        private float GetAverageOffsetForHeight() => 0.25f * ((Width - 1f) / Width);
+        private float GetAverageOffsetForWidth() => 0.5f * ((Height - 1f) / Height);
+
+        private Vector3 CalculateGridCenterOffset()
+        {
+            var centerX = (Width - 1) / 2f;
+            var centerY = (Height - 1) / 2f;
+            var centerZ = (Depth - 1) / 2f;
+
+            var (xSpacing, ySpacing, zSpacing) = GetSpacings();
+
+            if (!_isPointyTopped)
+            {
+                var offsetY = GetAverageOffsetForHeight();
+                return new Vector3(centerX * xSpacing, (centerZ + 0.5f) * zSpacing, (centerY + offsetY) * ySpacing);
+            }
+
+            var offsetX = GetAverageOffsetForWidth();
+            return new Vector3((centerX + offsetX) * xSpacing, (centerZ + 0.5f) * zSpacing, centerY * ySpacing);
+        }
+
+        private Vector3 CalculateLocalPosition(Vector3 gridPos)
+        {
+            var (xSpacing, ySpacing, zSpacing) = GetSpacings();
+
+            if (!_isPointyTopped)
+            {
+                var offset = 0.5f * ((int)gridPos.x & 1);
+                return new Vector3(gridPos.x * xSpacing, (gridPos.z + 0.5f) * zSpacing, (gridPos.y + offset) * ySpacing);
+            }
+            else
+            {
+                var offset = 0.5f * ((int)gridPos.y & 1);
+                return new Vector3((gridPos.x + offset) * xSpacing, (gridPos.z + 0.5f) * zSpacing, gridPos.y * ySpacing);
+            }
+        }
+
         public override Vector3 GridToWorld3(Vector3Int gridPos)
         {
             var localPos = CalculateLocalPosition(gridPos);
             var centeredPos = localPos - CalculateGridCenterOffset();
             return Transform.TransformPoint(centeredPos + GridOffset);
         }
-
-        private Vector3 CalculateGridCenterOffset()
-        {
-            var centerGridPos = new Vector3Int(Width / 2, Height / 2, Depth / 2);
-            return CalculateLocalPosition(centerGridPos);
-        }
-
-        private Vector3 CalculateLocalPosition(Vector3Int gridPos)
-        {
-            if (!_isPointyTopped)
-            {
-                var xSpacing = (CellSize.x + CellOffset.x) * Mathf.Sqrt(3f) / 2f;
-                var ySpacing = (CellSize.y + CellOffset.y);
-
-                var x = gridPos.x * xSpacing;
-                var z = (gridPos.y + 0.5f * (gridPos.x & 1)) * ySpacing;
-                var y = (gridPos.z + 0.5f) * (CellSize.z + CellOffset.z);
-
-                return new Vector3(x, y, z);
-            }
-            else
-            {
-                var xSpacing = (CellSize.x + CellOffset.x);
-                var ySpacing = (CellSize.y + CellOffset.y) * Mathf.Sqrt(3f) / 2f;
-
-                var x = (gridPos.x + 0.5f * (gridPos.y & 1)) * xSpacing;
-                var z = gridPos.y * ySpacing;
-                var y = (gridPos.z + 0.5f) * (CellSize.z + CellOffset.z);
-
-                return new Vector3(x, y, z);
-            }
-        }
-
         public override Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
         {
             var localPos = Transform.InverseTransformPoint(position) - GridOffset + CalculateGridCenterOffset();
