@@ -36,7 +36,7 @@ namespace UnityBase.GridSystem
             return !_isPointyTopped ? (x * Mathf.Sqrt(3f) / 2f, y, z) : (x, y * Mathf.Sqrt(3f) / 2f, z);
         }
 
-        private float GetAverageOffsetForHeight() => 0.5f * ((Width - 1f) / Width);
+        private float GetAverageOffsetForHeight() => 0.25f * ((Width - 1f) / Width);
         private float GetAverageOffsetForWidth() => 0.5f * ((Height - 1f) / Height);
 
         private Vector3 CalculateGridCenterOffset()
