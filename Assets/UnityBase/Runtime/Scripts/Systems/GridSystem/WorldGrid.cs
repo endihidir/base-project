@@ -514,7 +514,7 @@ namespace UnityBase.GridSystem
         public Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0)
         {
             var x = (gridPos.x - ((Width - 1) / 2f)) * (CellSize.x + CellOffset.x) + GridOffset.x;
-            var y = (depth + 0.5f) * (CellSize.z + CellOffset.z) + GridOffset.z;
+            var y = depth * (CellSize.z + CellOffset.z) + GridOffset.z;
             var z = (gridPos.y - ((Height - 1) / 2f)) * (CellSize.y + CellOffset.y) + GridOffset.y;
             return Transform.TransformPoint(new Vector3(x, y, z));
         }
@@ -522,7 +522,7 @@ namespace UnityBase.GridSystem
         public virtual Vector3 GridToWorld3(Vector3Int gridPos)
         {
             var x = (gridPos.x - ((Width - 1) / 2f)) * (CellSize.x + CellOffset.x) + GridOffset.x;
-            var y = (gridPos.z + 0.5f) * (CellSize.z + CellOffset.z) + GridOffset.z;
+            var y = gridPos.z * (CellSize.z + CellOffset.z) + GridOffset.z;
             var z = (gridPos.y - ((Height - 1) / 2f)) * (CellSize.y + CellOffset.y) + GridOffset.y;
             return Transform.TransformPoint(new Vector3(x, y, z));
         }

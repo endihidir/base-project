@@ -43,18 +43,17 @@ namespace UnityBase.GridSystem
         {
             var centerX = (Width - 1) / 2f;
             var centerY = (Height - 1) / 2f;
-            var centerZ = (Depth - 1) / 2f;
 
             var (xSpacing, ySpacing, zSpacing) = GetSpacings();
 
             if (!_isPointyTopped)
             {
                 var offsetY = GetAverageOffsetForHeight();
-                return new Vector3(centerX * xSpacing, (centerZ + 0.5f) * zSpacing, (centerY + offsetY) * ySpacing);
+                return new Vector3(centerX * xSpacing, 0f, (centerY + offsetY) * ySpacing);
             }
 
             var offsetX = GetAverageOffsetForWidth();
-            return new Vector3((centerX + offsetX) * xSpacing, (centerZ + 0.5f) * zSpacing, centerY * ySpacing);
+            return new Vector3((centerX + offsetX) * xSpacing, 0f, centerY * ySpacing);
         }
 
         private Vector3 CalculateLocalPosition(Vector3 gridPos)
@@ -64,24 +63,26 @@ namespace UnityBase.GridSystem
             if (!_isPointyTopped)
             {
                 var offset = 0.5f * ((int)gridPos.x & 1);
-                return new Vector3(gridPos.x * xSpacing, (gridPos.z + 0.5f) * zSpacing, (gridPos.y + offset) * ySpacing);
+                return new Vector3(gridPos.x * xSpacing, gridPos.z * zSpacing, (gridPos.y + offset) * ySpacing);
             }
             else
             {
                 var offset = 0.5f * ((int)gridPos.y & 1);
-                return new Vector3((gridPos.x + offset) * xSpacing, (gridPos.z + 0.5f) * zSpacing, gridPos.y * ySpacing);
+                return new Vector3((gridPos.x + offset) * xSpacing, gridPos.z * zSpacing, gridPos.y * ySpacing);
             }
         }
+
+        private Vector3 HexGridOffset() => new (GridOffset.x, GridOffset.z, GridOffset.y);
 
         public override Vector3 GridToWorld3(Vector3Int gridPos)
         {
             var localPos = CalculateLocalPosition(gridPos);
             var centeredPos = localPos - CalculateGridCenterOffset();
-            return Transform.TransformPoint(centeredPos + GridOffset);
+            return Transform.TransformPoint(centeredPos + HexGridOffset());
         }
         public override Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
         {
-            var localPos = Transform.InverseTransformPoint(position) - GridOffset + CalculateGridCenterOffset();
+            var localPos = Transform.InverseTransformPoint(position) - HexGridOffset() + CalculateGridCenterOffset();
             var xSpacing = (CellSize.x + CellOffset.x);
             var ySpacing = (CellSize.y + CellOffset.y);
             var zStep = (CellSize.z + CellOffset.z);
@@ -135,11 +136,7 @@ namespace UnityBase.GridSystem
         private Vector2 RoundAxial(Vector2 axial)
         {
             var cube = new Vector3(axial.x, -axial.x - axial.y, axial.y);
-            var roundedCube = new Vector3(
-                Mathf.Round(cube.x),
-                Mathf.Round(cube.y),
-                Mathf.Round(cube.z)
-            );
+            var roundedCube = new Vector3(Mathf.Round(cube.x), Mathf.Round(cube.y), Mathf.Round(cube.z));
 
             var dx = Mathf.Abs(roundedCube.x - cube.x);
             var dy = Mathf.Abs(roundedCube.y - cube.y);
@@ -159,9 +156,7 @@ namespace UnityBase.GridSystem
         {
             if (!includeDepth)
             {
-                return !_isPointyTopped
-                    ? (gridPos.x & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd
-                    : (gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd;
+                return !_isPointyTopped ? (gridPos.x & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd : (gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd;
             }
             
             return base.GetFilteredOffsets(gridPos, includeDepth, includeDiagonal);

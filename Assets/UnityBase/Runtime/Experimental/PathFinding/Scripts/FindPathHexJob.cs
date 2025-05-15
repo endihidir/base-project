@@ -115,8 +115,6 @@ namespace UnityBase.GridSystem
         {
             int axisCount = math.abs(dx) + math.abs(dy) + math.abs(dz);
             if (axisCount <= 1) return true;
-            
-            if (dz == 0) return true;
 
             if (dx != 0)
             {
