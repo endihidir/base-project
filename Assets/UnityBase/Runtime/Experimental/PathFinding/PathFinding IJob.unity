@@ -476,7 +476,7 @@ MonoBehaviour:
   _useJobSystem: 1
   _gridWidth: 7
   _gridHeight: 7
-  _gridDepth: 1
+  _gridDepth: 2
   _cellSize: {x: 7, y: 7, z: 7}
   _cellOffset: {x: 0, y: 0, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}

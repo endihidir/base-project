@@ -36,24 +36,24 @@ namespace UnityBase.GridSystem
             return !_isPointyTopped ? (x * Mathf.Sqrt(3f) / 2f, y, z) : (x, y * Mathf.Sqrt(3f) / 2f, z);
         }
 
-        private float GetAverageOffsetForHeight() => 0.25f * ((Width - 1f) / Width);
+        private float GetAverageOffsetForHeight() => 0.5f * ((Width - 1f) / Width);
         private float GetAverageOffsetForWidth() => 0.5f * ((Height - 1f) / Height);
 
         private Vector3 CalculateGridCenterOffset()
         {
             var centerX = (Width - 1) / 2f;
             var centerY = (Height - 1) / 2f;
-
+            
             var (xSpacing, ySpacing, zSpacing) = GetSpacings();
 
             if (!_isPointyTopped)
             {
                 var offsetY = GetAverageOffsetForHeight();
-                return new Vector3(centerX * xSpacing, 0f, (centerY + offsetY) * ySpacing);
+                return new Vector3(centerX * xSpacing, zSpacing * 0.5f, (centerY + offsetY) * ySpacing);
             }
 
             var offsetX = GetAverageOffsetForWidth();
-            return new Vector3((centerX + offsetX) * xSpacing, 0f, centerY * ySpacing);
+            return new Vector3((centerX + offsetX) * xSpacing, zSpacing * 0.5f, centerY * ySpacing);
         }
 
         private Vector3 CalculateLocalPosition(Vector3 gridPos)
@@ -63,12 +63,12 @@ namespace UnityBase.GridSystem
             if (!_isPointyTopped)
             {
                 var offset = 0.5f * ((int)gridPos.x & 1);
-                return new Vector3(gridPos.x * xSpacing, gridPos.z * zSpacing, (gridPos.y + offset) * ySpacing);
+                return new Vector3(gridPos.x * xSpacing,  (gridPos.z + 0.5f) * zSpacing, (gridPos.y + offset) * ySpacing);
             }
             else
             {
                 var offset = 0.5f * ((int)gridPos.y & 1);
-                return new Vector3((gridPos.x + offset) * xSpacing, gridPos.z * zSpacing, gridPos.y * ySpacing);
+                return new Vector3((gridPos.x + offset) * xSpacing,  (gridPos.z + 0.5f) * zSpacing, gridPos.y * ySpacing);
             }
         }
 
