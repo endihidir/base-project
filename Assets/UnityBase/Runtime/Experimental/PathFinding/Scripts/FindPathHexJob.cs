@@ -9,56 +9,56 @@ namespace UnityBase.GridSystem
     [BurstCompile]
     public struct FindPathHexJob<TNode> : IJob where TNode : struct, IGridNodeData
     {
-        public int3 gridSize;
-        public NativeArray<TNode> pathNodeArray;
-        public Vector3Int startPos, endPos;
-        public NativeList<Vector3Int> calculatedPathList;
-        public bool isPointyTopped, allowDiagonalCornerCutting;
+        public int3 GridSize;
+        public NativeArray<TNode> PathNodeArray;
+        public Vector3Int StartPos, EndPos;
+        public NativeList<Vector3Int> CalculatedPathList;
+        public bool IsPointyTopped, AllowDiagonalCornerCutting;
 
         public void Execute()
         {
             var openList = new NativeList<int>(Allocator.Temp);
             var closedList = new NativeList<int>(Allocator.Temp);
 
-            int startIndex = CalculateIndex(startPos.x, startPos.y, startPos.z);
-            int endIndex = CalculateIndex(endPos.x, endPos.y, endPos.z);
+            int startIndex = CalculateIndex(StartPos.x, StartPos.y, StartPos.z);
+            int endIndex = CalculateIndex(EndPos.x, EndPos.y, EndPos.z);
 
-            TNode startNode = pathNodeArray[startIndex];
+            TNode startNode = PathNodeArray[startIndex];
             startNode.GCost = 0;
-            startNode.HCost = CalculateHexHeuristic(startPos, endPos);
+            startNode.HCost = CalculateHexHeuristic(StartPos, EndPos);
             startNode.CalculateFCost();
-            pathNodeArray[startIndex] = startNode;
+            PathNodeArray[startIndex] = startNode;
 
             openList.Add(startIndex);
 
             while (openList.Length > 0)
             {
                 int currentIndex = GetLowestCostFNodeIndex(openList);
-                TNode currentNode = pathNodeArray[currentIndex];
+                TNode currentNode = PathNodeArray[currentIndex];
 
                 if (currentIndex == endIndex) break;
 
                 openList.RemoveAtSwapBack(openList.IndexOf(currentIndex));
                 closedList.Add(currentIndex);
 
-                var neighborOffsets = GetHexNeighborOffsets(currentNode.GridPos.x, currentNode.GridPos.y, isPointyTopped);
+                var neighborOffsets = GetHexNeighborOffsets(currentNode.GridPos.x, currentNode.GridPos.y, IsPointyTopped);
 
                 foreach (var offset in neighborOffsets)
                 {
                     for (int dz = -1; dz <= 1; dz++)
                     {
-                        if (gridSize.z == 1 && dz != 0) continue;
+                        if (GridSize.z == 1 && dz != 0) continue;
 
                         var neighborPos = currentNode.GridPos + new Vector3Int(offset.x, offset.y, dz);
                         if (!IsPositionInsideGrid(neighborPos)) continue;
                         
-                        if (!allowDiagonalCornerCutting && !IsAxisWalkable(currentNode.GridPos, offset.x, offset.y, dz)) 
+                        if (!AllowDiagonalCornerCutting && !IsAxisWalkable(currentNode.GridPos, offset.x, offset.y, dz)) 
                             continue;
 
                         int neighborIndex = CalculateIndex(neighborPos.x, neighborPos.y, neighborPos.z);
                         if (closedList.Contains(neighborIndex)) continue;
 
-                        TNode neighborNode = pathNodeArray[neighborIndex];
+                        TNode neighborNode = PathNodeArray[neighborIndex];
                         if (!neighborNode.IsWalkable) continue;
 
                         int moveCost = (math.abs(offset.x) + math.abs(offset.y) + math.abs(dz)) == 1 ? 10 : 14;
@@ -68,9 +68,9 @@ namespace UnityBase.GridSystem
                         {
                             neighborNode.CameFromNodeIndex = currentIndex;
                             neighborNode.GCost = tentativeGCost;
-                            neighborNode.HCost = CalculateHexHeuristic(neighborPos, endPos);
+                            neighborNode.HCost = CalculateHexHeuristic(neighborPos, EndPos);
                             neighborNode.CalculateFCost();
-                            pathNodeArray[neighborIndex] = neighborNode;
+                            PathNodeArray[neighborIndex] = neighborNode;
 
                             if (!openList.Contains(neighborIndex))
                                 openList.Add(neighborIndex);
@@ -119,21 +119,21 @@ namespace UnityBase.GridSystem
             if (dx != 0)
             {
                 var pos = origin + new Vector3Int(dx, 0, 0);
-                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                if (!IsPositionInsideGrid(pos) || !PathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
                     return false;
             }
 
             if (dy != 0)
             {
                 var pos = origin + new Vector3Int(0, dy, 0);
-                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                if (!IsPositionInsideGrid(pos) || !PathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
                     return false;
             }
 
             if (dz != 0)
             {
                 var pos = origin + new Vector3Int(0, 0, dz);
-                if (!IsPositionInsideGrid(pos) || !pathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
+                if (!IsPositionInsideGrid(pos) || !PathNodeArray[CalculateIndex(pos.x, pos.y, pos.z)].IsWalkable)
                     return false;
             }
 
@@ -142,14 +142,14 @@ namespace UnityBase.GridSystem
 
         private void ConstructPath(int endIndex)
         {
-            TNode currentNode = pathNodeArray[endIndex];
+            TNode currentNode = PathNodeArray[endIndex];
             if (currentNode.CameFromNodeIndex == -1) return;
 
             while (true)
             {
-                calculatedPathList.Add(currentNode.GridPos);
+                CalculatedPathList.Add(currentNode.GridPos);
                 if (currentNode.CameFromNodeIndex == -1) break;
-                currentNode = pathNodeArray[currentNode.CameFromNodeIndex];
+                currentNode = PathNodeArray[currentNode.CameFromNodeIndex];
             }
         }
 
@@ -165,12 +165,12 @@ namespace UnityBase.GridSystem
         private int GetLowestCostFNodeIndex(NativeList<int> openList)
         {
             int bestIndex = openList[0];
-            TNode bestNode = pathNodeArray[bestIndex];
+            TNode bestNode = PathNodeArray[bestIndex];
 
             for (int i = 1; i < openList.Length; i++)
             {
                 int index = openList[i];
-                TNode node = pathNodeArray[index];
+                TNode node = PathNodeArray[index];
                 if (node.FCost < bestNode.FCost)
                 {
                     bestIndex = index;
@@ -183,13 +183,13 @@ namespace UnityBase.GridSystem
 
         private int CalculateIndex(int x, int y, int z)
         {
-            return x + y * gridSize.x + z * gridSize.x * gridSize.y;
+            return x + y * GridSize.x + z * GridSize.x * GridSize.y;
         }
 
         private bool IsPositionInsideGrid(Vector3Int pos)
         {
             return pos.x >= 0 && pos.y >= 0 && pos.z >= 0 &&
-                   pos.x < gridSize.x && pos.y < gridSize.y && pos.z < gridSize.z;
+                   pos.x < GridSize.x && pos.y < GridSize.y && pos.z < GridSize.z;
         }
     }
 }

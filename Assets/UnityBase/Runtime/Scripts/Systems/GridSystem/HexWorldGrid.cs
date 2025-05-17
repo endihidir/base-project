@@ -74,13 +74,13 @@ namespace UnityBase.GridSystem
 
         private Vector3 HexGridOffset() => new (GridOffset.x, GridOffset.z, GridOffset.y);
 
-        public override Vector3 GridToWorld3(Vector3Int gridPos)
+        public override Vector3 GridToWorld(Vector3Int gridPos)
         {
             var localPos = CalculateLocalPosition(gridPos);
             var centeredPos = localPos - CalculateGridCenterOffset();
             return Transform.TransformPoint(centeredPos + HexGridOffset());
         }
-        public override Vector3Int WorldToGrid3(Vector3 position, bool clamp = true)
+        public override Vector3Int WorldToGrid(Vector3 position, bool clamp = true)
         {
             var localPos = Transform.InverseTransformPoint(position) - HexGridOffset() + CalculateGridCenterOffset();
             var xSpacing = (CellSize.x + CellOffset.x);
@@ -121,7 +121,7 @@ namespace UnityBase.GridSystem
                 z = Mathf.Clamp(z, 0, Depth - 1);
             }
             
-            var estimatedPos = GridToWorld3(new Vector3Int(x, y, z));
+            var estimatedPos = GridToWorld(new Vector3Int(x, y, z));
             
             var radius = CellSize.x / Mathf.Sqrt(3f);
 
@@ -166,7 +166,7 @@ namespace UnityBase.GridSystem
         {
             if (!DrawGizmos) return;
 
-            Gizmos.color = _gizmosColor;
+            Gizmos.color = GizmosColor;
 
             int total = Width * Height * Depth;
 
@@ -177,13 +177,13 @@ namespace UnityBase.GridSystem
                 int z = i / (Width * Height);
 
                 var pos = new Vector3Int(x, y, z);
-                DrawHighlightedCell(pos, _gizmosColor);
+                DrawHighlightedCell(pos, GizmosColor);
             }
         }
 
         public override void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
         {
-            var center = GridToWorld3(gridPos);
+            var center = GridToWorld(gridPos);
             var radius = CellSize.x / Mathf.Sqrt(3f);
             var halfHeight = CellSize.z * 0.5f;
 
@@ -226,11 +226,11 @@ namespace UnityBase.GridSystem
                     for (int z = 0; z < Depth; z++)
                     {
                         var pos = new Vector3Int(x, y, z);
-                        var node = GetFirst(pos);
+                        var node = GetGridObject(pos);
                         if (node.Equals(default(T))) continue;
                         var size = node.IsWalkable ? Vector3.zero : CellSize;
-                        var worldPos = GridToWorld3(pos);
-                        int index = CalculateIndex(pos);
+                        var worldPos = GridToWorld(pos);
+                        int index = GridPositionToIndex(pos);
                         MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, size.x / Mathf.Sqrt(3f),size.y, Transform, !_isPointyTopped);
                     }
                 }
@@ -254,7 +254,7 @@ namespace UnityBase.GridSystem
                     for (int z = 0; z < Depth; z++)
                     {
                         var pos = new Vector3Int(x, y, z);
-                        pathNodeArray[CalculateIndex(pos)] = GetFirst(pos);
+                        pathNodeArray[GridPositionToIndex(pos)] = GetGridObject(pos);
                     }
                 }
             }
@@ -285,20 +285,20 @@ namespace UnityBase.GridSystem
                     for (int z = 0; z < Depth; z++)
                     {
                         var pos = new Vector3Int(x, y, z);
-                        pathNodeArray[CalculateIndex(new Vector3Int(x,y,z))] = GetFirst(pos);
+                        pathNodeArray[GridPositionToIndex(new Vector3Int(x,y,z))] = GetGridObject(pos);
                     }
                 }
             }
 
             var job = new FindPathHexJob<T>
             {
-                pathNodeArray = pathNodeArray,
-                gridSize = new int3(Width, Height, Depth),
-                startPos = startPos,
-                endPos = endPos,
-                calculatedPathList = result,
-                allowDiagonalCornerCutting = allowDiagonalCornerCutting,
-                isPointyTopped = _isPointyTopped
+                PathNodeArray = pathNodeArray,
+                GridSize = new int3(Width, Height, Depth),
+                StartPos = startPos,
+                EndPos = endPos,
+                CalculatedPathList = result,
+                AllowDiagonalCornerCutting = allowDiagonalCornerCutting,
+                IsPointyTopped = _isPointyTopped
             };
 
             job.Schedule().Complete();
@@ -319,13 +319,13 @@ namespace UnityBase.GridSystem
 
         public override IWorldGrid<T> Build()
         {
-            if (_transform == null || !_width.HasValue || !_height.HasValue || !_depth.HasValue || !_cellSize.HasValue)
+            if (Transform == null || !Width.HasValue || !Height.HasValue || !Depth.HasValue || !CellSize.HasValue)
             {
                 Debug.LogError("HexWorldGridBuilder: Missing required parameters.");
                 return default;
             }
 
-            return new HexWorldGrid<T>(_transform, _width.Value, _height.Value, _depth.Value, _cellSize.Value, _offset, _cellOffset, _drawGizmos, _gizmosColor, _isPointyTopped);
+            return new HexWorldGrid<T>(Transform, Width.Value, Height.Value, Depth.Value, CellSize.Value, Offset, CellOffset, DrawGizmos, GizmosColor, _isPointyTopped);
         }
     }
 }

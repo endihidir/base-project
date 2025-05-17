@@ -46,17 +46,7 @@ namespace UnityBase.GridSystem
             
             Init();
 
-            _grid.Initialize(pos => new GridNode
-            {
-                GridPos = pos,
-                IsWalkable = true,
-                GCost = int.MaxValue,
-                HCost = 0,
-                FCost = 0,
-                CameFromNodeIndex = -1
-            });
-
-            _startNode = _grid.GetFirst(new Vector3Int(0, 0, _activeDepth));
+            _startNode = _grid.GetGridObject(new Vector3Int(0, 0, _activeDepth));
         }
 
         protected virtual void Init()
@@ -81,7 +71,7 @@ namespace UnityBase.GridSystem
                 
                 if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
                 
-                var endNode = _grid.GetFirst(gridPos);
+                var endNode = _grid.GetGridObject(gridPos);
                 
                 if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
 
@@ -132,11 +122,11 @@ namespace UnityBase.GridSystem
                 
                 if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
 
-                var pathNode = _grid.GetFirst(gridPos);
+                var pathNode = _grid.GetGridObject(gridPos);
                 
                 pathNode.IsWalkable = !pathNode.IsWalkable;
                 
-                _grid.SetFirst(gridPos, pathNode);
+                _grid.SetGridObject(gridPos, pathNode);
 
                 UpdateVisual();
             }
