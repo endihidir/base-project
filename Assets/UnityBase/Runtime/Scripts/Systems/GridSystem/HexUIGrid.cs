@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityBase.Extensions;
 using UnityEngine;
 
 namespace UnityBase.GridSystem
@@ -60,19 +61,22 @@ namespace UnityBase.GridSystem
             var effectiveRadius = (CellSize * Mathf.Sqrt(3f) / 2f) + (spacing * 0.5f);
             var acceptanceRadius = effectiveRadius * 0.6f;
 
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    var cell = new Vector3Int(x, y, 0);
-                    var cellWorldPos = GridToWorld(cell);
-                    var distance = Vector3.Distance(worldPos, cellWorldPos);
+            var cellCount = Width * Height;
 
-                    if (distance <= acceptanceRadius && distance < minDistance)
-                    {
-                        minDistance = distance;
-                        closestCell = cell;
-                    }
+            for (int i = 0; i < cellCount; i++)
+            {
+                var x = i % Width;
+                var y = i / Width;
+
+                var cell = new Vector3Int(x, y, 0);
+                var cellWorldPos = GridToWorld(cell);
+
+                var distance = worldPos.DistanceXY(cellWorldPos);
+
+                if (distance <= acceptanceRadius && distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestCell = cell;
                 }
             }
 

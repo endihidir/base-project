@@ -14,6 +14,10 @@ namespace UnityBase.Extensions
 			return (xDist + yDist + zDist) / 3f;
 		}
 		
+		public static float DistanceXY(this Vector3 a, Vector3 b) => (Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y)) * 0.5f;
+		public static float DistanceXZ(this Vector3 a, Vector3 b) => (Mathf.Abs(a.x - b.x) + Mathf.Abs(a.z - b.z)) * 0.5f;
+		public static float DistanceYZ(this Vector3 a, Vector3 b) => (Mathf.Abs(a.y - b.y) + Mathf.Abs(a.z - b.z)) * 0.5f;
+
 		public static Vector3 With(this Vector3 vector, float? x = null, float? y = null, float? z = null)
 		{
 			return new Vector3(x ?? vector.x, y ?? vector.y, z ?? vector.z);
