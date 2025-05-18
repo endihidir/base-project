@@ -5,6 +5,10 @@ public enum Direction
     Down,
     Right,
     Left,
+    LeftDown,
+    LeftUp,
+    RightUp,
+    RightDown,
     Forward,
     Backward
 }
