@@ -9,32 +9,21 @@ using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
-    public interface IUIGrid<T> : IGrid<T> where T : struct
-    {
-        bool TryGetGridObjectFromMousePosition(out T obj);
-        bool TryFindPositionOf(T obj, out Vector3Int pos);
-        bool TryGetNeighbor(T currentObject, Direction direction, out T neighbour);
-        bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour);
-        bool TryGetNeighbors(T currentObject, out T[] neighbours);
-        bool TryGetNeighborsNonAlloc(T currentObject, Span<T> resultBuffer, out int count);
-        public void Update(int width, int height, float screenSidePaddingRatio, float cellSpacingRatio, Vector3 originOffset, bool drawGizmos, Color gizmosColor);
-    }
-    
     public class UIGrid<T> : IUIGrid<T> where T : struct, IGridNodeData
     {
         #region VARIABLES
 
         private readonly Camera _cam;
-        private int _width, _height;
+        protected int _width, _height;
         
-        private float _screenSidePaddingRatio;
-        private float _cellSpacingRatio;
+        protected float _screenSidePaddingRatio;
+        protected float _cellSpacingRatio;
 
-        private T[,] _gridArray;
-        private Vector3 _originOffset;
+        protected T[,] _gridArray;
+        protected Vector3 _originOffset;
         
-        private float _cellSize;
-        private bool _drawGizmos;
+        protected float _cellSize;
+        protected bool _drawGizmos;
         protected Color GizmosColor;
 
         #endregion
@@ -145,7 +134,7 @@ namespace UnityBase.GridSystem
             _width = newWidth;
             _height = newHeight;
         }
-        
+
         private void CalculateCellSize()
         {
             var screenWidth = GetScreenWidth();
@@ -170,7 +159,7 @@ namespace UnityBase.GridSystem
             }
         }
         
-        public Vector3 GridToWorld(Vector3Int pos)
+        public virtual Vector3 GridToWorld(Vector3Int pos)
         {
             if (!IsInRange(pos)) return Vector3.zero;
 
@@ -180,11 +169,45 @@ namespace UnityBase.GridSystem
             var totalGridWidth = (Width * _cellSize) + ((Width - 1) * gridOffset);
             
             var xOffset = (GetScreenWidth() - totalGridWidth) / 2 + pos.x * (_cellSize + gridOffset);
-            var yOffset = (borderOffset / 2) + pos.y * (_cellSize + gridOffset);
+            var yOffset = pos.y * (_cellSize + gridOffset);
     
             var position = new Vector3(GetLeftX() + xOffset + (_cellSize / 2), GetTopY() - yOffset - (_cellSize / 2), 0);
 
             return position;
+        }
+        
+        public virtual Vector3Int WorldToGrid(Vector3 worldPos, bool clamp = true)
+        {
+            var pos = new Vector3Int(-1, -1);
+            
+            var absoluteXPos = worldPos.x - GetOriginPos(Vector3.up).x;
+            var absoluteYPos = GetOriginPos(Vector3.up).y - worldPos.y;
+
+            var screenWidth = GetScreenWidth();
+            var borderOffset = CalculateBorderOffset(screenWidth);
+            var gridOffset = CalculateGridOffset(screenWidth);
+
+            var xDivider = _cellSize + gridOffset;
+            var yDivider = _cellSize + gridOffset;
+
+            var xRaw = (absoluteXPos - (borderOffset / 2)) / xDivider;
+            var yRaw = (absoluteYPos) / yDivider;
+            
+            if (IsInPaddingArea(absoluteXPos, xDivider, borderOffset) || IsInPaddingArea(absoluteYPos, yDivider, borderOffset))
+            {
+                return pos;
+            }
+            
+            pos.x = Mathf.FloorToInt(xRaw);
+            pos.y = Mathf.FloorToInt(yRaw);
+            
+            if (clamp)
+            {
+                pos.x = Mathf.Clamp(pos.x, 0, Width - 1);
+                pos.y = Mathf.Clamp(pos.y, 0, Height - 1);
+            }
+
+            return pos;
         }
 
         public T GetGridObject(Vector3Int pos)
@@ -197,7 +220,7 @@ namespace UnityBase.GridSystem
         public bool TryGetGridObjectFromMousePosition(out T obj)
         {
             var worldPosition = _cam.ScreenToWorldPoint(Input.mousePosition).With(z: _cam.nearClipPlane);
-            var pos = WorldToGrid(worldPosition);
+            var pos = WorldToGrid(worldPosition, false);
             if (!IsInRange(pos))
             {
                 obj = default;
@@ -285,7 +308,7 @@ namespace UnityBase.GridSystem
             return count > 0;
         }
 
-        public bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
+        public virtual bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
         {
             neighbour = default;
 
@@ -324,34 +347,6 @@ namespace UnityBase.GridSystem
             return false;
         }
 
-        public Vector3Int WorldToGrid(Vector3 worldPos, bool clamp = true)
-        {
-            var pos = new Vector3Int(-1, -1);
-            
-            var absoluteXPos = worldPos.x - GetOriginPos(Vector3.up).x;
-            var absoluteYPos = GetOriginPos(Vector3.up).y - worldPos.y;
-
-            var screenWidth = GetScreenWidth();
-            var borderOffset = CalculateBorderOffset(screenWidth);
-            var gridOffset = CalculateGridOffset(screenWidth);
-
-            var xDivider = _cellSize + gridOffset;
-            var yDivider = _cellSize + gridOffset;
-
-            var xRaw = (absoluteXPos - (borderOffset / 2)) / xDivider;
-            var yRaw = (absoluteYPos - (borderOffset / 2)) / yDivider;
-            
-            if (IsInPaddingArea(absoluteXPos, xDivider, borderOffset) || IsInPaddingArea(absoluteYPos, yDivider, borderOffset))
-            {
-                return pos;
-            }
-            
-            pos.x = Mathf.FloorToInt(xRaw);
-            pos.y = Mathf.FloorToInt(yRaw);
-
-            return pos;
-        }
-
         public int GridPositionToIndex(Vector3Int pos) => (pos.y * Width) + pos.x;
 
         public Vector3Int IndexToGridPosition(int index)
@@ -361,7 +356,7 @@ namespace UnityBase.GridSystem
             return new Vector3Int(x, y);
         }
         
-        public void DrawGrid()
+        public virtual void DrawGrid()
         {
             if(!DrawGizmos) return;
     
@@ -407,7 +402,7 @@ namespace UnityBase.GridSystem
             }
         }
         
-        public void RebuildMeshVisual(Mesh mesh)
+        public virtual void RebuildMeshVisual(Mesh mesh)
         {
             var cellCount = _width * _height;
             MeshUtils.CreateEmptyMeshArrays(cellCount, out var vertices, out var uvs, out var triangles);
@@ -433,7 +428,7 @@ namespace UnityBase.GridSystem
             mesh.triangles = triangles;
         }
         
-        public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonal = false)
+        public virtual List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, bool allowDiagonal = false)
         {
             var totalSize = Width * Height;
             var pathNodeArray = new T[totalSize];
@@ -459,7 +454,7 @@ namespace UnityBase.GridSystem
             return pathFinder.Execute();
         }
         
-        public NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonal = false)
+        public virtual NativeList<Vector3Int> FindPathWithJobs(Vector3Int startPos, Vector3Int endPos, bool allowDiagonal = false)
         {
             var totalSize = Width * Height;
             var pathNodeArray = new NativeArray<T>(totalSize, Allocator.TempJob);
@@ -491,19 +486,18 @@ namespace UnityBase.GridSystem
         
         public bool IsInRange(Vector3Int pos) => pos.x >= 0 && pos.y >= 0 && pos.x < Width && pos.y < Height;
         
-        private float GetScreenWidth() => Mathf.Abs(GetLeftX() - GetRightX());
-        private float GetScreenHeight() => Mathf.Abs(GetTopY() - GetBottomY());
+        protected float GetScreenWidth() => Mathf.Abs(GetLeftX() - GetRightX());
+        protected float GetScreenHeight() => Mathf.Abs(GetTopY() - GetBottomY());
         
-        private Vector3 GetOriginPos(Vector3 origin = default) => _cam.ViewportToWorldPoint(origin.With(z: _cam.nearClipPlane)) - new Vector3(_originOffset.x, _originOffset.y, 0f);
+        protected Vector3 GetOriginPos(Vector3 origin = default) => _cam.ViewportToWorldPoint(origin.With(z: _cam.nearClipPlane)) - new Vector3(_originOffset.x, _originOffset.y, 0f);
 
-        private float GetRightX() => GetOriginPos(Vector3.right).x;
-        private float GetTopY() => GetOriginPos(Vector3.up).y;
-        private float GetLeftX() => GetOriginPos().x;
-        private float GetBottomY() => GetOriginPos().y;
+        protected float GetRightX() => GetOriginPos(Vector3.right).x;
+        protected float GetTopY() => GetOriginPos(Vector3.up).y;
+        protected float GetLeftX() => GetOriginPos().x;
+        protected float GetBottomY() => GetOriginPos().y;
         
-        private float CalculateBorderOffset(float screenWidth) => screenWidth * (_screenSidePaddingRatio / 100f);
-        private float CalculateGridOffset(float screenWidth) => screenWidth * (_cellSpacingRatio / 100f);
-
-        private bool IsInPaddingArea(float absolutePos, float divider, float borderOffset) => (absolutePos - (borderOffset / 2)) % divider > _cellSize;
+        protected float CalculateBorderOffset(float screenWidth) => screenWidth * (_screenSidePaddingRatio / 100f);
+        protected float CalculateGridOffset(float screenWidth) => screenWidth * (_cellSpacingRatio / 100f);
+        protected bool IsInPaddingArea(float absolutePos, float divider, float borderOffset) => (absolutePos - (borderOffset / 2)) % divider > _cellSize;
     }
 }

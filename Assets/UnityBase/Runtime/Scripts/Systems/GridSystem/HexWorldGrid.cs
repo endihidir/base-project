@@ -265,7 +265,7 @@ namespace UnityBase.GridSystem
                 PathNodeArray = pathNodeArray,
                 StartPos = startPos,
                 EndPos = endPos,
-                AllowDiagonalCornerCutting = allowDiagonalCornerCutting,
+                AllowDiagonalCornerCutting = true, //allowDiagonalCornerCutting, // Here needs to be always true for hex!!
                 IsPointyTopped = _isPointyTopped
             };
 
@@ -297,7 +297,7 @@ namespace UnityBase.GridSystem
                 StartPos = startPos,
                 EndPos = endPos,
                 CalculatedPathList = result,
-                AllowDiagonalCornerCutting = allowDiagonalCornerCutting,
+                AllowDiagonalCornerCutting = true, //allowDiagonalCornerCutting, // Here needs to be always true for hex!!
                 IsPointyTopped = _isPointyTopped
             };
 

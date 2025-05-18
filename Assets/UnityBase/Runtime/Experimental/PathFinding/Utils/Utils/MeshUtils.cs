@@ -50,6 +50,13 @@ public static class MeshUtils
 	    triangles = new int[36 * cubeCount];
     }
     
+    public static void CreateEmptyMeshArraysHex2D(int hexCount, out Vector3[] vertices, out Vector2[] uvs, out int[] triangles)
+    {
+	    vertices = new Vector3[7 * hexCount]; 
+	    uvs = new Vector2[7 * hexCount];
+	    triangles = new int[18 * hexCount];
+    }
+    
     public static void CreateEmptyMeshArraysHex3D(int hexCount, out Vector3[] vertices, out Vector2[] uvs, out int[] triangles)
     {
 	    vertices = new Vector3[14 * hexCount];
@@ -242,6 +249,32 @@ public static class MeshUtils
 
 	    for (int i = 0; i < 36; i++)
 		    triangles[tIndex + i] = vIndex + cubeTris[i];
+    }
+    
+    public static void AddToMeshArraysHex2D(Vector3[] vertices, Vector2[] uvs, int[] triangles, int index, Vector3 center, float radius, bool isPointyTopped)
+    {
+	    int vIndex = index * 7;
+	    int tIndex = index * 18;
+	    
+	    vertices[vIndex + 6] = center;
+	    uvs[vIndex + 6] = Vector2.zero;
+
+	    for (int i = 0; i < 6; i++)
+	    {
+		    float angleDeg = isPointyTopped ? 60 * i - 30 : 60 * i;
+		    float angleRad = Mathf.Deg2Rad * angleDeg;
+
+		    float x = Mathf.Cos(angleRad) * radius;
+		    float y = Mathf.Sin(angleRad) * radius;
+
+		    vertices[vIndex + i] = center + new Vector3(x, y, 0f);
+		    uvs[vIndex + i] = Vector2.zero;
+		    
+		    int next = (i + 1) % 6;
+		    triangles[tIndex + i * 3 + 0] = vIndex + i;
+		    triangles[tIndex + i * 3 + 1] = vIndex + next;
+		    triangles[tIndex + i * 3 + 2] = vIndex + 6;
+	    }
     }
     
     public static void AddToMeshArraysHex3D(Vector3[] vertices, Vector2[] uvs, int[] triangles, int index, Vector3 center, float radius, float height, Transform transform, bool isPointyTopped)

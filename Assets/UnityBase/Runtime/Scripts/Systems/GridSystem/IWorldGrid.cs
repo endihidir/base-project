@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityBase.GridSystem
 {
-    public interface IWorldGrid<T> : IGrid<T> where T : struct
+    public interface IWorldGrid<T> : IGrid<T> where T : struct, IGridNodeData
     {
         Vector3 CellSize { get; }  
         Vector3 CellOffset { get; }
