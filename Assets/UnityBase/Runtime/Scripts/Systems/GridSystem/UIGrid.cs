@@ -162,8 +162,7 @@ namespace UnityBase.GridSystem
         public virtual Vector3 GridToWorld(Vector3Int pos)
         {
             if (!IsInRange(pos)) return Vector3.zero;
-
-            var borderOffset = GetScreenWidth() * (_screenSidePaddingRatio / 100f);
+            
             var gridOffset = GetScreenWidth() * (_cellSpacingRatio / 100f);
             
             var totalGridWidth = (Width * _cellSize) + ((Width - 1) * gridOffset);
@@ -489,7 +488,7 @@ namespace UnityBase.GridSystem
         protected float GetScreenWidth() => Mathf.Abs(GetLeftX() - GetRightX());
         protected float GetScreenHeight() => Mathf.Abs(GetTopY() - GetBottomY());
         
-        protected Vector3 GetOriginPos(Vector3 origin = default) => _cam.ViewportToWorldPoint(origin.With(z: _cam.nearClipPlane)) - new Vector3(_originOffset.x, _originOffset.y, 0f);
+        protected Vector3 GetOriginPos(Vector3 origin = default) => _cam.ViewportToWorldPoint(origin.With(z: _cam.nearClipPlane)) + new Vector3(_originOffset.x, -_originOffset.y, 0f);
 
         protected float GetRightX() => GetOriginPos(Vector3.right).x;
         protected float GetTopY() => GetOriginPos(Vector3.up).y;
