@@ -8,6 +8,9 @@ namespace UnityBase.GridSystem
 {
     public class HexWorldGrid<T> : WorldGrid<T> where T : struct, IGridNodeData
     {
+        private const float SQRT3 = 1.73205f; // Mathf.Sqrt(3f)
+        private const float HEX_INNER_RADIUS_FACTOR = 0.866025f; // Mathf.Sqrt(3f) / 2f
+        
         private readonly bool _isPointyTopped;
 
         private static readonly Vector3Int[] _hexOffsetsEven =
@@ -33,7 +36,7 @@ namespace UnityBase.GridSystem
             var y = CellSize.y + CellOffset.y;
             var z = CellSize.z + CellOffset.z;
 
-            return !_isPointyTopped ? (x * Mathf.Sqrt(3f) / 2f, y, z) : (x, y * Mathf.Sqrt(3f) / 2f, z);
+            return !_isPointyTopped ? (x * HEX_INNER_RADIUS_FACTOR, y, z) : (x, y * HEX_INNER_RADIUS_FACTOR, z);
         }
 
         private float GetAverageOffsetForHeight() => 0.25f * ((Width - 1f) / Width);
@@ -91,7 +94,7 @@ namespace UnityBase.GridSystem
 
             if (!_isPointyTopped)
             {
-                xSpacing *= Mathf.Sqrt(3f) / 2f;
+                xSpacing *= HEX_INNER_RADIUS_FACTOR;
                 var q = localPos.x / xSpacing;
                 var isOdd = Mathf.RoundToInt(q) % 2 != 0;
                 var r = localPos.z / ySpacing - (isOdd ? 0.5f : 0f);
@@ -102,7 +105,7 @@ namespace UnityBase.GridSystem
             }
             else
             {
-                ySpacing *= Mathf.Sqrt(3f) / 2f;
+                ySpacing *= HEX_INNER_RADIUS_FACTOR;
                 var r = localPos.z / ySpacing;
                 var isOdd = Mathf.RoundToInt(r) % 2 != 0;
                 var q = localPos.x / xSpacing - (isOdd ? 0.5f : 0f);
@@ -111,9 +114,9 @@ namespace UnityBase.GridSystem
                 x = Mathf.RoundToInt(rounded.x);
                 y = Mathf.RoundToInt(rounded.y);
             }
-
+        
             z = Mathf.FloorToInt(localPos.y / zStep);
-
+        
             if (clamp)
             {
                 x = Mathf.Clamp(x, 0, Width - 1);
@@ -122,34 +125,35 @@ namespace UnityBase.GridSystem
             }
             
             var estimatedPos = GridToWorld(new Vector3Int(x, y, z));
-            
-            var radius = CellSize.x / Mathf.Sqrt(3f);
-
-            if (Vector3.Distance(position, estimatedPos) > radius)
-            {
-                return new Vector3Int(-1, -1, -1);
-            }
-
-            return new Vector3Int(x, y, z);
+            var radius = CellSize.x / SQRT3;
+        
+            return Vector3.Distance(position, estimatedPos) > radius 
+                ? new Vector3Int(-1, -1, -1) 
+                : new Vector3Int(x, y, z);
         }
-
+        
         private Vector2 RoundAxial(Vector2 axial)
         {
-            var cube = new Vector3(axial.x, -axial.x - axial.y, axial.y);
-            var roundedCube = new Vector3(Mathf.Round(cube.x), Mathf.Round(cube.y), Mathf.Round(cube.z));
-
-            var dx = Mathf.Abs(roundedCube.x - cube.x);
-            var dy = Mathf.Abs(roundedCube.y - cube.y);
-            var dz = Mathf.Abs(roundedCube.z - cube.z);
-
+            var x = axial.x;
+            var z = axial.y;
+            var y = -x - z;
+            
+            var rx = Mathf.Round(x);
+            var ry = Mathf.Round(y);
+            var rz = Mathf.Round(z);
+            
+            var dx = Mathf.Abs(rx - x);
+            var dy = Mathf.Abs(ry - y);
+            var dz = Mathf.Abs(rz - z);
+            
             if (dx > dy && dx > dz)
-                roundedCube.x = -roundedCube.y - roundedCube.z;
+                rx = -ry - rz;
             else if (dy > dz)
-                roundedCube.y = -roundedCube.x - roundedCube.z;
+                ry = -rx - rz;
             else
-                roundedCube.z = -roundedCube.x - roundedCube.y;
-
-            return new Vector2(roundedCube.x, roundedCube.z);
+                rz = -rx - ry;
+            
+            return new Vector2(rx, rz);
         }
 
         protected override IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
@@ -184,7 +188,7 @@ namespace UnityBase.GridSystem
         public override void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor)
         {
             var center = GridToWorld(gridPos);
-            var radius = CellSize.x / Mathf.Sqrt(3f);
+            var radius = CellSize.x / SQRT3;
             var halfHeight = CellSize.z * 0.5f;
 
             var cornersTop = new Vector3[6];
@@ -231,7 +235,7 @@ namespace UnityBase.GridSystem
                         var size = node.IsWalkable ? Vector3.zero : CellSize;
                         var worldPos = GridToWorld(pos);
                         int index = GridPositionToIndex(pos);
-                        MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, size.x / Mathf.Sqrt(3f),size.y, Transform, !_isPointyTopped);
+                        MeshUtils.AddToMeshArraysHex3D(vertices, uv, triangles, index, worldPos, size.x / SQRT3, size.y, Transform, !_isPointyTopped);
                     }
                 }
             }

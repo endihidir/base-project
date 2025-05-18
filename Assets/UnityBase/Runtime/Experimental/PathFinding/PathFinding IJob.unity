@@ -529,17 +529,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _useJobSystem: 1
   _gridWidth: 7
-  _gridHeight: 7
+  _gridHeight: 6
   _gridDepth: 1
   _cellSize: {x: 7, y: 7, z: 7}
-  _cellOffset: {x: 0, y: 0, z: 0}
+  _cellOffset: {x: 2, y: 2, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _meshFilter: {fileID: 181437503}
   _activeDepth: 0
   _allowDiagonalCornerCutting: 1
-  _isPointyTopped: 0
+  _isPointyTopped: 1
 --- !u!1 &2101881219
 GameObject:
   m_ObjectHideFlags: 0
@@ -589,12 +589,12 @@ MonoBehaviour:
   _width: 6
   _height: 8
   _screenSidePaddingRatio: 10
-  _cellSpacingRatio: 1
+  _cellSpacingRatio: 2
   _originOffset: {x: 0, y: 5, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.96566105, b: 0, a: 1}
   _meshFilter: {fileID: 181437503}
-  _isPointyTopped: 1
+  _isPointyTopped: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

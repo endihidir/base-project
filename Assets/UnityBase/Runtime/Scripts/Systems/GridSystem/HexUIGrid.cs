@@ -9,6 +9,9 @@ namespace UnityBase.GridSystem
 {
     public class HexUIGrid<T> : UIGrid<T> where T : struct, IGridNodeData
     {
+        private const float SQRT3 = 1.73205f; // Mathf.Sqrt(3f)
+        private const float HEX_INNER_RADIUS_FACTOR = 0.866025f; // Mathf.Sqrt(3f) / 2f
+        
         private readonly bool _isPointyTopped;
 
         private static readonly Vector3Int[] _hexOffsetsEven =
@@ -36,8 +39,8 @@ namespace UnityBase.GridSystem
             var spacing = GetScreenWidth() * (_cellSpacingRatio / 100f);
             var borderOffset = GetScreenWidth() * (_screenSidePaddingRatio / 100f);
 
-            var w = (CellSize * (Mathf.Sqrt(3f) * 0.5f)) + spacing;
-            var h = Mathf.Sqrt(3f) * 0.5f * w;
+            var w = (CellSize * HEX_INNER_RADIUS_FACTOR) + spacing;
+            var h = HEX_INNER_RADIUS_FACTOR * w;
 
             var x = _isPointyTopped ? w * (pos.x + 0.5f * (pos.y & 1)) : h * pos.x;
             
@@ -51,52 +54,86 @@ namespace UnityBase.GridSystem
 
             return new Vector3(startX + x + w / 2f, startY - y - h / 2f, 0f);
         }
-
+        
         public override Vector3Int WorldToGrid(Vector3 worldPos, bool clamp = true)
         {
-            var closestCell = new Vector3Int(-1, -1, 0);
-            var minDistance = float.MaxValue;
-            
             var spacing = GetScreenWidth() * (_cellSpacingRatio / 100f);
-            var effectiveRadius = (CellSize * Mathf.Sqrt(3f) / 2f) + (spacing * 0.5f);
-            var acceptanceRadius = effectiveRadius * 0.6f;
-
-            var cellCount = Width * Height;
-
-            for (int i = 0; i < cellCount; i++)
+            var borderOffset = GetScreenWidth() * (_screenSidePaddingRatio / 100f);
+      
+            var totalAvailableWidth = GetScreenWidth() - borderOffset;
+            var w = (CellSize * HEX_INNER_RADIUS_FACTOR) + spacing;
+            var h = HEX_INNER_RADIUS_FACTOR * w;
+            
+            var totalGridWidth = _isPointyTopped ? Width * w + (w * 0.5f) : Width * h + (h * 0.5f);
+            var startX = GetLeftX() + (totalAvailableWidth - totalGridWidth) / 2f + borderOffset / 2f;
+            var startY = GetTopY();
+      
+            var normalizedX = worldPos.x - startX - w / 2f;
+            var normalizedY = startY - worldPos.y - h / 2f;
+            
+            int x, y;
+            
+            if (_isPointyTopped)
             {
-                var x = i % Width;
-                var y = i / Width;
-
-                var cell = new Vector3Int(x, y, 0);
-                var cellWorldPos = GridToWorld(cell);
-
-                var distance = worldPos.DistanceXY(cellWorldPos);
-
-                if (distance <= acceptanceRadius && distance < minDistance)
-                {
-                    minDistance = distance;
-                    closestCell = cell;
-                }
+                var q = normalizedX / w;
+                var r = normalizedY / h;
+                
+                var qOffset = 0.5f * (Mathf.RoundToInt(r) & 1);
+                var axialCoord = new Vector2(q - qOffset, r);
+                
+                var rounded = RoundAxial(axialCoord);
+                x = Mathf.RoundToInt(rounded.x);
+                y = Mathf.RoundToInt(rounded.y);
             }
-
+            else
+            {
+                var q = normalizedX / h;
+                var r = normalizedY / w;
+                
+                var rOffset = 0.5f * (Mathf.RoundToInt(q) & 1);
+                var axialCoord = new Vector2(q, r - rOffset);
+                
+                var rounded = RoundAxial(axialCoord);
+                x = Mathf.RoundToInt(rounded.x);
+                y = Mathf.RoundToInt(rounded.y);
+            }
+            
             if (clamp)
             {
-                closestCell.x = Mathf.Clamp(closestCell.x, 0, Width - 1);
-                closestCell.y = Mathf.Clamp(closestCell.y, 0, Height - 1);
+                x = Mathf.Clamp(x, 0, Width - 1);
+                y = Mathf.Clamp(y, 0, Height - 1);
             }
             
-            var estimatedPos = GridToWorld(closestCell);
-            
-            var radius = (CellSize / Mathf.Sqrt(3f)) * 0.8f;
+            var estimatedPos = GridToWorld(new Vector3Int(x, y, 0));
+            var radius = (CellSize / SQRT3) * 0.8f;
 
             if (Vector3.Distance(worldPos, estimatedPos) > radius)
             {
-                return new Vector3Int(-1, -1, -1);
+                return new Vector3Int(-1, -1, -1); 
             }
 
-            return closestCell;
+            return new Vector3Int(x, y, 0);
         }
+
+        private Vector2 RoundAxial(Vector2 axial)
+        {
+            var cube = new Vector3(axial.x, -axial.x - axial.y, axial.y);
+            var roundedCube = new Vector3(Mathf.Round(cube.x), Mathf.Round(cube.y), Mathf.Round(cube.z));
+
+            var dx = Mathf.Abs(roundedCube.x - cube.x);
+            var dy = Mathf.Abs(roundedCube.y - cube.y);
+            var dz = Mathf.Abs(roundedCube.z - cube.z);
+
+            if (dx > dy && dx > dz)
+                roundedCube.x = -roundedCube.y - roundedCube.z;
+            else if (dy > dz)
+                roundedCube.y = -roundedCube.x - roundedCube.z;
+            else
+                roundedCube.z = -roundedCube.x - roundedCube.y;
+
+            return new Vector2(roundedCube.x, roundedCube.z);
+        }
+
 
         public override bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
         {
