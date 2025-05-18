@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityBase.Extensions;
 using UnityEngine;
 
 namespace UnityBase.GridSystem
