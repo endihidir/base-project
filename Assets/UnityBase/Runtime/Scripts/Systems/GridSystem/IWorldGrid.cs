@@ -19,8 +19,6 @@ namespace UnityBase.GridSystem
         void Add(Vector3 worldPos, T item);
         bool Remove(Vector3 worldPos, T item);
 
-        T GetGridObject(Vector3 worldPos);
-
         bool TryGet(Vector3Int gridPos, out IReadOnlyList<T> result);
         bool TryGet(Vector3 worldPos, out IReadOnlyList<T> result);
         bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos);
@@ -30,9 +28,7 @@ namespace UnityBase.GridSystem
         bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false);
 
         Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0);
-        Vector3 GridToWorld(Vector3Int gridPos);
         Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
-        Vector3Int WorldToGrid(Vector3 position, bool clamp = true);
         
         bool IsInRange(Vector3 worldPos);
         bool IsInRange2(Vector2Int pos);

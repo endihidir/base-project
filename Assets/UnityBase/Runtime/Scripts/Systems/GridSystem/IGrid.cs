@@ -12,6 +12,9 @@ namespace UnityBase.GridSystem
         bool DrawGizmos { get; }
         T GetGridObject(Vector3Int gridPos);
         void SetGridObject(Vector3Int gridPos, T item);
+        T GetGridObject(Vector3 worldPos);
+        Vector3 GridToWorld(Vector3Int pos);
+        Vector3Int WorldToGrid(Vector3 position, bool clamp = true);
         bool IsInRange(Vector3Int pos);
         int GridPositionToIndex(Vector3Int pos);
         Vector3Int IndexToGridPosition(int index);

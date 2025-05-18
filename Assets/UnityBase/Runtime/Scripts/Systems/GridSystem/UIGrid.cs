@@ -11,15 +11,12 @@ namespace UnityBase.GridSystem
 {
     public interface IUIGrid<T> : IGrid<T> where T : struct
     {
-        Vector3 GetWorldPosition(Vector3Int pos);
-        Vector3Int WorldToGrid(Vector3 worldPos);
         bool TryGetGridObjectFromMousePosition(out T obj);
         bool TryFindPositionOf(T obj, out Vector3Int pos);
         bool TryGetNeighbor(T currentObject, Direction direction, out T neighbour);
         bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour);
         bool TryGetNeighbors(T currentObject, out T[] neighbours);
         bool TryGetNeighborsNonAlloc(T currentObject, Span<T> resultBuffer, out int count);
-
         public void Update(int width, int height, float screenSidePaddingRatio, float cellSpacingRatio, Vector3 originOffset, bool drawGizmos, Color gizmosColor);
     }
     
@@ -173,7 +170,7 @@ namespace UnityBase.GridSystem
             }
         }
         
-        public Vector3 GetWorldPosition(Vector3Int pos)
+        public Vector3 GridToWorld(Vector3Int pos)
         {
             if (!IsInRange(pos)) return Vector3.zero;
 
@@ -327,9 +324,7 @@ namespace UnityBase.GridSystem
             return false;
         }
 
-        public bool IsInRange(Vector3Int pos) => pos.x >= 0 && pos.y >= 0 && pos.x < Width && pos.y < Height;
-
-        public Vector3Int WorldToGrid(Vector3 worldPos)
+        public Vector3Int WorldToGrid(Vector3 worldPos, bool clamp = true)
         {
             var pos = new Vector3Int(-1, -1);
             
@@ -376,7 +371,7 @@ namespace UnityBase.GridSystem
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    var center = GetWorldPosition(new Vector3Int(x, y));
+                    var center = GridToWorld(new Vector3Int(x, y));
                     var halfSize = _cellSize * 0.5f;
                     
                     var topLeft = new Vector3(center.x - halfSize, center.y + halfSize, center.z);
@@ -396,8 +391,8 @@ namespace UnityBase.GridSystem
         {
             for (int i = 0; i < path.Count - 1; i++)
             {
-                var start = GetWorldPosition(path[i]);
-                var end = GetWorldPosition(path[i + 1]);
+                var start = GridToWorld(path[i]);
+                var end = GridToWorld(path[i + 1]);
                 Debug.DrawLine(start, end, color, duration);
             }
         }
@@ -406,8 +401,8 @@ namespace UnityBase.GridSystem
         {
             for (int i = 0; i < path.Length - 1; i++)
             {
-                var start = GetWorldPosition(path[i]);
-                var end = GetWorldPosition(path[i + 1]);
+                var start = GridToWorld(path[i]);
+                var end = GridToWorld(path[i + 1]);
                 Debug.DrawLine(start, end, color, duration);
             }
         }
@@ -425,7 +420,7 @@ namespace UnityBase.GridSystem
                     var node = GetGridObject(pos);
                     if (node.Equals(default(GridNode)) || node.IsWalkable) continue;
 
-                    var worldPos = GetWorldPosition(pos);
+                    var worldPos = GridToWorld(pos);
                     var size = new Vector3(CellSize, CellSize, 0f);
                     var index = GridPositionToIndex(pos);
                     MeshUtils.AddToMeshArrays(vertices, uvs, triangles, index, worldPos, 0f, size, Vector2.zero, Vector2.one);
@@ -493,6 +488,8 @@ namespace UnityBase.GridSystem
             pathNodeArray.Dispose();
             return result;
         }
+        
+        public bool IsInRange(Vector3Int pos) => pos.x >= 0 && pos.y >= 0 && pos.x < Width && pos.y < Height;
         
         private float GetScreenWidth() => Mathf.Abs(GetLeftX() - GetRightX());
         private float GetScreenHeight() => Mathf.Abs(GetTopY() - GetBottomY());
