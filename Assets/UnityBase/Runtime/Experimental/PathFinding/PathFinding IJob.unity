@@ -587,9 +587,9 @@ MonoBehaviour:
   _useJobSystem: 1
   _allowDiagonalCornerCutting: 1
   _width: 6
-  _height: 8
-  _screenSidePaddingRatio: 10
-  _cellSpacingRatio: 1.83
+  _height: 2
+  _screenSidePaddingRatio: 0
+  _cellSpacingRatio: 1
   _originOffset: {x: 0, y: 5, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.96566105, b: 0, a: 1}

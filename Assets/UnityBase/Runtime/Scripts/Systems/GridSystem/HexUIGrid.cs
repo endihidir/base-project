@@ -41,7 +41,7 @@ namespace UnityBase.GridSystem
             var w = (CellSize * HEX_INNER_RADIUS_FACTOR) + spacing;
             var h = HEX_INNER_RADIUS_FACTOR * w;
 
-            var x = _isPointyTopped ? w * (pos.x + 0.5f * (pos.y & 1)) : h * (pos.x + 0.18f); // 0.18f Magic Number (Offset adjustment for flat-topped hexes to align grid coordinates with visual representation)
+            var x = _isPointyTopped ? w * (pos.x + 0.5f * (pos.y & 1)) : h * (pos.x + (SQRT3 / 10f));
             var y = _isPointyTopped ? h * pos.y : w * (pos.y + 0.5f * (pos.x & 1));
 
             var totalAvailableWidth = GetScreenWidth() - borderOffset;
@@ -85,7 +85,7 @@ namespace UnityBase.GridSystem
             }
             else
             {
-                var q = normalizedX / h - 0.18f; // 0.18f Magic Number (Offset adjustment for flat-topped hexes to align grid coordinates with visual representation)
+                var q = normalizedX / h - (SQRT3 / 10f);
                 var r = normalizedY / w;
                 
                 var rOffset = 0.5f * (Mathf.RoundToInt(q) & 1);
