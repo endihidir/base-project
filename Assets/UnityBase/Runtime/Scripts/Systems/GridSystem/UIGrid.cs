@@ -36,6 +36,18 @@ namespace UnityBase.GridSystem
 
         public T[,] GridArray => _gridArray;
         public float CellSize => _cellSize;
+        
+        private static readonly Dictionary<Direction, Vector2Int> _baseDirections = new()
+        {
+            { Direction.Right,     new Vector2Int(1, 0) },
+            { Direction.Left,      new Vector2Int(-1, 0) },
+            { Direction.Up,        new Vector2Int(0, -1) },
+            { Direction.Down,      new Vector2Int(0, 1) },
+            { Direction.RightUp,   new Vector2Int(1, -1) },
+            { Direction.LeftUp,    new Vector2Int(-1, -1) },
+            { Direction.RightDown, new Vector2Int(1, 1) },
+            { Direction.LeftDown,  new Vector2Int(-1, 1) }
+        };
 
         #endregion
 
@@ -306,22 +318,32 @@ namespace UnityBase.GridSystem
 
             return count > 0;
         }
-
+        
         public virtual bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
         {
             neighbour = default;
-
-            switch (direction)
+            
+            if (direction is Direction.Forward or Direction.Backward)
+                return false;
+            
+            if (direction == Direction.None)
             {
-                case Direction.Right: pos.x++; break;
-                case Direction.Left:  pos.x--; break;
-                case Direction.Up:    pos.y--; break;
-                case Direction.Down:  pos.y++; break;
+                if (IsInRange(pos))
+                {
+                    neighbour = _gridArray[pos.x, pos.y];
+                    return !EqualityComparer<T>.Default.Equals(neighbour, default);
+                }
+                return false;
             }
-
-            if (IsInRange(pos))
+            
+            if (!_baseDirections.TryGetValue(direction, out var offset))
+                return false;
+            
+            var newPos = new Vector3Int(pos.x + offset.x, pos.y + offset.y, 0);
+            
+            if (IsInRange(newPos))
             {
-                neighbour = _gridArray[pos.x, pos.y];
+                neighbour = _gridArray[newPos.x, newPos.y];
                 return !EqualityComparer<T>.Default.Equals(neighbour, default);
             }
 

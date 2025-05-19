@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityBase.Extensions;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ namespace UnityBase.GridSystem
         private Camera _cam;
         protected Mesh _mesh;
 
+        private bool _test;
         private void Awake()
         {
             _mesh = new Mesh();
@@ -41,7 +43,14 @@ namespace UnityBase.GridSystem
 
         protected virtual void Init()
         {
-            _grid = new UIGrid<GridNode>(Camera.main, _width, _height, _screenSidePaddingRatio, _cellSpacingRatio, _originOffset, _drawGizmos, _gizmosColor);
+            _grid = new UIGridBuilder<GridNode>()
+                .WithCamera(Camera.main)
+                .WithSize(_width, _height)
+                .WithScreenSidePaddingRatio(_screenSidePaddingRatio)
+                .WithCellSpacingRatio(_cellSpacingRatio)
+                .WithOriginOffset(_originOffset)
+                .WithGizmos(_drawGizmos, _gizmosColor)
+                .Build();
         }
         
         private void Update()
@@ -55,7 +64,7 @@ namespace UnityBase.GridSystem
                 if (!_grid.TryGetGridObjectFromMousePosition(out var endNode)) return;
 
                 if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
-
+                
                 if (_useJobSystem)
                 {
                     var path = _grid.FindPathWithJobs(_startNode.GridPos, endNode.GridPos, _allowDiagonalCornerCutting);
@@ -96,6 +105,8 @@ namespace UnityBase.GridSystem
                         _grid.DebugDrawPath(path, 2f, Color.green);
                     }
                 }
+
+                _test = true;
             }
             else if (Input.GetMouseButtonDown(1))
             {
@@ -123,8 +134,25 @@ namespace UnityBase.GridSystem
                 
                 _grid.Update(_width, _height, _screenSidePaddingRatio, _cellSpacingRatio, _originOffset, _drawGizmos, _gizmosColor);
             }
+
+            //NeighbourTest();
             
             _grid.DrawGrid();
+        }
+        
+        private void NeighbourTest()
+        {
+            if (_test)
+            {
+                if (!_grid.TryGetGridObjectFromMousePosition(out var endNode)) return;
+
+                if (_grid.TryGetNeighbor(endNode, Direction.LeftUp, out var node))
+                {
+                    var worldPos = _grid.GridToWorld(node.GridPos);
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawCube(worldPos, Vector3.one);
+                }
+            }
         }
     }
 }

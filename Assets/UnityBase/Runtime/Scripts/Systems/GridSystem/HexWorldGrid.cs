@@ -12,17 +12,49 @@ namespace UnityBase.GridSystem
         private const float HEX_INNER_RADIUS_FACTOR = 0.866025f; // Mathf.Sqrt(3f) / 2f
         
         private readonly bool _isPointyTopped;
+        
+        private static readonly Dictionary<Direction, int> _pointyToppedDirections = new()
+        {
+            { Direction.Right, 0 },
+            { Direction.RightUp, 1 },
+            { Direction.LeftUp, 2 },
+            { Direction.Left, 3 },
+            { Direction.LeftDown, 4 },
+            { Direction.RightDown, 5 }
+        };
+
+        private static readonly Dictionary<Direction, int> _flatToppedDirections = new()
+        {
+            { Direction.Up, 0 },
+            { Direction.RightUp, 1 },
+            { Direction.LeftUp, 2 },
+            { Direction.Down, 3 },
+            { Direction.LeftDown, 4 },
+            { Direction.RightDown, 5 }
+        };
 
         private static readonly Vector3Int[] _hexOffsetsEven =
         {
-            new (+1, 0, 0), new (0, +1, 0), new (-1, +1, 0),
-            new (-1, 0, 0), new (-1, -1, 0), new (0, -1, 0)
+            new(+1, 0, 0), new(0, +1, 0), new(-1, +1, 0),
+            new(-1, 0, 0), new(-1, -1, 0), new(0, -1, 0)
         };
 
         private static readonly Vector3Int[] _hexOffsetsOdd =
         {
-            new (+1, 0, 0), new (+1, +1, 0), new (0, +1, 0),
-            new (-1, 0, 0), new (0, -1, 0), new (+1, -1, 0)
+            new(+1, 0, 0), new(+1, +1, 0), new(0, +1, 0),
+            new(-1, 0, 0), new(0, -1, 0), new(+1, -1, 0)
+        };
+        
+        private static readonly Vector3Int[] _flatHexOffsetsEven =
+        {
+            new(0, +1, 0), new(+1, 0, 0), new(-1, 0, 0),
+            new(0, -1, 0), new(-1, -1, 0), new(+1, -1, 0)
+        };
+
+        private static readonly Vector3Int[] _flatHexOffsetsOdd =
+        {
+            new(0, +1, 0), new(+1, +1, 0), new(-1, +1, 0),
+            new(0, -1, 0), new(-1, 0, 0), new(+1, 0, 0)
         };
 
         public HexWorldGrid(Transform coreTransform, int width, int height, int depth, Vector3 cellSize, Vector3 offset, Vector3 cellOffset, bool drawGizmos, Color gizmosColor, bool isPointyTopped = false) : base(coreTransform, width, height, depth, cellSize, offset, cellOffset, drawGizmos, gizmosColor)
@@ -155,12 +187,43 @@ namespace UnityBase.GridSystem
             
             return new Vector2(rx, rz);
         }
+        
+        public override bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false)
+        {
+            neighbor = default;
+            
+            var directionMap = _isPointyTopped ? _pointyToppedDirections : _flatToppedDirections;
+
+            if (!directionMap.TryGetValue(direction, out var dirIndex))
+                return false;
+
+            var offset = _isPointyTopped
+                ? ((pos.y & 1) == 0 ? _hexOffsetsEven[dirIndex] : _hexOffsetsOdd[dirIndex])
+                : ((pos.x & 1) == 0 ? _flatHexOffsetsEven[dirIndex] : _flatHexOffsetsOdd[dirIndex]);
+
+            var neighborPos = pos + offset;
+
+            if (IsInRange(neighborPos))
+            {
+                var candidate = GetGridObject(neighborPos);
+                
+                if (!candidate.Equals(default(T)))
+                {
+                    neighbor = candidate;
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         protected override IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
         {
             if (!includeDepth)
             {
-                return !_isPointyTopped ? (gridPos.x & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd : (gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd;
+                return _isPointyTopped
+                    ? ((gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd)
+                    : ((gridPos.x & 1) == 0 ? _flatHexOffsetsEven : _flatHexOffsetsOdd);
             }
             
             return base.GetFilteredOffsets(gridPos, includeDepth, includeDiagonal);
@@ -176,9 +239,9 @@ namespace UnityBase.GridSystem
 
             for (int i = 0; i < total; i++)
             {
-                int x = i % Width;
-                int y = (i / Width) % Height;
-                int z = i / (Width * Height);
+                var x = i % Width;
+                var y = (i / Width) % Height;
+                var z = i / (Width * Height);
 
                 var pos = new Vector3Int(x, y, z);
                 DrawHighlightedCell(pos, GizmosColor);
@@ -308,28 +371,6 @@ namespace UnityBase.GridSystem
             job.Schedule().Complete();
             pathNodeArray.Dispose();
             return result;
-        }
-    }
-    
-    public class HexWorldGridBuilder<T> : WorldGridBuilder<T> where T : struct, IGridNodeData
-    {
-        private bool _isPointyTopped = true;
-
-        public HexWorldGridBuilder<T> WithIsPointyTopped(bool isPointyTopped)
-        {
-            _isPointyTopped = isPointyTopped;
-            return this;
-        }
-
-        public override IWorldGrid<T> Build()
-        {
-            if (Transform == null || !Width.HasValue || !Height.HasValue || !Depth.HasValue || !CellSize.HasValue)
-            {
-                Debug.LogError("HexWorldGridBuilder: Missing required parameters.");
-                return default;
-            }
-
-            return new HexWorldGrid<T>(Transform, Width.Value, Height.Value, Depth.Value, CellSize.Value, Offset, CellOffset, DrawGizmos, GizmosColor, _isPointyTopped);
         }
     }
 }

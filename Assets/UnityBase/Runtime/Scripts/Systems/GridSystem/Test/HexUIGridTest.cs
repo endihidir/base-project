@@ -7,7 +7,15 @@ namespace UnityBase.GridSystem
         [SerializeField] private bool _isPointyTopped = true;
         protected override void Init()
         {
-            _grid = new HexUIGrid<GridNode>(Camera.main, _width, _height, _screenSidePaddingRatio, _cellSpacingRatio, _originOffset, _drawGizmos, _gizmosColor, _isPointyTopped);
+            _grid = new HexUIGridBuilder<GridNode>()
+                .WithIsPointyTopped(_isPointyTopped)
+                .WithCamera(Camera.main)
+                .WithSize(_width, _height)
+                .WithScreenSidePaddingRatio(_screenSidePaddingRatio)
+                .WithCellSpacingRatio(_cellSpacingRatio)
+                .WithOriginOffset(_originOffset)
+                .WithGizmos(_drawGizmos, _gizmosColor)
+                .Build();
         }
     }
 }

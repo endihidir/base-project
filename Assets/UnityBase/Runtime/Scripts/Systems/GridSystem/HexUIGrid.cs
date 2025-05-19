@@ -12,17 +12,49 @@ namespace UnityBase.GridSystem
         private const float HEX_INNER_RADIUS_FACTOR = 0.866025f; // Mathf.Sqrt(3f) / 2f
         
         private readonly bool _isPointyTopped;
+        
+        private static readonly Dictionary<Direction, int> _pointyToppedDirections = new()
+        {
+            { Direction.Right, 0 },      
+            { Direction.RightUp, 1 },   
+            { Direction.LeftUp, 2 },   
+            { Direction.Left, 3 },      
+            { Direction.LeftDown, 4 },  
+            { Direction.RightDown, 5 }  
+        };
+        
+        private static readonly Dictionary<Direction, int> _flatToppedDirections = new()
+        {
+            { Direction.Up, 0 },      
+            { Direction.RightUp, 1 },    
+            { Direction.LeftUp, 2 },
+            { Direction.Down, 3 },       
+            { Direction.LeftDown, 4 },  
+            { Direction.RightDown, 5 }  
+        };
 
         private static readonly Vector3Int[] _hexOffsetsEven =
         {
-            new(+1, 0, 0), new(0, +1, 0), new(-1, +1, 0),
-            new(-1, 0, 0), new(-1, -1, 0), new(0, -1, 0)
+            new(+1, 0, 0), new(0, -1, 0), new(-1, -1, 0),
+            new(-1, 0, 0), new(-1, +1, 0), new(0, +1, 0)
         };
 
         private static readonly Vector3Int[] _hexOffsetsOdd =
         {
-            new(+1, 0, 0), new(+1, +1, 0), new(0, +1, 0),
-            new(-1, 0, 0), new(0, -1, 0), new(+1, -1, 0)
+            new(+1, 0, 0), new(+1, -1, 0), new(0, -1, 0),
+            new(-1, 0, 0), new(0, +1, 0), new(+1, +1, 0)
+        };
+        
+        private static readonly Vector3Int[] _flatHexOffsetsEven =
+        {
+            new(0, -1, 0), new(+1, -1, 0), new(-1, -1, 0),
+            new(0, +1, 0), new(-1, 0, 0), new(+1, 0, 0)
+        };
+
+        private static readonly Vector3Int[] _flatHexOffsetsOdd =
+        {
+            new(0, -1, 0), new(+1, 0, 0), new(-1, 0, 0),
+            new(0, +1, 0), new(-1, +1, 0), new(+1, +1, 0)
         };
 
         public HexUIGrid(Camera cam, int width, int height, float screenSidePaddingRatio, float cellSpacingRatio, Vector3 originOffset, bool drawGizmos, Color gizmosColor, bool isPointyTopped = false)
@@ -131,19 +163,41 @@ namespace UnityBase.GridSystem
 
             return new Vector2(roundedCube.x, roundedCube.z);
         }
-
-
+        
         public override bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
         {
             neighbour = default;
-
-            var offset = (pos.y & 1) == 0 ? _hexOffsetsEven[(int)direction] : _hexOffsetsOdd[(int)direction];
+            
+            if (direction is Direction.Forward or Direction.Backward)
+                return false;
+            
+            if (direction == Direction.None)
+            {
+                if (IsInRange(pos))
+                {
+                    neighbour = _gridArray[pos.x, pos.y];
+                    return !EqualityComparer<T>.Default.Equals(neighbour, default);
+                }
+                return false;
+            }
+            
+         
+            var directionMap = _isPointyTopped ? _pointyToppedDirections : _flatToppedDirections;
+            
+            if (!directionMap.TryGetValue(direction, out var hexIndex))
+                return false;
+            
+            var offsetArray = _isPointyTopped 
+                ? ((pos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd)
+                : ((pos.x & 1) == 0 ? _flatHexOffsetsEven : _flatHexOffsetsOdd);
+            
+            var offset = offsetArray[hexIndex];
             var neighborPos = pos + offset;
-
+            
             if (IsInRange(neighborPos))
             {
-                neighbour = GetGridObject(neighborPos);
-                return true;
+                neighbour = _gridArray[neighborPos.x, neighborPos.y];
+                return !EqualityComparer<T>.Default.Equals(neighbour, default);
             }
 
             return false;

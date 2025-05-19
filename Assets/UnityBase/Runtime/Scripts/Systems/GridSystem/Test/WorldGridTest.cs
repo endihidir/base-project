@@ -23,7 +23,8 @@ namespace UnityBase.GridSystem
         private Vector3 _previousRot;
 
         protected IWorldGrid<GridNode> _grid;
-
+        
+        private bool _test;
         #endregion
 
         #region COMPONENTS
@@ -72,6 +73,8 @@ namespace UnityBase.GridSystem
                 if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
                 
                 var endNode = _grid.GetGridObject(gridPos);
+
+                _test = true;
                 
                 if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
 
@@ -155,7 +158,34 @@ namespace UnityBase.GridSystem
                 _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
             }
             
+            //NeighbourTest();
+            
             _grid.DrawGrid();
+        }
+
+        private void NeighbourTest()
+        {
+            if (_test)
+            {
+                var ray = _cam.ScreenPointToRay(Input.mousePosition);
+                
+                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
+
+                if (_grid.TryGetNeighbor(gridPos, Direction.Forward, out var node))
+                {
+                    var worldPos = _grid.GridToWorld(node.GridPos);
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawCube(worldPos, Vector3.one);
+                }
+                
+                
+                if (_grid.TryGetNeighbor(gridPos, Direction.Backward, out var node2))
+                {
+                    var worldPos = _grid.GridToWorld(node2.GridPos);
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawCube(worldPos, Vector3.one);
+                }
+            }
         }
     }
 }

@@ -33,6 +33,10 @@ namespace UnityBase.GridSystem
             { Direction.Left, new Vector3Int(-1, 0, 0) },
             { Direction.Up, new Vector3Int(0, 1, 0) },
             { Direction.Down, new Vector3Int(0, -1, 0) },
+            { Direction.RightDown, new Vector3Int(1, -1, 0) },
+            { Direction.LeftDown,  new Vector3Int(-1, -1, 0) },
+            { Direction.LeftUp, new Vector3Int(-1, 1, 0) },
+            { Direction.RightUp,  new Vector3Int(1, 1, 0) },
             { Direction.Forward, new Vector3Int(0, 0, 1) },
             { Direction.Backward, new Vector3Int(0, 0, -1) }
         };
@@ -249,7 +253,7 @@ namespace UnityBase.GridSystem
             return count;
         }
         
-        public bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false)
+        public virtual bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false)
         {
             neighbor = default;
 
@@ -692,34 +696,5 @@ namespace UnityBase.GridSystem
         }
 
         public void ClearAll() => _itemList.Clear();
-    }
-    
-    public class WorldGridBuilder<T> where T : struct, IGridNodeData
-    {
-        protected Transform Transform;
-        protected int? Width, Height, Depth;
-        protected Vector3? CellSize;
-        protected Vector3 Offset;
-        protected bool DrawGizmos;
-        protected Color GizmosColor = Color.white;
-        protected Vector3 CellOffset = Vector3.one;
-
-        public WorldGridBuilder<T> WithTransform(Transform transform) { Transform = transform; return this; }
-        public WorldGridBuilder<T> WithSize(int width, int height, int depth) { Width = width; Height = height; Depth = depth; return this; }
-        public WorldGridBuilder<T> WithCellSize(Vector3 cellSize) { CellSize = cellSize; return this; }
-        public WorldGridBuilder<T> WithOffset(Vector3 offset) { Offset = offset; return this; }
-        public WorldGridBuilder<T> WithGizmos(bool draw, Color color) { DrawGizmos = draw; GizmosColor = color; return this; }
-        public WorldGridBuilder<T> WithCellOffset(Vector3 cellSpace) { CellOffset = cellSpace; return this; }
-
-        public virtual IWorldGrid<T> Build()
-        {
-            if (!Transform || !Width.HasValue || !Height.HasValue || !Depth.HasValue || !CellSize.HasValue)
-            {
-                Debug.LogError("WorldGridBuilder: Missing required parameters.");
-                return default;
-            }
-
-            return new WorldGrid<T>(Transform, Width.Value, Height.Value, Depth.Value, CellSize.Value, Offset,CellOffset, DrawGizmos, GizmosColor);
-        }
     }
 }
