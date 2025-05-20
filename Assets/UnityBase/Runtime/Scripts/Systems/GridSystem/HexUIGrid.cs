@@ -13,24 +13,24 @@ namespace UnityBase.GridSystem
         
         private readonly bool _isPointyTopped;
         
-        private static readonly Dictionary<Direction, int> _pointyToppedDirections = new()
+        private static readonly Dictionary<Direction2D, int> _pointyToppedDirections = new()
         {
-            { Direction.Right, 0 },      
-            { Direction.RightUp, 1 },   
-            { Direction.LeftUp, 2 },   
-            { Direction.Left, 3 },      
-            { Direction.LeftDown, 4 },  
-            { Direction.RightDown, 5 }  
+            { Direction2D.Right, 0 },      
+            { Direction2D.RightUp, 1 },   
+            { Direction2D.LeftUp, 2 },   
+            { Direction2D.Left, 3 },      
+            { Direction2D.LeftDown, 4 },  
+            { Direction2D.RightDown, 5 }  
         };
         
-        private static readonly Dictionary<Direction, int> _flatToppedDirections = new()
+        private static readonly Dictionary<Direction2D, int> _flatToppedDirections = new()
         {
-            { Direction.Up, 0 },      
-            { Direction.RightUp, 1 },    
-            { Direction.LeftUp, 2 },
-            { Direction.Down, 3 },       
-            { Direction.LeftDown, 4 },  
-            { Direction.RightDown, 5 }  
+            { Direction2D.Up, 0 },      
+            { Direction2D.RightUp, 1 },    
+            { Direction2D.LeftUp, 2 },
+            { Direction2D.Down, 3 },       
+            { Direction2D.LeftDown, 4 },  
+            { Direction2D.RightDown, 5 }  
         };
 
         private static readonly Vector3Int[] _hexOffsetsEven =
@@ -164,14 +164,11 @@ namespace UnityBase.GridSystem
             return new Vector2(roundedCube.x, roundedCube.z);
         }
         
-        public override bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
+        public override bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbour)
         {
             neighbour = default;
             
-            if (direction is Direction.Forward or Direction.Backward)
-                return false;
-            
-            if (direction == Direction.None)
+            if (direction2D == Direction2D.None)
             {
                 if (IsInRange(pos))
                 {
@@ -181,10 +178,9 @@ namespace UnityBase.GridSystem
                 return false;
             }
             
-         
             var directionMap = _isPointyTopped ? _pointyToppedDirections : _flatToppedDirections;
             
-            if (!directionMap.TryGetValue(direction, out var hexIndex))
+            if (!directionMap.TryGetValue(direction2D, out var hexIndex))
                 return false;
             
             var offsetArray = _isPointyTopped 

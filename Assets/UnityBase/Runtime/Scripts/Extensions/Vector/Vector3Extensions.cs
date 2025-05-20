@@ -22,10 +22,21 @@ namespace UnityBase.Extensions
 		{
 			return new Vector3(x ?? vector.x, y ?? vector.y, z ?? vector.z);
 		}
+		
+		public static Vector3Int With(this Vector3Int vector, int? x = null, int? y = null, int? z = null)
+		{
+			return new Vector3Int(x ?? vector.x, y ?? vector.y, z ?? vector.z);
+		}
+
 
 		public static Vector3 Add(this Vector3 vector, float? x = null, float? y = null, float? z = null) 
 		{
 			return new Vector3(vector.x + (x ?? 0), vector.y + (y ?? 0), vector.z + (z ?? 0));
+		}
+		
+		public static Vector3Int Add(this Vector3Int vector, int? x = null, int? y = null, int? z = null)
+		{
+			return new Vector3Int(vector.x + (x ?? 0), vector.y + (y ?? 0), vector.z + (z ?? 0));
 		}
 
 		public static Vector3 SetLength(this Vector3 v, float length)

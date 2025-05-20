@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityBase.Extensions;
 using UnityBase.PathFinding;
 using UnityEngine;
 
@@ -27,18 +28,27 @@ namespace UnityBase.GridSystem
         
         private static readonly ConcurrentDictionary<(bool,bool), Vector3Int[]> _offsetCache = new();
         
-        private static readonly Dictionary<Direction, Vector3Int> _baseDirections = new()
+        private static readonly Dictionary<Direction2D, Vector3> _hexWorldDirectionsPointy = new()
         {
-            { Direction.Right, new Vector3Int(1, 0, 0) },
-            { Direction.Left, new Vector3Int(-1, 0, 0) },
-            { Direction.Up, new Vector3Int(0, 1, 0) },
-            { Direction.Down, new Vector3Int(0, -1, 0) },
-            { Direction.RightDown, new Vector3Int(1, -1, 0) },
-            { Direction.LeftDown,  new Vector3Int(-1, -1, 0) },
-            { Direction.LeftUp, new Vector3Int(-1, 1, 0) },
-            { Direction.RightUp,  new Vector3Int(1, 1, 0) },
-            { Direction.Forward, new Vector3Int(0, 0, 1) },
-            { Direction.Backward, new Vector3Int(0, 0, -1) }
+            { Direction2D.Right,      new Vector3(1f, 0f, 0f) },
+            { Direction2D.RightUp,    new Vector3(0.5f, 0f, 0.866f) },
+            { Direction2D.LeftUp,     new Vector3(-0.5f, 0f, 0.866f) },
+            { Direction2D.Left,       new Vector3(-1f, 0f, 0f) },
+            { Direction2D.LeftDown,   new Vector3(-0.5f, 0f, -0.866f) },
+            { Direction2D.RightDown,  new Vector3(0.5f, 0f, -0.866f) },
+        };
+        
+        private static readonly Dictionary<Direction2D, Vector3Int> _baseDirections = new()
+        {
+            { Direction2D.Self, new Vector3Int(0, 0, 0) },
+            { Direction2D.Right, new Vector3Int(1, 0, 0) },
+            { Direction2D.Left, new Vector3Int(-1, 0, 0) },
+            { Direction2D.Up, new Vector3Int(0, 1, 0) },
+            { Direction2D.Down, new Vector3Int(0, -1, 0) },
+            { Direction2D.RightDown, new Vector3Int(1, -1, 0) },
+            { Direction2D.LeftDown,  new Vector3Int(-1, -1, 0) },
+            { Direction2D.LeftUp, new Vector3Int(-1, 1, 0) },
+            { Direction2D.RightUp,  new Vector3Int(1, 1, 0) },
         };
         
         private static readonly Vector3Int[] _neighborOffsets = 
@@ -155,21 +165,21 @@ namespace UnityBase.GridSystem
             }
         }
 
-        public int TryGetNeighbors(Vector3Int gridPos, int size, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true)
+        public int GetNeighborsNonAlloc(Vector3Int gridPos, int radius, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true)
         {
-            var yBegin = gridPos.y - size;
-            var yEnd = gridPos.y + size;
+            var yBegin = gridPos.y - radius;
+            var yEnd = gridPos.y + radius;
 
-            var xBegin = gridPos.x - size;
-            var xEnd = gridPos.x + size;
+            var xBegin = gridPos.x - radius;
+            var xEnd = gridPos.x + radius;
 
-            var zBegin = gridPos.z - size;
-            var zEnd = gridPos.z + size;
+            var zBegin = gridPos.z - radius;
+            var zEnd = gridPos.z + radius;
 
             if (includeDepth)
             {
-                zBegin = Mathf.Max(0, gridPos.z - size);
-                zEnd = Mathf.Min(_gridDepth - 1, gridPos.z + size);
+                zBegin = Mathf.Max(0, gridPos.z - radius);
+                zEnd = Mathf.Min(_gridDepth - 1, gridPos.z + radius);
             }
             else
             {
@@ -224,46 +234,24 @@ namespace UnityBase.GridSystem
             return count;
         }
         
-        public int TryGetImmediateNeighborsNonAlloc(Vector3Int gridPos, Span<T> resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true)
-        {
-            var count = 0;
-
-            foreach (var offset in GetFilteredOffsets(gridPos, includeDepth, includeDiagonal))
-            {
-                var neighborPos = gridPos + offset;
-
-                if (!includeSelf && neighborPos == gridPos) continue;
-
-                if (!IsInRange(neighborPos)) continue;
-
-                if (!_itemList.TryGetValue(neighborPos, out var items)) continue;
-
-                foreach (var item in items)
-                {
-                    if (count >= resultBuffer.Length)
-                    {
-                        Debug.LogError("TryGetImmediateNeighborsNonAlloc resultBuffer capacity full");
-                        return count;
-                    }
-
-                    resultBuffer[count++] = item;
-                }
-            }
-
-            return count;
-        }
-        
-        public virtual bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false)
+        public virtual bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default)
         {
             neighbor = default;
-
-            if (_baseDirections.TryGetValue(direction, out var baseDir))
+            
+            if (_baseDirections.TryGetValue(direction2D, out var baseDir))
             {
-                var basePos = pos + baseDir;
-
-                if (IsInRange(basePos))
+                if (depthDirection != DepthDirection.None)
                 {
-                    var baseItem = GetGridObject(basePos);
+                    baseDir.z = depthDirection == DepthDirection.Forward ? -1 : 1;
+                }
+                
+                var worldOffset = Vector3.Scale(baseDir, CellSize + CellOffset);
+                var neighborWorldPos = GridToWorld(pos) + worldOffset;
+                var neighborGridPos = WorldToGrid(neighborWorldPos);
+
+                if (IsInRange(neighborGridPos))
+                {
+                    var baseItem = GetGridObject(neighborGridPos);
                     
                     if (!baseItem.Equals(default(T)))
                     {
@@ -272,32 +260,8 @@ namespace UnityBase.GridSystem
                     }
                 }
             }
-
-            foreach (var offset in GetFilteredOffsets(pos, includeDepth, includeDiagonal))
-            {
-                var neighborPos = pos + offset;
-
-                if (!IsInRange(neighborPos)) continue;
-
-                var item = GetGridObject(neighborPos);
-                
-                if (!item.Equals(default(T)))
-                {
-                    neighbor = item;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        protected virtual IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
-        {
-            var key = (includeDepth, includeDiagonal);
             
-            return _offsetCache.GetOrAdd(key, k => 
-                _neighborOffsets.Where(offset => (k.Item1 || offset.z == 0) && 
-                                                 (k.Item2 || (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) + Mathf.Abs(offset.z)) <= 1)).ToArray());
+            return false;
         }
         
         public bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos)
@@ -500,11 +464,6 @@ namespace UnityBase.GridSystem
             }
         }
 
-        public void DrawGrid(Color gizmoColor)
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual void RebuildMeshVisual(Mesh mesh)
         {
             var cellCount = Width * Height * Depth;
@@ -569,11 +528,10 @@ namespace UnityBase.GridSystem
 
             var halfGridWidth = (Width - 1) * stepX * 0.5f;
             var halfGridHeight = (Height - 1) * stepY * 0.5f;
-            var halfGridDepth = Depth * stepZ * 0.5f;
             
             var x = Mathf.RoundToInt((position.x - GridOffset.x + halfGridWidth) / stepX);
             var y = Mathf.RoundToInt((position.z - GridOffset.y + halfGridHeight) / stepY);
-            var z = Mathf.FloorToInt((position.y - GridOffset.z + halfGridDepth) / stepZ);
+            var z = Mathf.RoundToInt((position.y - GridOffset.z) / stepZ);
             
             var gridPos = new Vector3Int(x, y, z);
 

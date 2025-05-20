@@ -9,18 +9,18 @@ namespace UnityBase.Manager
     {
         private readonly float _minDistanceForSwipe = Screen.width * 0.1f;
         private Vector2 _fingerDownPosition, _fingerUpPosition;
-        private Direction _direction;
+        private Direction2D _direction2D;
         private bool _isDragging;
 
         public void Initialize() { }
         public void Dispose() { }
 
-        public Direction GetSwipeDirection()
+        public Direction2D GetSwipeDirection()
         {
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 ResetInput();
-                return _direction;
+                return _direction2D;
             }
 
             if (Input.GetMouseButtonDown(0))
@@ -43,7 +43,7 @@ namespace UnityBase.Manager
                 CheckSwipe();
             }
 
-            return _direction;
+            return _direction2D;
         }
 
         private void CheckSwipe()
@@ -53,17 +53,17 @@ namespace UnityBase.Manager
 
             if (!(Mathf.Abs(deltaX) > _minDistanceForSwipe) && !(Mathf.Abs(deltaY) > _minDistanceForSwipe))
             {
-                _direction = Direction.None;
+                _direction2D = Direction2D.None;
                 return;
             }
 
             if (Mathf.Abs(deltaX) > Mathf.Abs(deltaY))
             {
-                _direction = deltaX > 0 ? Direction.Right : deltaX < 0 ? Direction.Left : Direction.None;
+                _direction2D = deltaX > 0 ? Direction2D.Right : deltaX < 0 ? Direction2D.Left : Direction2D.None;
             }
             else
             {
-                _direction = deltaY > 0 ? Direction.Up : deltaY < 0 ? Direction.Down : Direction.None;
+                _direction2D = deltaY > 0 ? Direction2D.Up : deltaY < 0 ? Direction2D.Down : Direction2D.None;
             }
 
             _fingerDownPosition = _fingerUpPosition;
@@ -71,18 +71,18 @@ namespace UnityBase.Manager
 
         public void ResetInput()
         {
-            _direction = Direction.None;
+            _direction2D = Direction2D.None;
             _fingerDownPosition = Vector2.zero;
             _fingerUpPosition = Vector2.zero;
             _isDragging = false;
         }
 
-        public Vector3 SerializeDirection(Direction direction) => direction switch
+        public Vector3 SerializeDirection(Direction2D direction2D) => direction2D switch
         {
-            Direction.Down => Vector3.back,
-            Direction.Up => Vector3.forward,
-            Direction.Right => Vector3.right,
-            Direction.Left => Vector3.left,
+            Direction2D.Down => Vector3.back,
+            Direction2D.Up => Vector3.forward,
+            Direction2D.Right => Vector3.right,
+            Direction2D.Left => Vector3.left,
             _ => Vector3.zero
         };
     }

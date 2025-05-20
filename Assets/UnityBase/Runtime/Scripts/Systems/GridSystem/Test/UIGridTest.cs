@@ -146,7 +146,7 @@ namespace UnityBase.GridSystem
             {
                 if (!_grid.TryGetGridObjectFromMousePosition(out var endNode)) return;
 
-                if (_grid.TryGetNeighbor(endNode, Direction.LeftUp, out var node))
+                if (_grid.TryGetNeighbor(endNode, Direction2D.LeftUp, out var node))
                 {
                     var worldPos = _grid.GridToWorld(node.GridPos);
                     Gizmos.color = Color.red;

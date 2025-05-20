@@ -13,24 +13,24 @@ namespace UnityBase.GridSystem
         
         private readonly bool _isPointyTopped;
         
-        private static readonly Dictionary<Direction, int> _pointyToppedDirections = new()
+        private static readonly Dictionary<Direction2D, int> _pointyToppedDirections = new()
         {
-            { Direction.Right, 0 },
-            { Direction.RightUp, 1 },
-            { Direction.LeftUp, 2 },
-            { Direction.Left, 3 },
-            { Direction.LeftDown, 4 },
-            { Direction.RightDown, 5 }
+            { Direction2D.Right, 0 },
+            { Direction2D.RightUp, 1 },
+            { Direction2D.LeftUp, 2 },
+            { Direction2D.Left, 3 },
+            { Direction2D.LeftDown, 4 },
+            { Direction2D.RightDown, 5 }
         };
 
-        private static readonly Dictionary<Direction, int> _flatToppedDirections = new()
+        private static readonly Dictionary<Direction2D, int> _flatToppedDirections = new()
         {
-            { Direction.Up, 0 },
-            { Direction.RightUp, 1 },
-            { Direction.LeftUp, 2 },
-            { Direction.Down, 3 },
-            { Direction.LeftDown, 4 },
-            { Direction.RightDown, 5 }
+            { Direction2D.Up, 0 },
+            { Direction2D.RightUp, 1 },
+            { Direction2D.LeftUp, 2 },
+            { Direction2D.Down, 3 },
+            { Direction2D.LeftDown, 4 },
+            { Direction2D.RightDown, 5 }
         };
 
         private static readonly Vector3Int[] _hexOffsetsEven =
@@ -98,12 +98,12 @@ namespace UnityBase.GridSystem
             if (!_isPointyTopped)
             {
                 var offset = 0.5f * ((int)gridPos.x & 1);
-                return new Vector3(gridPos.x * xSpacing,  (gridPos.z + 0.5f) * zSpacing, (gridPos.y + offset) * ySpacing);
+                return new Vector3(gridPos.x * xSpacing, (gridPos.z + 0.5f) * zSpacing, (gridPos.y + offset) * ySpacing);
             }
             else
             {
                 var offset = 0.5f * ((int)gridPos.y & 1);
-                return new Vector3((gridPos.x + offset) * xSpacing,  (gridPos.z + 0.5f) * zSpacing, gridPos.y * ySpacing);
+                return new Vector3((gridPos.x + offset) * xSpacing, (gridPos.z + 0.5f) * zSpacing, gridPos.y * ySpacing);
             }
         }
 
@@ -188,24 +188,24 @@ namespace UnityBase.GridSystem
             return new Vector2(rx, rz);
         }
         
-        public override bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbor, bool includeDepth = false, bool includeDiagonal = false)
+        public override bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default)
         {
             neighbor = default;
             
             var directionMap = _isPointyTopped ? _pointyToppedDirections : _flatToppedDirections;
 
-            if (!directionMap.TryGetValue(direction, out var dirIndex))
+            if (!directionMap.TryGetValue(direction2D, out var dirIndex))
                 return false;
 
             var offset = _isPointyTopped
                 ? ((pos.y & 1) == 0 ? _hexOffsetsEven[dirIndex] : _hexOffsetsOdd[dirIndex])
                 : ((pos.x & 1) == 0 ? _flatHexOffsetsEven[dirIndex] : _flatHexOffsetsOdd[dirIndex]);
-
-            var neighborPos = pos + offset;
-
-            if (IsInRange(neighborPos))
+            
+            var neighborGridPos = pos + offset;
+            
+            if (IsInRange(neighborGridPos))
             {
-                var candidate = GetGridObject(neighborPos);
+                var candidate = GetGridObject(neighborGridPos);
                 
                 if (!candidate.Equals(default(T)))
                 {
@@ -215,18 +215,6 @@ namespace UnityBase.GridSystem
             }
 
             return false;
-        }
-
-        protected override IEnumerable<Vector3Int> GetFilteredOffsets(Vector3Int gridPos, bool includeDepth, bool includeDiagonal)
-        {
-            if (!includeDepth)
-            {
-                return _isPointyTopped
-                    ? ((gridPos.y & 1) == 0 ? _hexOffsetsEven : _hexOffsetsOdd)
-                    : ((gridPos.x & 1) == 0 ? _flatHexOffsetsEven : _flatHexOffsetsOdd);
-            }
-            
-            return base.GetFilteredOffsets(gridPos, includeDepth, includeDiagonal);
         }
         
         public override void DrawGrid()

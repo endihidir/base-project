@@ -158,7 +158,7 @@ namespace UnityBase.GridSystem
                 _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
             }
             
-            //NeighbourTest();
+            NeighbourTest();
             
             _grid.DrawGrid();
         }
@@ -171,20 +171,20 @@ namespace UnityBase.GridSystem
                 
                 if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
 
-                if (_grid.TryGetNeighbor(gridPos, Direction.Forward, out var node))
+                if (_grid.TryGetNeighbor(gridPos, Direction2D.LeftDown, out var node))
                 {
                     var worldPos = _grid.GridToWorld(node.GridPos);
                     Gizmos.color = Color.red;
                     Gizmos.DrawCube(worldPos, Vector3.one);
                 }
                 
-                
-                if (_grid.TryGetNeighbor(gridPos, Direction.Backward, out var node2))
+                /*if (_grid.TryGetNeighbor(gridPos, Direction2D.LeftUp, out var node2))
                 {
                     var worldPos = _grid.GridToWorld(node2.GridPos);
-                    Gizmos.color = Color.green;
+                    Gizmos.color = Color.red;
                     Gizmos.DrawCube(worldPos, Vector3.one);
-                }
+                }*/
+                
             }
         }
     }

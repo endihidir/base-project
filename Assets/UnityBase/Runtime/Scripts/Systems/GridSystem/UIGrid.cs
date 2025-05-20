@@ -37,16 +37,16 @@ namespace UnityBase.GridSystem
         public T[,] GridArray => _gridArray;
         public float CellSize => _cellSize;
         
-        private static readonly Dictionary<Direction, Vector2Int> _baseDirections = new()
+        private static readonly Dictionary<Direction2D, Vector2Int> _baseDirections = new()
         {
-            { Direction.Right,     new Vector2Int(1, 0) },
-            { Direction.Left,      new Vector2Int(-1, 0) },
-            { Direction.Up,        new Vector2Int(0, -1) },
-            { Direction.Down,      new Vector2Int(0, 1) },
-            { Direction.RightUp,   new Vector2Int(1, -1) },
-            { Direction.LeftUp,    new Vector2Int(-1, -1) },
-            { Direction.RightDown, new Vector2Int(1, 1) },
-            { Direction.LeftDown,  new Vector2Int(-1, 1) }
+            { Direction2D.Right,     new Vector2Int(1, 0) },
+            { Direction2D.Left,      new Vector2Int(-1, 0) },
+            { Direction2D.Up,        new Vector2Int(0, -1) },
+            { Direction2D.Down,      new Vector2Int(0, 1) },
+            { Direction2D.RightUp,   new Vector2Int(1, -1) },
+            { Direction2D.LeftUp,    new Vector2Int(-1, -1) },
+            { Direction2D.RightDown, new Vector2Int(1, 1) },
+            { Direction2D.LeftDown,  new Vector2Int(-1, 1) }
         };
 
         #endregion
@@ -256,13 +256,13 @@ namespace UnityBase.GridSystem
             _gridArray[pos.x, pos.y] = value;
         }
 
-        public bool TryGetNeighbor(T currentObject, Direction direction, out T neighbour)
+        public bool TryGetNeighbor(T currentObject, Direction2D direction2D, out T neighbour)
         {
             neighbour = default;
             
             if (TryFindPositionOf(currentObject, out var pos))
             {
-                return TryGetNeighbor(pos, direction, out neighbour);
+                return TryGetNeighbor(pos, direction2D, out neighbour);
             }
             
             return false;
@@ -278,11 +278,8 @@ namespace UnityBase.GridSystem
 
             var result = new List<T>();
             
-            foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+            foreach (Direction2D direction in Enum.GetValues(typeof(Direction2D)))
             {
-                if (direction is Direction.None or Direction.Forward or Direction.Backward)
-                    continue;
-                
                 if (TryGetNeighbor(pos, direction, out var neighbour))
                 {
                     result.Add(neighbour);
@@ -300,11 +297,8 @@ namespace UnityBase.GridSystem
             if (!TryFindPositionOf(currentObject, out var pos))
                 return false;
 
-            foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+            foreach (Direction2D direction in Enum.GetValues(typeof(Direction2D)))
             {
-                if (direction is Direction.None or Direction.Forward or Direction.Backward)
-                    continue;
-
                 if (TryGetNeighbor(pos, direction, out var neighbour))
                 {
                     if (count >= resultBuffer.Length)
@@ -319,14 +313,11 @@ namespace UnityBase.GridSystem
             return count > 0;
         }
         
-        public virtual bool TryGetNeighbor(Vector3Int pos, Direction direction, out T neighbour)
+        public virtual bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbour)
         {
             neighbour = default;
             
-            if (direction is Direction.Forward or Direction.Backward)
-                return false;
-            
-            if (direction == Direction.None)
+            if (direction2D == Direction2D.None)
             {
                 if (IsInRange(pos))
                 {
@@ -336,7 +327,7 @@ namespace UnityBase.GridSystem
                 return false;
             }
             
-            if (!_baseDirections.TryGetValue(direction, out var offset))
+            if (!_baseDirections.TryGetValue(direction2D, out var offset))
                 return false;
             
             var newPos = new Vector3Int(pos.x + offset.x, pos.y + offset.y, 0);
