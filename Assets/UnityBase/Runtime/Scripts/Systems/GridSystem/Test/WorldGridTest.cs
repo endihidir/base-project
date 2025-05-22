@@ -158,7 +158,7 @@ namespace UnityBase.GridSystem
                 _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
             }
             
-            NeighbourTest();
+            //NeighbourTest();
             
             _grid.DrawGrid();
         }
