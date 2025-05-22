@@ -234,20 +234,34 @@ namespace UnityBase.GridSystem
             return count;
         }
         
-        public virtual bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default)
+        public virtual bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default, bool useWorldDirection = true)
         {
             neighbor = default;
             
             if (_baseDirections.TryGetValue(direction2D, out var baseDir))
             {
-                if (depthDirection != DepthDirection.None)
-                {
-                    baseDir.z = depthDirection == DepthDirection.Forward ? -1 : 1;
-                }
+                Vector3Int neighborGridPos;
                 
-                var worldOffset = Vector3.Scale(baseDir, CellSize + CellOffset);
-                var neighborWorldPos = GridToWorld(pos) + worldOffset;
-                var neighborGridPos = WorldToGrid(neighborWorldPos);
+                if (useWorldDirection)
+                {
+                    if (depthDirection != DepthDirection.None)
+                    {
+                        baseDir.z = depthDirection == DepthDirection.Forward ? -1 : 1;
+                    }
+                    
+                    var worldOffset = Vector3.Scale(baseDir, CellSize + CellOffset);
+                    var neighborWorldPos = GridToWorld(pos) + worldOffset;
+                    neighborGridPos = WorldToGrid(neighborWorldPos);
+                }
+                else
+                {
+                    if (depthDirection != DepthDirection.None)
+                    {
+                        baseDir.z = depthDirection == DepthDirection.Forward ? 1 : -1;
+                    }
+                    
+                    neighborGridPos = pos + baseDir;
+                }
 
                 if (IsInRange(neighborGridPos))
                 {

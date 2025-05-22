@@ -24,7 +24,7 @@ namespace UnityBase.GridSystem
         bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos);
 
         int GetNeighborsNonAlloc(Vector3Int gridPos, int radius, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
-        bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default);
+        bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default, bool useWorldDirection = true);
 
         Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0);
         Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);

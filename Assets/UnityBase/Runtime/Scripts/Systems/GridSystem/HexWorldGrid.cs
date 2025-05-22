@@ -33,13 +33,13 @@ namespace UnityBase.GridSystem
             { Direction2D.RightDown, 5 }
         };
 
-        private static readonly Vector3Int[] _hexOffsetsEven =
+        private static readonly Vector3Int[] _pointyHexOffsetsEven =
         {
             new(+1, 0, 0), new(0, +1, 0), new(-1, +1, 0),
             new(-1, 0, 0), new(-1, -1, 0), new(0, -1, 0)
         };
 
-        private static readonly Vector3Int[] _hexOffsetsOdd =
+        private static readonly Vector3Int[] _pointyHexOffsetsOdd =
         {
             new(+1, 0, 0), new(+1, +1, 0), new(0, +1, 0),
             new(-1, 0, 0), new(0, -1, 0), new(+1, -1, 0)
@@ -55,6 +55,18 @@ namespace UnityBase.GridSystem
         {
             new(0, +1, 0), new(+1, +1, 0), new(-1, +1, 0),
             new(0, -1, 0), new(-1, 0, 0), new(+1, 0, 0)
+        };
+            
+        private static readonly Vector3Int[] _pointyHexOffsetsWorld =
+        {
+            new(+2, 0, 0), new(+1, +1, 0), new(-1, +1, 0),
+            new(-2, 0, 0), new(-1, -1, 0), new(1, -1, 0)
+        };
+        
+        private static readonly Vector3Int[] _flatHexOffsetsWorld =
+        {
+            new(0, +2, 0), new(+1, +1, 0), new(-1, +1, 0),
+            new(0, -2, 0), new(-1, -1, 0), new(1, -1, 0)
         };
 
         public HexWorldGrid(Transform coreTransform, int width, int height, int depth, Vector3 cellSize, Vector3 offset, Vector3 cellOffset, bool drawGizmos, Color gizmosColor, bool isPointyTopped = false) : base(coreTransform, width, height, depth, cellSize, offset, cellOffset, drawGizmos, gizmosColor)
@@ -188,7 +200,7 @@ namespace UnityBase.GridSystem
             return new Vector2(rx, rz);
         }
         
-        public override bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default)
+        public override bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default, bool useWorldDirection = true)
         {
             neighbor = default;
             
@@ -196,12 +208,39 @@ namespace UnityBase.GridSystem
 
             if (!directionMap.TryGetValue(direction2D, out var dirIndex))
                 return false;
-
-            var offset = _isPointyTopped
-                ? ((pos.y & 1) == 0 ? _hexOffsetsEven[dirIndex] : _hexOffsetsOdd[dirIndex])
-                : ((pos.x & 1) == 0 ? _flatHexOffsetsEven[dirIndex] : _flatHexOffsetsOdd[dirIndex]);
             
-            var neighborGridPos = pos + offset;
+            Vector3Int neighborGridPos;
+            
+            if (useWorldDirection)
+            { 
+                var offset = _isPointyTopped ? _pointyHexOffsetsWorld[dirIndex] : _flatHexOffsetsWorld[dirIndex];
+                
+                if (depthDirection != DepthDirection.None)
+                {
+                    offset.z = depthDirection == DepthDirection.Forward ? -1 : 1;
+                }
+
+                var xOffset = _isPointyTopped ? (CellSize.x + CellOffset.x) * 0.5f : (CellSize.x + CellOffset.x) * HEX_INNER_RADIUS_FACTOR;;
+                var yOffset =  _isPointyTopped ? (CellSize.y + CellOffset.y) * HEX_INNER_RADIUS_FACTOR : (CellSize.y + CellOffset.y) * 0.5f;
+                var zOffset = (CellSize.z + CellOffset.z);
+                
+                var worldOffset = Vector3.Scale(offset, new Vector3(xOffset, yOffset, zOffset));
+                var neighborWorldPos = GridToWorld(pos) + worldOffset;
+                neighborGridPos = WorldToGrid(neighborWorldPos);
+            }
+            else
+            {
+                var offset = _isPointyTopped
+                    ? ((pos.y & 1) == 0 ? _pointyHexOffsetsEven[dirIndex] : _pointyHexOffsetsOdd[dirIndex])
+                    : ((pos.x & 1) == 0 ? _flatHexOffsetsEven[dirIndex] : _flatHexOffsetsOdd[dirIndex]);
+                
+                if (depthDirection != DepthDirection.None)
+                {
+                    offset.z = depthDirection == DepthDirection.Forward ? 1 : -1;
+                }
+                
+                neighborGridPos = pos + offset;
+            }
             
             if (IsInRange(neighborGridPos))
             {

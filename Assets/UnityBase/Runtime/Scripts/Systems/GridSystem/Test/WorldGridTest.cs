@@ -171,19 +171,19 @@ namespace UnityBase.GridSystem
                 
                 if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
 
-                if (_grid.TryGetNeighbor(gridPos, Direction2D.LeftDown, out var node))
+                if (_grid.TryGetNeighbor(gridPos, Direction2D.Up, out var node))
                 {
                     var worldPos = _grid.GridToWorld(node.GridPos);
                     Gizmos.color = Color.red;
                     Gizmos.DrawCube(worldPos, Vector3.one);
                 }
                 
-                /*if (_grid.TryGetNeighbor(gridPos, Direction2D.LeftUp, out var node2))
+                if (_grid.TryGetNeighbor(gridPos, Direction2D.RightDown, out var node8, DepthDirection.Forward))
                 {
-                    var worldPos = _grid.GridToWorld(node2.GridPos);
+                    var worldPos = _grid.GridToWorld(node8.GridPos);
                     Gizmos.color = Color.red;
                     Gizmos.DrawCube(worldPos, Vector3.one);
-                }*/
+                }
                 
             }
         }

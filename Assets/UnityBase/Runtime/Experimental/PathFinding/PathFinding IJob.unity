@@ -508,13 +508,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1884106351}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: -0.7071068}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -270, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!114 &1884106354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -530,14 +530,14 @@ MonoBehaviour:
   _useJobSystem: 1
   _gridWidth: 7
   _gridHeight: 6
-  _gridDepth: 1
+  _gridDepth: 3
   _cellSize: {x: 7, y: 7, z: 7}
   _cellOffset: {x: 2, y: 2, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _meshFilter: {fileID: 181437503}
-  _activeDepth: 0
+  _activeDepth: 1
   _allowDiagonalCornerCutting: 1
   _isPointyTopped: 1
 --- !u!1 &2101881219
