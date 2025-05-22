@@ -135,7 +135,7 @@ namespace UnityBase.GridSystem
             }
             
             var estimatedPos = GridToWorld(new Vector3Int(x, y, 0));
-            var radius = (CellSize / SQRT3) * 0.8f; // 0.8f Magic Number (Adjustment factor for hex hitbox - makes selection area slightly smaller than the visual hex)
+            var radius = (CellSize / SQRT3) * 0.75f; // 0.75f Magic Number (Adjustment factor for hex hitbox - makes selection area slightly smaller than the visual hex)
 
             if (Vector3.Distance(worldPos, estimatedPos) > radius)
             {
