@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityBase.Extensions;
 using UnityBase.PathFinding;
 using UnityEngine;
 
@@ -26,18 +22,6 @@ namespace UnityBase.GridSystem
         
         private readonly Dictionary<Vector3Int, List<T>> _itemList = new();
         
-        private static readonly ConcurrentDictionary<(bool,bool), Vector3Int[]> _offsetCache = new();
-        
-        private static readonly Dictionary<Direction2D, Vector3> _hexWorldDirectionsPointy = new()
-        {
-            { Direction2D.Right,      new Vector3(1f, 0f, 0f) },
-            { Direction2D.RightUp,    new Vector3(0.5f, 0f, 0.866f) },
-            { Direction2D.LeftUp,     new Vector3(-0.5f, 0f, 0.866f) },
-            { Direction2D.Left,       new Vector3(-1f, 0f, 0f) },
-            { Direction2D.LeftDown,   new Vector3(-0.5f, 0f, -0.866f) },
-            { Direction2D.RightDown,  new Vector3(0.5f, 0f, -0.866f) },
-        };
-        
         private static readonly Dictionary<Direction2D, Vector3Int> _baseDirections = new()
         {
             { Direction2D.Self, new Vector3Int(0, 0, 0) },
@@ -50,12 +34,6 @@ namespace UnityBase.GridSystem
             { Direction2D.LeftUp, new Vector3Int(-1, 1, 0) },
             { Direction2D.RightUp,  new Vector3Int(1, 1, 0) },
         };
-        
-        private static readonly Vector3Int[] _neighborOffsets = 
-                Enumerable.Range(-1, 3).SelectMany(x => Enumerable.Range(-1, 3)
-                .SelectMany(y => Enumerable.Range(-1, 3).Where(z => x != 0 || y != 0 || z != 0).Select(z => new Vector3Int(x, y, z))))
-                .ToArray();
-        
         
         public int Width => _gridWidth;
         public int Height => _gridHeight;
@@ -278,7 +256,7 @@ namespace UnityBase.GridSystem
             return false;
         }
         
-        public bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos)
+        public bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos, bool clamp)
         {
             gridPos = default;
             
@@ -290,9 +268,9 @@ namespace UnityBase.GridSystem
             {
                 var point = ray.GetPoint(enter);
                 
-                if (IsInRange(point))
+                if (IsInRange(point, clamp))
                 {
-                    var grid2D = WorldToGrid2(point);
+                    var grid2D = WorldToGrid2(point, clamp);
                     
                     gridPos = new Vector3Int(grid2D.x, grid2D.y, activeDepth);
                     
@@ -526,13 +504,13 @@ namespace UnityBase.GridSystem
             return Transform.TransformPoint(new Vector3(x, y, z));
         }
 
-        public Vector2Int WorldToGrid2(Vector3 position, bool clamp = true)
+        public Vector2Int WorldToGrid2(Vector3 position, bool clamp = false)
         {
             var grid = WorldToGrid(position, clamp);
             return grid.x == -1 ? new Vector2Int(-1, -1) : new Vector2Int(grid.x, grid.y);
         }
 
-        public virtual Vector3Int WorldToGrid(Vector3 position, bool clamp = true)
+        public virtual Vector3Int WorldToGrid(Vector3 position, bool clamp = false)
         {
             position = Transform.InverseTransformPoint(position);
 
@@ -547,35 +525,45 @@ namespace UnityBase.GridSystem
             var y = Mathf.RoundToInt((position.z - GridOffset.y + halfGridHeight) / stepY);
             var z = Mathf.RoundToInt((position.y - GridOffset.z) / stepZ);
             
-            var gridPos = new Vector3Int(x, y, z);
+            if (clamp)
+            {
+                x = Mathf.Clamp(x, 0, Width - 1);
+                y = Mathf.Clamp(y, 0, Height - 1);
+                z = Mathf.Clamp(z, 0, Depth - 1);
+                
+                var gridPos = new Vector3Int(x, y, z);
 
-            if (!IsInRange(gridPos))
+                return gridPos;
+            }
+            
+            var pos = new Vector3Int(x, y, z);
+
+            if (!IsInRange(pos))
                 return new Vector3Int(-1, -1, -1);
 
-            var center = GridToWorld(gridPos);
+            var center = GridToWorld(pos);
             var localCenter = Transform.InverseTransformPoint(center);
             var localDelta = position - localCenter;
      
-            if (Mathf.Abs(localDelta.x) - CellSize.x * 0.5f > 0f || 
-                Mathf.Abs(localDelta.z) - CellSize.y * 0.5f > 0f)
+            if (Mathf.Abs(localDelta.x) - CellSize.x * 0.5f > 0f || Mathf.Abs(localDelta.z) - CellSize.y * 0.5f > 0f)
             {
                 return new Vector3Int(-1, -1, -1);
             }
             
-            return gridPos;
+            return pos;
         }
 
         public bool IsInRange2(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
         public bool IsInRange(Vector3Int pos) => pos is { x: >= 0, y: >= 0, z: >= 0 } && pos.x < Width && pos.y < Height && pos.z < Depth;
-        public bool IsInRange2(Vector3 worldPos)
+        public bool IsInRange2(Vector3 worldPos, bool clamp = false)
         {
-            var grid = WorldToGrid2(worldPos, false);
+            var grid = WorldToGrid2(worldPos, clamp);
             return grid.x != -1 && IsInRange2(grid);
         }
 
-        public bool IsInRange(Vector3 worldPos)
+        public bool IsInRange(Vector3 worldPos, bool clamp = false)
         {
-            var grid = WorldToGrid(worldPos, false);
+            var grid = WorldToGrid(worldPos, clamp);
             return grid.x != -1 && IsInRange(grid);
         }
     }

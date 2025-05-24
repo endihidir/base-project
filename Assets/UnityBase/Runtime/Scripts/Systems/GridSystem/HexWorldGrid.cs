@@ -20,7 +20,8 @@ namespace UnityBase.GridSystem
             { Direction2D.LeftUp, 2 },
             { Direction2D.Left, 3 },
             { Direction2D.LeftDown, 4 },
-            { Direction2D.RightDown, 5 }
+            { Direction2D.RightDown, 5 },
+            { Direction2D.Self , 6}
         };
 
         private static readonly Dictionary<Direction2D, int> _flatToppedDirections = new()
@@ -30,43 +31,44 @@ namespace UnityBase.GridSystem
             { Direction2D.LeftUp, 2 },
             { Direction2D.Down, 3 },
             { Direction2D.LeftDown, 4 },
-            { Direction2D.RightDown, 5 }
+            { Direction2D.RightDown, 5 },
+            { Direction2D.Self , 6}
         };
 
         private static readonly Vector3Int[] _pointyHexOffsetsEven =
         {
             new(+1, 0, 0), new(0, +1, 0), new(-1, +1, 0),
-            new(-1, 0, 0), new(-1, -1, 0), new(0, -1, 0)
+            new(-1, 0, 0), new(-1, -1, 0), new(0, -1, 0), new(0, 0, 0)
         };
 
         private static readonly Vector3Int[] _pointyHexOffsetsOdd =
         {
             new(+1, 0, 0), new(+1, +1, 0), new(0, +1, 0),
-            new(-1, 0, 0), new(0, -1, 0), new(+1, -1, 0)
+            new(-1, 0, 0), new(0, -1, 0), new(+1, -1, 0), new(0, 0, 0)
         };
         
         private static readonly Vector3Int[] _flatHexOffsetsEven =
         {
             new(0, +1, 0), new(+1, 0, 0), new(-1, 0, 0),
-            new(0, -1, 0), new(-1, -1, 0), new(+1, -1, 0)
+            new(0, -1, 0), new(-1, -1, 0), new(+1, -1, 0), new(0, 0, 0)
         };
 
         private static readonly Vector3Int[] _flatHexOffsetsOdd =
         {
             new(0, +1, 0), new(+1, +1, 0), new(-1, +1, 0),
-            new(0, -1, 0), new(-1, 0, 0), new(+1, 0, 0)
+            new(0, -1, 0), new(-1, 0, 0), new(+1, 0, 0), new(0, 0, 0)
         };
             
         private static readonly Vector3Int[] _pointyHexOffsetsWorld =
         {
             new(+2, 0, 0), new(+1, +1, 0), new(-1, +1, 0),
-            new(-2, 0, 0), new(-1, -1, 0), new(1, -1, 0)
+            new(-2, 0, 0), new(-1, -1, 0), new(1, -1, 0), new(0, 0, 0)
         };
         
         private static readonly Vector3Int[] _flatHexOffsetsWorld =
         {
             new(0, +2, 0), new(+1, +1, 0), new(-1, +1, 0),
-            new(0, -2, 0), new(-1, -1, 0), new(1, -1, 0)
+            new(0, -2, 0), new(-1, -1, 0), new(1, -1, 0), new(0, 0, 0)
         };
 
         public HexWorldGrid(Transform coreTransform, int width, int height, int depth, Vector3 cellSize, Vector3 offset, Vector3 cellOffset, bool drawGizmos, Color gizmosColor, bool isPointyTopped = false) : base(coreTransform, width, height, depth, cellSize, offset, cellOffset, drawGizmos, gizmosColor)
@@ -127,7 +129,7 @@ namespace UnityBase.GridSystem
             var centeredPos = localPos - CalculateGridCenterOffset();
             return Transform.TransformPoint(centeredPos + HexGridOffset());
         }
-        public override Vector3Int WorldToGrid(Vector3 position, bool clamp = true)
+        public override Vector3Int WorldToGrid(Vector3 position, bool clamp = false)
         {
             var localPos = Transform.InverseTransformPoint(position) - HexGridOffset() + CalculateGridCenterOffset();
             var xSpacing = (CellSize.x + CellOffset.x);
@@ -166,14 +168,18 @@ namespace UnityBase.GridSystem
                 x = Mathf.Clamp(x, 0, Width - 1);
                 y = Mathf.Clamp(y, 0, Height - 1);
                 z = Mathf.Clamp(z, 0, Depth - 1);
+
+                return new Vector3Int(x, y, z);
             }
             
             var estimatedPos = GridToWorld(new Vector3Int(x, y, z));
             var radius = CellSize.x / SQRT3;
-        
-            return Vector3.Distance(position, estimatedPos) > radius 
+            
+            var result = Vector3.Distance(position, estimatedPos) > radius 
                 ? new Vector3Int(-1, -1, -1) 
                 : new Vector3Int(x, y, z);
+
+            return result;
         }
         
         private Vector2 RoundAxial(Vector2 axial)
@@ -208,6 +214,16 @@ namespace UnityBase.GridSystem
 
             if (!directionMap.TryGetValue(direction2D, out var dirIndex))
                 return false;
+            
+            if (_isPointyTopped && direction2D is Direction2D.Up or Direction2D.Down)
+            {
+                Debug.LogWarning("Direction2D.Up or Direction2D.Down are not supported for PointyTop Hex.");
+            }
+                
+            if (!_isPointyTopped && direction2D is Direction2D.Right or Direction2D.Left)
+            {
+                Debug.LogWarning("Direction2D.Right or Direction2D.Left are not supported for FlatTop Hex.");
+            }
             
             Vector3Int neighborGridPos;
             

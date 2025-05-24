@@ -7,24 +7,31 @@ namespace UnityBase.GridSystem
         #region VARIABLES
 
         [SerializeField] private bool _useJobSystem;
+        [SerializeField] protected MeshFilter _meshFilter;
+        
         [SerializeField] protected int _gridWidth;
         [SerializeField] protected int _gridHeight;
         [SerializeField] protected int _gridDepth;
         [SerializeField] protected Vector3 _cellSize;
         [SerializeField] protected Vector3 _cellOffset;
         [SerializeField] protected Vector3 _gridOffset;
+        [SerializeField][Range(0, 10)] protected int _activeDepth = 0;
+        
         [SerializeField] protected bool _drawGizmos;
         [SerializeField] protected Color _gizmosColor = Color.yellow;
-        [SerializeField] protected MeshFilter _meshFilter;
-        [SerializeField][Range(0, 10)] protected int _activeDepth = 0;
+        
+        [SerializeField] private Direction2D[] _direction2Ds;
+        [SerializeField] private DepthDirection[] _depthDirections;
+        [SerializeField] private bool _drawNeighbours;
+
         [SerializeField] private bool _allowDiagonalCornerCutting;
+        [SerializeField] private bool _clamp;
         
         private GridNode _startNode;
         private Vector3 _previousRot;
 
         protected IWorldGrid<GridNode> _grid;
         
-        private bool _test;
         #endregion
 
         #region COMPONENTS
@@ -70,11 +77,9 @@ namespace UnityBase.GridSystem
             {
                 var ray = _cam.ScreenPointToRay(Input.mousePosition);
                 
-                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
+                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos, _clamp)) return;
                 
                 var endNode = _grid.GetGridObject(gridPos);
-
-                _test = true;
                 
                 if (!endNode.IsWalkable || endNode.GridPos == _startNode.GridPos) return;
 
@@ -123,7 +128,7 @@ namespace UnityBase.GridSystem
             {
                 var ray = _cam.ScreenPointToRay(Input.mousePosition);
                 
-                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
+                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos, _clamp)) return;
 
                 var pathNode = _grid.GetGridObject(gridPos);
                 
@@ -158,33 +163,30 @@ namespace UnityBase.GridSystem
                 _grid.Update(_gridWidth, _gridHeight, _gridDepth, _cellSize, _gridOffset, _cellOffset, _drawGizmos, _gizmosColor);
             }
             
-            //NeighbourTest();
+            NeighbourTest();
             
             _grid.DrawGrid();
         }
 
         private void NeighbourTest()
         {
-            if (_test)
+            if (!_drawNeighbours || !Application.isPlaying) return;
+            
+            var ray = _cam.ScreenPointToRay(Input.mousePosition);
+                
+            if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos, _clamp)) return;
+                
+            for (int i = 0; i < _direction2Ds.Length; i++)
             {
-                var ray = _cam.ScreenPointToRay(Input.mousePosition);
-                
-                if (!_grid.TryGetNodeFromScreenRay(ray, _activeDepth, out var gridPos)) return;
-
-                if (_grid.TryGetNeighbor(gridPos, Direction2D.Up, out var node))
+                for (int j = 0; j < _depthDirections.Length; j++)
                 {
-                    var worldPos = _grid.GridToWorld(node.GridPos);
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawCube(worldPos, Vector3.one);
+                    if (_grid.TryGetNeighbor(gridPos, _direction2Ds[i], out var node, _depthDirections[j]))
+                    {
+                        var worldPos = _grid.GridToWorld(node.GridPos);
+                        Gizmos.color = Color.red;
+                        Gizmos.DrawCube(worldPos, Vector3.one);
+                    }
                 }
-                
-                if (_grid.TryGetNeighbor(gridPos, Direction2D.RightDown, out var node8, DepthDirection.Forward))
-                {
-                    var worldPos = _grid.GridToWorld(node8.GridPos);
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawCube(worldPos, Vector3.one);
-                }
-                
             }
         }
     }

@@ -1,4 +1,4 @@
-using System;
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +21,7 @@ namespace UnityBase.GridSystem
 
         bool TryGet(Vector3Int gridPos, out IReadOnlyList<T> result);
         bool TryGet(Vector3 worldPos, out IReadOnlyList<T> result);
-        bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos);
+        bool TryGetNodeFromScreenRay(Ray ray, int activeDepth, out Vector3Int gridPos, bool clamp);
 
         int GetNeighborsNonAlloc(Vector3Int gridPos, int radius, T[] resultBuffer, bool includeSelf = false, bool includeDepth = false, bool includeDiagonal = true);
         bool TryGetNeighbor(Vector3Int pos, Direction2D direction2D, out T neighbor, DepthDirection depthDirection = default, bool useWorldDirection = true);
@@ -29,9 +29,9 @@ namespace UnityBase.GridSystem
         Vector3 GridToWorld2(Vector2Int gridPos, int depth = 0);
         Vector2Int WorldToGrid2(Vector3 position, bool clamp = true);
         
-        bool IsInRange(Vector3 worldPos);
+        bool IsInRange(Vector3 worldPos, bool clamp = false);
         bool IsInRange2(Vector2Int pos);
-        bool IsInRange2(Vector3 worldPos);
+        bool IsInRange2(Vector3 worldPos, bool clamp);
         
         void DrawHighlightedCell(Vector3Int gridPos, Color highlightColor);
         void ClearAll();
