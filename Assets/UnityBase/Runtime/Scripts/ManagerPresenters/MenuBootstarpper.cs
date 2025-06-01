@@ -11,15 +11,6 @@ namespace UnityBase.Presenter
     {
         [Inject]
         private readonly IEnumerable<IMenuBootService> _menuBootServices;
-        
-        public MenuBootstarpper(IObjectResolver objectResolver) => UpdateObjectResolvers(objectResolver);
-
-        private static void UpdateObjectResolvers(IObjectResolver objectResolver)
-        {
-            var resolverContainer = objectResolver.Resolve<IObjectResolverContainer>();
-            
-            resolverContainer.Update(objectResolver);
-        }
 
         public void Initialize()
         {

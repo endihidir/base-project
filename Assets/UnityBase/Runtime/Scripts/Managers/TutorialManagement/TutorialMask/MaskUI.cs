@@ -44,6 +44,7 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
     public bool fitOnLateUpdate { get { return m_FitOnLateUpdate; } set { m_FitOnLateUpdate = value; } }
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
+    public int PoolKey { get; set; }
 
     public bool showUnmaskGraphic
     {

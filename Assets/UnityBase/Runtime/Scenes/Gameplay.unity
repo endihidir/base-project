@@ -516,6 +516,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dd2a5c29ccb02c4d9cf68d9a909ff54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _coinIconTestPrefab: {fileID: -3547271263419976193, guid: b7fc4a1c8c3b71f43bdf2a31a2a5dd67,
+    type: 3}
   _parent: {fileID: 1725484346}
 --- !u!1001 &1725484344
 PrefabInstance:

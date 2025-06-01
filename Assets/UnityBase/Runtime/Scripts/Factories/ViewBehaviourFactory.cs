@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityBase.Extensions;
-using UnityBase.Manager;
 using UnityEngine;
+using VContainer;
 
 namespace UnityBase.UI.ViewCore
 {
@@ -10,11 +10,11 @@ namespace UnityBase.UI.ViewCore
     {
         private readonly IDictionary<Type, IViewBehaviourGroup> _viewBehaviourGroup;
         
-        private IObjectResolverContainer _resolverContainer;
+        private IObjectResolver _objectResolver;
 
-        public ViewBehaviourFactory(IObjectResolverContainer resolverContainerContainer)
+        public ViewBehaviourFactory(IObjectResolver objectObjectResolver)
         {
-            _resolverContainer = resolverContainerContainer;
+            _objectResolver = objectObjectResolver;
             
             _viewBehaviourGroup = new Dictionary<Type, IViewBehaviourGroup>();
         }
@@ -25,7 +25,7 @@ namespace UnityBase.UI.ViewCore
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewBehaviourGroup))
             {
-                viewBehaviourGroup = new ViewBehaviourGroup(_resolverContainer.ObjectResolver);
+                viewBehaviourGroup = new ViewBehaviourGroup(_objectResolver);
                 
                 _viewBehaviourGroup[key] = viewBehaviourGroup;
             }
@@ -39,7 +39,7 @@ namespace UnityBase.UI.ViewCore
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewBehaviourGroup))
             {
-                viewBehaviourGroup = new ViewBehaviourGroup(_resolverContainer.ObjectResolver);
+                viewBehaviourGroup = new ViewBehaviourGroup(_objectResolver);
                 
                 _viewBehaviourGroup[key] = viewBehaviourGroup;
             }
@@ -53,7 +53,7 @@ namespace UnityBase.UI.ViewCore
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewBehaviourGroup))
             {
-                viewBehaviourGroup = new ViewBehaviourGroup(_resolverContainer.ObjectResolver);
+                viewBehaviourGroup = new ViewBehaviourGroup(_objectResolver);
 
                 _viewBehaviourGroup[key] = viewBehaviourGroup;
             }
@@ -67,7 +67,7 @@ namespace UnityBase.UI.ViewCore
             
             if (!_viewBehaviourGroup.TryGetValue(key, out var viewBehaviourGroup))
             {
-                viewBehaviourGroup = new ViewBehaviourGroup(_resolverContainer.ObjectResolver);
+                viewBehaviourGroup = new ViewBehaviourGroup(_objectResolver);
 
                 _viewBehaviourGroup[key] = viewBehaviourGroup;
             }
@@ -75,10 +75,10 @@ namespace UnityBase.UI.ViewCore
             return viewBehaviourGroup.CreateAction<TAct>();
         }
 
-        public TView CreateLocalView<TView>() where TView : class, IView => ClassExtensions.CreateInstance<TView>(_resolverContainer.ObjectResolver);
-        public TModel CreateLocalModel<TModel>() where TModel : class, IModel => ClassExtensions.CreateInstance<TModel>(_resolverContainer.ObjectResolver);
-        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IAnimation => ClassExtensions.CreateInstance<TAnim>(_resolverContainer.ObjectResolver);
-        public TAct CreateViewLocalAction<TAct>() where TAct : class, IAction => ClassExtensions.CreateInstance<TAct>(_resolverContainer.ObjectResolver);
+        public TView CreateLocalView<TView>() where TView : class, IView => ClassExtensions.CreateInstance<TView>(_objectResolver);
+        public TModel CreateLocalModel<TModel>() where TModel : class, IModel => ClassExtensions.CreateInstance<TModel>(_objectResolver);
+        public TAnim CreateViewLocalAnimation<TAnim>() where TAnim : class, IAnimation => ClassExtensions.CreateInstance<TAnim>(_objectResolver);
+        public TAct CreateViewLocalAction<TAct>() where TAct : class, IAction => ClassExtensions.CreateInstance<TAct>(_objectResolver);
 
         public bool TryGetView<TViewUI, TView>(out TView view) where TViewUI : Component where TView : class, IView
         {

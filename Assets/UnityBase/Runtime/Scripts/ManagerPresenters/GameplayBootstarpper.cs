@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityBase.BootService;
-using UnityBase.Manager;
 using VContainer;
 using VContainer.Unity;
 
@@ -12,15 +11,6 @@ namespace UnityBase.Presenter
         [Inject]
         private readonly IEnumerable<IGameplayBootService> _gameplayBootServices;
         
-        public GameplayBootstarpper(IObjectResolver objectResolver) => UpdateObjectResolvers(objectResolver);
-
-        private static void UpdateObjectResolvers(IObjectResolver objectResolver)
-        {
-            var resolverContainer = objectResolver.Resolve<IObjectResolverContainer>();
-            
-            resolverContainer.Update(objectResolver);
-        }
-
         public void Initialize()
         {
             foreach (var gameplayBootService in _gameplayBootServices)

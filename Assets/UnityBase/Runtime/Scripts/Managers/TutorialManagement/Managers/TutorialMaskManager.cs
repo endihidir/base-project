@@ -202,7 +202,7 @@ namespace UnityBase.Manager
 
         private void SetFadePanelsOpacity()
         {
-            var activePoolables = PoolableObjectGroup.FindPoolablesOfType<MaskUI>();
+            var activePoolables = PoolableObjectGroup.FindPoolableObjectsOfType<MaskUI>();
 
             foreach (var activePoolable in activePoolables)
             {

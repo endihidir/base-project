@@ -18,6 +18,7 @@ namespace UnityBase.PopUpCore
         public bool IsSettingsPopUp => _isSettingsPopUp;
         public virtual bool IsActive => isActiveAndEnabled;
         public virtual bool IsUnique => true;
+        public int PoolKey { get; set; }
 
         private Vector2 _defaultSizeDelta;
 

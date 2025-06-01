@@ -25,6 +25,7 @@ namespace UnityBase.TutorialCore
         
         public bool IsActive => isActiveAndEnabled;
         public bool IsUnique => false;
+        public int PoolKey { get; set; }
         public PositionSpace SpawnSpace => _spawnSpace;
 
         #endregion

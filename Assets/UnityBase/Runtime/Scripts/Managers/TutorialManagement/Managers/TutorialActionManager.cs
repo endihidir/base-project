@@ -14,7 +14,7 @@ namespace UnityBase.Manager
         private Transform _tutorialsParent;
 
         private TutorialActionManagerSO _tutorialActionManagerSo;
-
+        
         private readonly IPoolManager _poolManager;
 
         public TutorialActionManager(GameDataHolderSO gameDataHolderSo, IPoolManager poolManager)
@@ -23,7 +23,7 @@ namespace UnityBase.Manager
 
             _poolManager = poolManager;
 
-            _tutorialsParent = _tutorialActionManagerSo.tutorialsParent; ;
+            _tutorialsParent = _tutorialActionManagerSo.tutorialsParent;
         }
 
         public void Initialize() { }

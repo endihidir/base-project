@@ -15,4 +15,4 @@ MonoBehaviour:
   poolSize: 5
   poolObject: {fileID: 7590577888471835269, guid: b7fc4a1c8c3b71f43bdf2a31a2a5dd67,
     type: 3}
-  isLazy: 0
+  isLazy: 1

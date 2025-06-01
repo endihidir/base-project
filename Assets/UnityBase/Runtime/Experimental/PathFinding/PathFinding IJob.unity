@@ -347,7 +347,7 @@ MonoBehaviour:
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _direction2Ds: 010000000200000003000000040000000500000008000000090000000600000007000000
   _depthDirections: 0100000002000000
-  _drawNeighbours: 1
+  _drawNeighbours: 0
   _allowDiagonalCornerCutting: 0
   _clamp: 0
 --- !u!1 &1490488255
@@ -513,7 +513,7 @@ Transform:
   m_GameObject: {fileID: 1884106351}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 42.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -535,11 +535,11 @@ MonoBehaviour:
   _meshFilter: {fileID: 181437503}
   _gridWidth: 7
   _gridHeight: 6
-  _gridDepth: 3
+  _gridDepth: 1
   _cellSize: {x: 7, y: 7, z: 7}
   _cellOffset: {x: 2, y: 2, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}
-  _activeDepth: 1
+  _activeDepth: 0
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _direction2Ds: 01000000050000000600000007000000040000000800000009000000

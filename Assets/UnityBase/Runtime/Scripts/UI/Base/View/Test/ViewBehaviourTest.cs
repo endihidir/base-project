@@ -5,6 +5,8 @@ using VContainer;
 
 public class ViewBehaviourTest : MonoBehaviour
 {
+    [SerializeField] private CoinIconTest _coinIconTestPrefab;
+    
     [Inject] private readonly ICurrencyManager _currencyManager;
     [Inject] private readonly IPoolManager _poolManager;
 
@@ -13,7 +15,7 @@ public class ViewBehaviourTest : MonoBehaviour
     [Button]
     public void TestBehaviour()
     {
-        var coinIcon = _poolManager.GetObject<CoinIconTest>(false);
+        var coinIcon = _poolManager.GetObject(_coinIconTestPrefab,false);
         
         coinIcon.Show(0f, 0f, null);
         coinIcon.transform.SetParent(_parent);

@@ -42,7 +42,6 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<TutorialActionManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TutorialMaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<TutorialProcessManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<ObjectResolverContainer>(Lifetime.Singleton).AsImplementedInterfaces();
 
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();

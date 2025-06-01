@@ -10,7 +10,8 @@ public class BulletTest : MonoBehaviour, IPoolable
     private Tween _scaleTween;
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
-    
+    public int PoolKey { get; set; }
+
     protected Collider _collider;
 
     [Inject]

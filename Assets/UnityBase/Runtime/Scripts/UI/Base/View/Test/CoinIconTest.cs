@@ -7,8 +7,10 @@ public class CoinIconTest : MonoBehaviour, IPoolable
 {
     public bool IsActive => isActiveAndEnabled;
     public bool IsUnique => false;
+    public int PoolKey { get; set; }
 
     private Tween _tw;
+    
     public void Show(float duration, float delay, Action onComplete)
     {
         gameObject.SetActive(true);
