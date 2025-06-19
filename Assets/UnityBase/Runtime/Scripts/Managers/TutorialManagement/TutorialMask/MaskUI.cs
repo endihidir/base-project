@@ -187,6 +187,9 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
         _maskFadeImage.color = _maskFadeImage.color.SetAlpha(0f);
         _maskFadeImage.rectTransform.sizeDelta = scale;
         _maskFadeImage.pixelsPerUnitMultiplier = pixelsPerUnitMultiplier * sharpnessMultiplier;
+        var rt = transform as RectTransform;
+        rt.pivot = Vector2.one * 0.5f;
+        rt.localScale = Vector3.one;
     }
 
     public void SetMaskPanelStartColor(Color fadePanelStartColor)
@@ -208,7 +211,7 @@ public class MaskUI : MonoBehaviour, IMaterialModifier, IPoolable
         {
             onComplete?.Invoke();
             Reset();
-        });
+        }).SetUpdate(true);
     }
 
     private void Reset()

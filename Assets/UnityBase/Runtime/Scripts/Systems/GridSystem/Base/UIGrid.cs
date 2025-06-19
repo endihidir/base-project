@@ -92,8 +92,8 @@ namespace UnityBase.GridSystem
         
         public void Update(int width, int height, float screenSidePaddingRatio, float cellSpacingRatio, Vector3 originOffset, bool drawGizmos, Color gizmosColor)
         {
-            var widthChanged = width != _width;
-            var heightChanged = height != _height;
+            var widthChanged = width != Width;
+            var heightChanged = height != Height;
 
             if (widthChanged || heightChanged)
             {
@@ -112,8 +112,8 @@ namespace UnityBase.GridSystem
         private void ResizePreserveOldData(int newWidth, int newHeight)
         {
             var oldGrid = _gridArray;
-            var oldWidth = _width;
-            var oldHeight = _height;
+            var oldWidth = Width;
+            var oldHeight = Height;
 
             var newGrid = new T[newWidth, newHeight];
 
@@ -204,9 +204,9 @@ namespace UnityBase.GridSystem
             var xRaw = (absoluteXPos - (borderOffset / 2)) / xDivider;
             var yRaw = (absoluteYPos) / yDivider;
             
-            if (IsInPaddingArea(absoluteXPos, xDivider, borderOffset) || IsInPaddingArea(absoluteYPos, yDivider, borderOffset))
+            if (IsInHorizontalPaddingArea(absoluteXPos, borderOffset, gridOffset) || IsInVerticalPaddingArea(absoluteYPos, gridOffset))
             {
-                return pos;
+                return new Vector3Int(-1, -1);
             }
             
             pos.x = Mathf.FloorToInt(xRaw);
@@ -416,12 +416,12 @@ namespace UnityBase.GridSystem
         
         public virtual void RebuildMeshVisual(Mesh mesh)
         {
-            var cellCount = _width * _height;
+            var cellCount = Width * Height;
             MeshUtils.CreateEmptyMeshArrays(cellCount, out var vertices, out var uvs, out var triangles);
             
-            for (int x = 0; x < _width; x++)
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < _height; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     var pos = new Vector3Int(x, y);
                     var node = GetGridObject(pos);
@@ -510,6 +510,17 @@ namespace UnityBase.GridSystem
         
         protected float CalculateBorderOffset(float screenWidth) => screenWidth * (_screenSidePaddingRatio / 100f);
         protected float CalculateGridOffset(float screenWidth) => screenWidth * (_cellSpacingRatio / 100f);
-        protected bool IsInPaddingArea(float absolutePos, float divider, float borderOffset) => (absolutePos - (borderOffset / 2)) % divider > _cellSize;
+        protected bool IsInHorizontalPaddingArea(float absoluteXPos, float borderOffset, float gridOffset)
+        {
+            var adjustedXPos = absoluteXPos - (borderOffset / 2);
+            var totalCellWidth = _cellSize + gridOffset;
+            return adjustedXPos % totalCellWidth > _cellSize;
+        }
+
+        protected bool IsInVerticalPaddingArea(float absoluteYPos, float gridOffset)
+        {
+            var totalCellHeight = _cellSize + gridOffset;
+            return absoluteYPos % totalCellHeight > _cellSize;
+        }
     }
 }

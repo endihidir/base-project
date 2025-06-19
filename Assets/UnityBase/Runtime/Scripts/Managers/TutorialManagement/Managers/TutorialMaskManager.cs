@@ -174,7 +174,7 @@ namespace UnityBase.Manager
 
             try
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(duration + delay), DelayType.DeltaTime, PlayerLoopTiming.Update, _delayCancellationToken.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration + delay), DelayType.UnscaledDeltaTime, PlayerLoopTiming.Update, _delayCancellationToken.Token);
 
                 _maskFadePanel.gameObject.SetActive(false);
             }

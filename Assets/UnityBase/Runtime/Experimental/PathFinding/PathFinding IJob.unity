@@ -221,7 +221,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &275793780
 Transform:
   m_ObjectHideFlags: 0
@@ -254,7 +254,7 @@ MonoBehaviour:
   _width: 7
   _height: 7
   _screenSidePaddingRatio: 10
-  _cellSpacingRatio: 1
+  _cellSpacingRatio: 2.89
   _originOffset: {x: 0, y: 5, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 0.98878634, g: 1, b: 0, a: 1}
@@ -509,7 +509,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1884106353
 Transform:
   m_ObjectHideFlags: 0
