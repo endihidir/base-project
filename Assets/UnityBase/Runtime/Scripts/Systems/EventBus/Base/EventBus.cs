@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace UnityBase.EventBus
 {
@@ -58,7 +59,7 @@ namespace UnityBase.EventBus
 
         private static void Clear()
         {
-            //Debug.Log($"Clearing {typeof(T).Name} bindings");
+            Debug.LogError($"Clearing {typeof(T).Name} bindings");
 
             foreach (var bindings in _bindingDictionary)
             {

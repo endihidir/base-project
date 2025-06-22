@@ -25,14 +25,15 @@ public class CoinIconTest : MonoBehaviour, IPoolable
         onComplete?.Invoke();
     }
 
-    public void MoveTo(Transform target, float duration, Action onComplete)
+    public void MoveTo(Transform target, float duration, Action onMoveComplete, Action onAnimComplete)
     {
         _tw?.Kill(true);
 
         _tw = DOTween.Sequence()
             .Append(transform.DOMove(target.position, duration).SetEase(Ease.InOutQuad))
             .Join(transform.DOScale(1f, duration).SetEase(Ease.InOutQuad))
+            .AppendCallback(()=> onMoveComplete?.Invoke())
             .Append(transform.DOPunchScale(Vector3.one * 0.5f, 0.1f).SetEase(Ease.InBack))
-            .AppendCallback(() => onComplete?.Invoke());
+            .AppendCallback(() => onAnimComplete?.Invoke());
     }
 }

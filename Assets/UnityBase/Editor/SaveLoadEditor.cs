@@ -1,5 +1,6 @@
 using UnityBase.Manager;
 using UnityEditor;
+using UnityEngine;
 
 namespace UnityBase.Scripts.Editor
 {
@@ -9,6 +10,14 @@ namespace UnityBase.Scripts.Editor
         private static void ClearAllSaveLoadData()
         {
             SaveManager.ClearAllSaveLoadData();
+        }
+        
+        
+        [MenuItem("Edit/Clear All")]
+        private static void ClearAll()
+        {
+            SaveManager.ClearAllSaveLoadData();
+            PlayerPrefs.DeleteAll();
         }
     }
 }

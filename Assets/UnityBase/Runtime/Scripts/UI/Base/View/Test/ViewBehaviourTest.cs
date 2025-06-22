@@ -22,10 +22,14 @@ public class ViewBehaviourTest : MonoBehaviour
         coinIcon.transform.localScale = Vector3.one * 0.5f;
         coinIcon.transform.position = new Vector3(Screen.width * 0.5f, Screen.height * 0.3f);
         
+        
         coinIcon.MoveTo(_currencyManager.CoinIconT,0.5f, ()=>
         {
-            _currencyManager.SaveCoinData(1);
+            _currencyManager.SaveCoinData(500);
             _currencyManager.UpdateCoinView();
+        },
+        () =>
+        {
             _poolManager.HideObject(coinIcon, 0f, 0.1f);
         });
     }

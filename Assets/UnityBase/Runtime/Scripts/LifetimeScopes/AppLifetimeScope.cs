@@ -34,7 +34,7 @@ namespace UnityBase.BaseLifetimeScope
         private void RegisterSingletonServices(IContainerBuilder builder)
         {
             builder.Register<GameManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<SceneGroupManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<SceneManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LevelManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();

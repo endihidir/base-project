@@ -7,12 +7,13 @@ using UnityBase.Extensions;
 using UnityBase.Manager.Data;
 using UnityBase.Service;
 using UnityEngine;
+using CancellationTokenExtensions = UnityBase.Extensions.CancellationTokenExtensions;
 
 namespace UnityBase.Manager
 {
     public class GameplayManager : IGameplayManager, IGameplayBootService
     {
-        private readonly ISceneGroupManager _sceneGroupManager;
+        private readonly ISceneManager _sceneManager;
         private readonly ITutorialProcessManager _tutorialProcessManager;
         
         private GameState _currentGameState = GameState.GameLoadingState;
@@ -22,9 +23,9 @@ namespace UnityBase.Manager
 
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public GameplayManager(ISceneGroupManager sceneGroupManager, ITutorialProcessManager tutorialProcessManager)
+        public GameplayManager(ISceneManager sceneManager, ITutorialProcessManager tutorialProcessManager)
         {
-            _sceneGroupManager = sceneGroupManager;
+            _sceneManager = sceneManager;
             _tutorialProcessManager = tutorialProcessManager;
         }
 
@@ -32,10 +33,10 @@ namespace UnityBase.Manager
 
         public void Initialize()
         {
-            _sceneGroupManager.OnSceneReadyToPlay += OnSceneGroupLoadComplete;
+            _sceneManager.OnSceneReadyToPlay += OnSceneLoadComplete;
         }
 
-        private void OnSceneGroupLoadComplete(SceneType sceneType)
+        private void OnSceneLoadComplete(SceneType sceneType)
         {
             if (sceneType == SceneType.Gameplay)
             {
@@ -45,7 +46,7 @@ namespace UnityBase.Manager
 
         public void Dispose()
         {
-            _sceneGroupManager.OnSceneReadyToPlay -= OnSceneGroupLoadComplete;
+            _sceneManager.OnSceneReadyToPlay -= OnSceneLoadComplete;
             
             DisposeToken();
             
@@ -96,7 +97,7 @@ namespace UnityBase.Manager
 
         private async UniTask ChangeStateAsync(GameStateData gameStateData, float transitionDuration, float startDelay)
         {
-            CancellationTokenExtentions.Refresh(ref _cancellationTokenSource);
+            CancellationTokenExtensions.Refresh(ref _cancellationTokenSource);
             
             var halfDuration = transitionDuration * 0.5f;
             

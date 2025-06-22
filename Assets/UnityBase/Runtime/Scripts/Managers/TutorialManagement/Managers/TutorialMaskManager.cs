@@ -10,6 +10,7 @@ using UnityBase.Pool;
 using UnityBase.Service;
 using UnityEngine;
 using UnityEngine.UI;
+using CancellationTokenExtensions = UnityBase.Extensions.CancellationTokenExtensions;
 
 namespace UnityBase.Manager
 {
@@ -170,7 +171,7 @@ namespace UnityBase.Manager
 
         private async UniTask DeactivateFadePanelAsync(float duration, float delay)
         {
-            CancellationTokenExtentions.Refresh(ref _delayCancellationToken);
+            CancellationTokenExtensions.Refresh(ref _delayCancellationToken);
 
             try
             {

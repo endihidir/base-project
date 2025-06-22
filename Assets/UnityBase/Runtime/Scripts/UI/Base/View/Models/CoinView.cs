@@ -11,6 +11,8 @@ namespace UnityBase.UI.ViewCore
         private ICoinModel _coinModel;
         
         private Tween _valueIncrease;
+        
+        private int _currentCoin;
         public Transform CoinIconTransform { get; private set; }
 
         public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel)
@@ -18,13 +20,25 @@ namespace UnityBase.UI.ViewCore
             CoinIconTransform = coinIconTransform;
             _coinTxt = textMeshProUGUI;
             _coinModel = coinModel;
-            _coinTxt.text = _coinModel.Coins.Value.ToString();
+            _currentCoin = _coinModel.Coins.Value;
+            _coinTxt.text = _currentCoin.ToString();
             return this;
         }
 
         public ICoinView UpdateView()
         {
-            _coinTxt.text = _coinModel.Coins.Value.ToString();
+            _valueIncrease?.Kill();
+            
+            var duration = ((Mathf.Abs(_currentCoin - _coinModel.Coins.Value) * 0.1f) - 0.1f) * 0.5f;
+            
+            duration = Mathf.Clamp(duration, 0, 0.35f);
+            
+            _valueIncrease = DOVirtual.Int(_currentCoin, _coinModel.Coins.Value, duration, x=>
+            {
+                _currentCoin = x;
+                _coinTxt.text = x.ToString();
+            });
+            
             return this;
         }
         
