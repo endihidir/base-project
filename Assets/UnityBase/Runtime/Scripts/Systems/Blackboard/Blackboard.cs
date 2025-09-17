@@ -42,7 +42,7 @@ namespace UnityBase.BlackboardCore
         public override int GetHashCode() => Key.GetHashCode();
     }
     
-    public class GlobalBlackboard : IBlackboard
+    public class Blackboard : IBlackboard
     {
         private Dictionary<string, BlackboardKey> _keyRegistry = new();
         
@@ -56,10 +56,12 @@ namespace UnityBase.BlackboardCore
             if (_entries.TryGetValue(key, out var entry) && entry is BlackboardEntry<T> castedEntry)
             {
                 value = castedEntry.Value;
+                
                 return true;
             }
 
             value = default;
+            
             return false;
         }
 
@@ -77,7 +79,9 @@ namespace UnityBase.BlackboardCore
             if (!_keyRegistry.TryGetValue(keyName, out var blackboardKey))
             {
                 blackboardKey = new BlackboardKey(keyName);
+                
                 _keyRegistry[keyName] = blackboardKey;
+                
                 OnKeyAdded?.Invoke(blackboardKey);
             }
             
@@ -101,7 +105,7 @@ namespace UnityBase.BlackboardCore
 
                     var value = valueProperty.GetValue(entry.Value);
                     
-                    UnityEngine.Debug.LogError($"Key: {entry.Key}, Value: {value}");
+                    DebugLogger.LogError($"Key: {entry.Key}, Value: {value}");
                 }
             }
         }

@@ -59,7 +59,7 @@ namespace UnityBase.Manager
      
         public void HideTutorial(Tutorial tutorial, float duration = 0f, float delay = 0f, Action onComplete = default)
         {
-            _poolManager.HideObject(tutorial, duration, delay, onComplete);
+            _poolManager.ReturnToPool(tutorial, duration, delay, onComplete);
         }
 
         public void HideAllTutorialOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = default) where T : Tutorial

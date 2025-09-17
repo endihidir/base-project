@@ -4,7 +4,8 @@ using UnityBase.Manager;
 using UnityBase.Presenter;
 using UnityBase.SceneManagement;
 using UnityBase.StateMachineCore;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
+using UnityBase.SaveSystem;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -14,10 +15,16 @@ namespace UnityBase.BaseLifetimeScope
     public class AppLifetimeScope : LifetimeScope
     {
         [SerializeField] private GameDataHolderSO gameDataHolderSo;
-        
+
         protected override void Configure(IContainerBuilder builder)
         {
             gameDataHolderSo.Initialize();
+            
+            if (!FindObjectOfType<SaveDispatcher>())
+            {
+                var go = new GameObject("SaveDispatcher");
+                go.AddComponent<SaveDispatcher>();
+            }
             
             builder.RegisterInstance(gameDataHolderSo);
 
@@ -45,13 +52,11 @@ namespace UnityBase.BaseLifetimeScope
 
             builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
-
-            builder.Register<GlobalBlackboard>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<ViewBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<SaveManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<StateMachineManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
-            builder.Register<GlobalStateMachine>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<StateMachineFactory>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<OwnerBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<BlackboardRegistry>(Lifetime.Singleton).AsImplementedInterfaces();
         }
     }   
 }

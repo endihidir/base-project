@@ -1,6 +1,6 @@
 using TMPro;
 using UnityBase.UI.Config.SO;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 using UnityEngine;
 
 namespace UnityBase.UI.Dynamic
@@ -15,12 +15,14 @@ namespace UnityBase.UI.Dynamic
 
         private ILevelModel _levelModel;
 
-        protected override void Initialize(IViewBehaviourFactory viewBehaviourFactory)
+        protected override void Initialize()
         {
-            _levelModel = viewBehaviourFactory.CreateModel<LevelModel>(this)
+            var context = _ownerFactory.RegisterAndGetContext(this);
+            
+            _levelModel = context.CreateModel<LevelModel>()
                 .Initialize(_levelTxt);
 
-            _moveInOutAnim = viewBehaviourFactory.CreateViewLocalAnimation<MoveInOutAnimation>()
+            _moveInOutAnim = _ownerFactory.CreateLocalAnimation<MoveInOutAnimation>()
                 .Initialize(_rectTransform)
                 .Configure(_moveInOutViewConfigSo);
         }
@@ -49,6 +51,7 @@ namespace UnityBase.UI.Dynamic
         {
             _moveInOutAnim?.Dispose();
             _levelModel?.Dispose();
+            _ownerFactory?.Release(this);
         }
     }
 }

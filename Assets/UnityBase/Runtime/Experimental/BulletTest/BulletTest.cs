@@ -57,7 +57,7 @@ public class BulletTest : MonoBehaviour, IPoolable
         {
             _collider.enabled = false;
             
-            PoolManager.HideObject(this, 1f, 0f, default);
+            PoolManager.ReturnToPool(this, 1f, 0f, default);
         }
     }
 

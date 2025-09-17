@@ -144,7 +144,7 @@ namespace UnityBase.Pool
                 }
                 else
                 {
-                    Debug.LogError($"{poolable.GetType()} is not Component!");
+                    DebugLogger.LogError($"{poolable.GetType()} is not Component!");
                 }
             }
         }
@@ -185,16 +185,18 @@ namespace UnityBase.Pool
 
             if (poolable is not Component poolableObj)
             {
-                Debug.LogError($"{poolable.GetType()} is not Component!");
+                DebugLogger.LogError($"{poolable.GetType()} is not Component!");
                 return;
             }
             
             var poolableT = poolableObj.transform;
-
+            
             poolableT.SetParent(_poolParent.transform);
 
             poolableT.localPosition = Vector3.zero;
 
+            poolable.Hide();
+            
             _pool.Enqueue(poolable);
 
             onComplete?.Invoke();

@@ -1,16 +1,18 @@
 using DG.Tweening;
 using UnityBase.UI.ButtonCore;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 
 public class PlayButton : ButtonBase
 {
-    protected override void Initialize(IViewBehaviourFactory viewBehaviourFactory)
+    protected override void Initialize(IOwnerBehaviourFactory ownerBehaviourFactory)
     {
-        _buttonAction = viewBehaviourFactory.CreateAction<SceneLoadAction>(this)
-                                              .Configure(SceneType.Gameplay, true);
+        var context = ownerBehaviourFactory.RegisterAndGetContext(this);
         
-        _buttonAnimation = viewBehaviourFactory.CreateAnimation<ButtonClickAnim>(this)
-                                               .SetButtonTransform(Button.transform)
-                                               .Configure(1.05f, 0.1f, Ease.InOutQuad);
+        _buttonAction = context.CreateAction<SceneLoadAction>()
+                               .Configure(SceneType.Gameplay, true);
+        
+        _buttonAnimation = context.CreateAnimation<ButtonClickAnim>()
+                                  .SetButtonTransform(Button.transform)
+                                  .Configure(1.05f, 0.1f, Ease.InOutQuad);
     }
 }

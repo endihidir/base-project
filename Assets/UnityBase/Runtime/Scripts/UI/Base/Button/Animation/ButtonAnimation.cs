@@ -1,5 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 
 namespace UnityBase.UI.ButtonCore
 {

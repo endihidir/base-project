@@ -1,4 +1,4 @@
-using UnityBase.Manager;
+using UnityBase.SaveSystem;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,17 +6,17 @@ namespace UnityBase.Scripts.Editor
 {
     public class SaveLoadEditor : EditorWindow
     {
-        [MenuItem("Edit/Clear All Save Load Data")]
-        private static void ClearAllSaveLoadData()
+        [MenuItem("Edit/Clear Json Data")]
+        private static void ClearJsonData()
         {
-            SaveManager.ClearAllSaveLoadData();
+            SaveManager.ClearJsonData();
         }
         
         
         [MenuItem("Edit/Clear All")]
         private static void ClearAll()
         {
-            SaveManager.ClearAllSaveLoadData();
+            SaveManager.ClearJsonData();
             PlayerPrefs.DeleteAll();
         }
     }

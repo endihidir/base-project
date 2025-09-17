@@ -2,38 +2,34 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace UnityBase.UI.ViewCore
+namespace UnityBase.Runtime.Behaviours
 {
     public class CoinView : ICoinView
     {
         private TextMeshProUGUI _coinTxt;
-        
-        private ICoinModel _coinModel;
         
         private Tween _valueIncrease;
         
         private int _currentCoin;
         public Transform CoinIconTransform { get; private set; }
 
-        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel)
+        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI)
         {
             CoinIconTransform = coinIconTransform;
             _coinTxt = textMeshProUGUI;
-            _coinModel = coinModel;
-            _currentCoin = _coinModel.Coins.Value;
             _coinTxt.text = _currentCoin.ToString();
             return this;
         }
 
-        public ICoinView UpdateView()
+        public ICoinView UpdateView(int value)
         {
             _valueIncrease?.Kill();
             
-            var duration = ((Mathf.Abs(_currentCoin - _coinModel.Coins.Value) * 0.1f) - 0.1f) * 0.5f;
+            var duration = ((Mathf.Abs(_currentCoin - value) * 0.1f) - 0.1f) * 0.5f;
             
             duration = Mathf.Clamp(duration, 0, 0.35f);
             
-            _valueIncrease = DOVirtual.Int(_currentCoin, _coinModel.Coins.Value, duration, x=>
+            _valueIncrease = DOVirtual.Int(_currentCoin, value, duration, x=>
             {
                 _currentCoin = x;
                 _coinTxt.text = x.ToString();
@@ -51,7 +47,7 @@ namespace UnityBase.UI.ViewCore
     public interface ICoinView : IView
     {
         public Transform CoinIconTransform { get; }
-        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI, ICoinModel coinModel);
-        public ICoinView UpdateView();
+        public ICoinView Initialize(Transform coinIconTransform, TextMeshProUGUI textMeshProUGUI);
+        public ICoinView UpdateView(int value);
     }
 }

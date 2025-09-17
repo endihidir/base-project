@@ -2,7 +2,7 @@
 using UnityBase.UI.Config.SO;
 using UnityEngine;
 
-namespace UnityBase.UI.ViewCore
+namespace UnityBase.Runtime.Behaviours
 {
     public class MoveInOutAnimation : IMoveInOutAnimation
     {
@@ -73,5 +73,5 @@ namespace UnityBase.UI.ViewCore
         public void MoveInInstantly();
         public void MoveOutInstantly();
     }
-
+    
 }

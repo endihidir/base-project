@@ -42,7 +42,7 @@ namespace UnityBase.Manager
 
         public void HidePopUp(PopUp popUp, float duration = 0.2f, float delay = 0f, Action onComplete = default)
         {
-            _poolManager.HideObject(popUp, duration, delay, onComplete);
+            _poolManager.ReturnToPool(popUp, duration, delay, onComplete);
         }
         
         public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default) where T : PopUp

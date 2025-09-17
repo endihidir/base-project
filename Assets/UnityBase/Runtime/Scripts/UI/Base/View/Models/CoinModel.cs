@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityBase.Observable;
-using UnityBase.Service;
+using UnityBase.SaveSystem;
 
-namespace UnityBase.UI.ViewCore
+namespace UnityBase.Runtime.Behaviours
 {
     public class CoinModel : ICoinModel
     {
@@ -34,25 +34,25 @@ namespace UnityBase.UI.ViewCore
             _saveManager.SaveToPrefs("CoinData", savedData);
         }
 
-        public void Add(int value)
-        {
-            Coins.Set(Coins.Value + value);
-            
-            Serialize(new CoinData{coins = Coins.Value});
-        }
+        public void Add(int value) => Coins.Set(Coins.Value + value);
         
+        public void Save()
+        {
+            Serialize(new CoinData { coins = Coins.Value });
+        }
+
         public void Dispose()
         {
             Coins?.Dispose();
         }
     }
     
-    public interface ICoinModel : IModel
+    public interface ICoinModel : IModel, ISaveData
     {
         public Observable<int> Coins { get; }
         public ICoinModel Initialize();
-        CoinData Deserialize();
-        void Serialize(CoinData savedData);
+        public CoinData Deserialize();
+        public void Serialize(CoinData savedData);
         public void Add(int value);
     }
 

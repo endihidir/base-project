@@ -1,5 +1,5 @@
 using NaughtyAttributes;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 using UnityEngine;
 using VContainer;
 
@@ -13,14 +13,18 @@ namespace UnityBase.UI.Dynamic
         protected void OnValidate() => _rectTransform = GetComponent<RectTransform>();
 #endif
         protected void Awake() => _rectTransform ??= GetComponent<RectTransform>();
+        
+        protected IOwnerBehaviourFactory _ownerFactory;
 
         [Inject]
-        private void Construct(IViewBehaviourFactory viewBehaviourFactory)
+        private void Construct(IOwnerBehaviourFactory ownerBehaviourFactory)
         {
-            Initialize(viewBehaviourFactory);
+            _ownerFactory = ownerBehaviourFactory;
+            
+            Initialize();
         }
         
-        protected abstract void Initialize(IViewBehaviourFactory viewBehaviourFactory);
+        protected abstract void Initialize();
 
         public abstract void OpenView();
         public abstract void CloseView();
@@ -36,4 +40,3 @@ namespace UnityBase.UI.Dynamic
         public void CloseViewInstantly();
     }
 }
-

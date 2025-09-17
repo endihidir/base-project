@@ -1,5 +1,5 @@
 using TMPro;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 
 namespace UnityBase.UI.Dynamic
 {
@@ -15,6 +15,7 @@ namespace UnityBase.UI.Dynamic
         }
 
         public void UpdateLevelView(int value) => _levelTxt.text = "LEVEL " + value;
+
         public void Dispose() {}
     }
     

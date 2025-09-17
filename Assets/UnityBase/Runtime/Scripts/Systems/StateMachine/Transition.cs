@@ -1,62 +1,37 @@
 using System;
-using UnityEngine;
 
 namespace UnityBase.StateMachineCore
 {
     public interface ITransition
     {
-        public IState From { get; }
-        public IState To { get; }
-        public bool CheckTrigger();
+        IState From { get; }
+        IState To { get; }
+        int Priority { get; }
+        bool OneShot { get; }
+        bool TryInvokeTransition();
     }
 
-    public class Transition : ITransition
+    public sealed class Transition : ITransition
     {
         public IState From { get; }
         public IState To { get; }
-        private event Func<bool> Condition;
+        public int Priority { get; }
+        public bool OneShot { get; }
 
-        public Transition(IState from, IState to, Func<bool> onSuccess)
+        private readonly Func<bool> _condition;
+
+        public Transition(IState from, IState to, Func<bool> condition, int priority = 0, bool oneShot = false)
         {
             From = from;
             To = to;
-            Condition = onSuccess;
-            
-            if (from is ITreeState fromTree && to is ITreeState toTree && fromTree.GetRootState() != toTree.GetRootState())
-            {
-                Debug.LogError($"Invalid transition: '{fromTree.StateID}' and '{toTree.StateID}' are not in the same hierarchy.");
-            }
-        }
-        
-        public bool CheckTrigger()
-        {
-            if (Condition?.Invoke() == false) return false;
-            
-            if (!From.IsActive) return false;
+            _condition = condition;
+            Priority = priority;
+            OneShot = oneShot;
 
-            if (From is ITreeState fromTree && To is ITreeState toTree)
-            {
-                if (CanTransition(fromTree, toTree))
-                {
-                    fromTree.Exit();
-
-                    toTree.Enter();
-
-                    return true;
-                }
-
-                Debug.LogError($"Cannot force transition from '{fromTree.StateID}' to '{toTree.StateID}': different root states.");
-
-                return false;
-            }
-
-            From.Exit();
-
-            To.Enter();
-
-            return true;
+            if (from is ITreeState f && to is ITreeState t && f.GetRootState() != t.GetRootState())
+                DebugLogger.LogError($"Invalid transition: '{(f.StateID ?? "null")}' and '{(t.StateID ?? "null")}' are in different roots.");
         }
 
-        private bool CanTransition(ITreeState from, ITreeState to) => (from.GetRootState() == to.GetRootState()) || from.IsRootState;
+        public bool TryInvokeTransition() => _condition();
     }
 }

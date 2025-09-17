@@ -119,7 +119,7 @@ namespace UnityBase.Manager
 
         public async void HideMask(MaskUI maskUI, float killDuration = 0f, float delay = 0f, Action onComplete = default)
         {
-            _poolManager.HideObject(maskUI, killDuration, delay, onComplete);
+            _poolManager.ReturnToPool(maskUI, killDuration, delay, onComplete);
 
             var raycastFitter = _maskRaycastFilters.FirstOrDefault(x => x.TargetMaskUI == maskUI);
 

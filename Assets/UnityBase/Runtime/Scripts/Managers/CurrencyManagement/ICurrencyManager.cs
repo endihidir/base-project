@@ -1,12 +1,13 @@
 ﻿using System;
+using UnityBase.Runtime.Behaviours;
 using UnityEngine;
 
 namespace UnityBase.Service
 {
     public interface ICurrencyManager
     {
-        public Transform CoinIconT { get; }
-        public void SaveCoinData(int value);
-        public void UpdateCoinView();
+        void BindCoinContext(IOwnerContext context);
+        void UnbindCoinContext(IOwnerContext context);
+        void PlayCollect(int amount, CoinIconTest prefab, Transform parent, Vector3 screenPos);
     }
 }

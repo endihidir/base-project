@@ -1,52 +1,47 @@
 using UnityBase.BootService;
 using UnityBase.Service;
-using UnityBase.UI.Dynamic;
-using UnityBase.UI.ViewCore;
+using UnityBase.Runtime.Behaviours;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
     public class CurrencyManager : ICurrencyManager, IAppBootService
     {
-        private readonly IViewBehaviourFactory _viewBehaviourFactory;
-        public CurrencyManager(IViewBehaviourFactory viewBehaviourFactory)
-        {
-            _viewBehaviourFactory = viewBehaviourFactory;
-        }
-        
+        private IOwnerContext _coinCtx;
+        private ICoinController _coinController;
+
         public void Initialize() { }
 
-        public Transform CoinIconT
+        public void BindCoinContext(IOwnerContext context)
         {
-            get
+            _coinCtx = context;
+            
+            if (!_coinCtx.TryGetController(out _coinController))
             {
-                _viewBehaviourFactory.TryGetView<CoinViewUI, CoinView>(out var coinView);
-                return coinView.CoinIconTransform; 
+                _coinController = _coinCtx.CreateController<CoinController>();
             }
+            
+            _coinController.Initialize(_coinCtx);
         }
 
-        public void SaveCoinData(int value)
+        public void UnbindCoinContext(IOwnerContext context)
         {
-            if (_viewBehaviourFactory.TryGetModel<CoinViewUI, CoinModel>(out var coinViewModel))
-            {
-                coinViewModel.Add(value);
-            }
-            else
-            {
-                Debug.LogError("Coin model does not exist!");
-            }
+            if (_coinCtx != context) return;
+            
+            _coinController?.Dispose();
+            _coinController = null;
+            _coinCtx = null;
         }
 
-        public void UpdateCoinView()
+        public void PlayCollect(int amount, CoinIconTest prefab, Transform parent, Vector3 screenPos)
         {
-            if (_viewBehaviourFactory.TryGetView<CoinViewUI, CoinView>(out var coinViewModel))
+            if (_coinController == null)
             {
-               coinViewModel.UpdateView();
+                DebugLogger.LogError("[CurrencyManager] CoinController not ready.");
+                return;
             }
-            else
-            {
-                Debug.LogError("Coin model does not exist!");
-            }
+
+            _coinController.PlayCollect(amount, prefab, parent, screenPos);
         }
 
         public void Dispose() { }

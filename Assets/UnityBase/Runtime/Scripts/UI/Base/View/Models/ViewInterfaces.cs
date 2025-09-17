@@ -1,5 +1,5 @@
 ﻿
-namespace UnityBase.UI.ViewCore
+namespace UnityBase.Runtime.Behaviours
 {
     public interface IModel
     {
@@ -19,5 +19,15 @@ namespace UnityBase.UI.ViewCore
     public interface IAction
     {
         public void Dispose();
+    }
+    
+    public interface IController
+    {
+        public void Dispose();
+    }
+
+    public interface ISaveData
+    {
+        public void Save();
     }
 }

@@ -1,7 +1,7 @@
 using System.IO;
 using System.Linq;
 using UnityBase.BootService;
-using UnityBase.Service;
+using UnityBase.Runtime.Behaviours;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,8 +10,15 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace UnityBase.Manager
+namespace UnityBase.SaveSystem
 {
+    public interface ISaveManager
+    {
+        public void SaveToJson<T>(string key, T data);
+        public T LoadFromJson<T>(string key, T defaultData = default, bool autoSaveDefaultData = true);
+        public void SaveToPrefs<T>(string key, T data);
+        public T LoadFromPrefs<T>(string key, T defaultData = default);
+    }
     public class SaveManager : ISaveManager, IAppBootService
     {
         private const string DirectoryName = "JsonData";
@@ -90,7 +97,7 @@ namespace UnityBase.Manager
                 Directory.CreateDirectory(DirectoryPath);
         }
 
-        public static void ClearAllSaveLoadData()
+        public static void ClearJsonData()
         {
             var files = Directory.GetFiles(DirectoryPath).Select(Path.GetFileName).ToArray();
 
@@ -106,7 +113,7 @@ namespace UnityBase.Manager
                 AssetDatabase.Refresh();
 #endif
         }
-
+        
         private string GetFilePath(string key) => Path.Combine(DirectoryPath, $"{key}.json");
         public void Dispose() { }
     }

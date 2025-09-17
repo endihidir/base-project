@@ -7,7 +7,6 @@ using UnityBase.Managers.SO;
 using UnityBase.Pool;
 using UnityBase.Service;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace UnityBase.Manager
 {
@@ -95,39 +94,40 @@ namespace UnityBase.Manager
             }
         }
 
-        public void HideObject<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
+        public void ReturnToPool<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
         {
             if (_isDisposed) return;
+            
+            if (!objectRef) { DebugLogger.LogError("[PoolManager] Return failed: null/destroyed object"); return; }
+            
+            PoolableObjectGroup group = null;
+            
+            if (objectRef.TryGetComponent<IPoolable>(out var poolable))
+                _poolableObjectGroupsWithID.TryGetValue(poolable.PoolKey, out group);
+            
+            if (group == null)
+                _poolableGroupsWithType.TryGetValue(objectRef.GetType(), out group);
 
-            var typeFound = _poolableGroupsWithType.TryGetValue(typeof(T), out var poolableTypeGroup);
-            var idFound = false;
-            PoolableObjectGroup poolableIdGroup = null;
-
-            if (!typeFound && objectRef.TryGetComponent<IPoolable>(out var poolable))
+            if (group == null)
             {
-                idFound = _poolableObjectGroupsWithID.TryGetValue(poolable.PoolKey, out poolableIdGroup);
-            }
-
-            if (!typeFound && !idFound)
-            {
-                Debug.LogError($"[PoolManager] HideObject failed: Neither Type '{typeof(T).Name}' nor Object '{objectRef.name}' (Hash: {objectRef.GetHashCode()}) exists in the pool.");
+                DebugLogger.LogError($"[PoolManager] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
                 return;
             }
 
-            var poolableObjectGroup = typeFound ? poolableTypeGroup : poolableIdGroup;
-            poolableObjectGroup?.HideObject(objectRef, duration, delay, onComplete);
-        }
-        
-        public void ReturnToPool<T>(T objectRef, Action onComplete = null) where T : IPoolable
-        {
-            if(_isDisposed) return;
-
-            if (!_poolableGroupsWithType.TryGetValue(typeof(T), out var poolableObjectGroup))
+            if (duration > 0f || delay > 0f)
             {
-                Debug.LogError($"You can not hide object because {typeof(T)} does not exist in the list of prefabs.");
+                group.HideObject(objectRef, duration, delay, onComplete);
             }
-            
-            poolableObjectGroup?.ReturnToPool(objectRef, onComplete);
+            else
+            {
+                if (!objectRef.TryGetComponent<IPoolable>(out var p))
+                {
+                    DebugLogger.LogError("[PoolManager] Return failed: object is not IPoolable.");
+                    return;
+                }
+                
+                group.ReturnToPool(p, onComplete);
+            }
         }
         
         public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = null) where T : Component, IPoolable
@@ -138,7 +138,7 @@ namespace UnityBase.Manager
             
             foreach (var poolable in poolables)
             {
-                HideObject(poolable, duration, delay, onComplete);
+                ReturnToPool(poolable, duration, delay, onComplete);
             }
         }
 
@@ -152,7 +152,7 @@ namespace UnityBase.Manager
             {
                 if (poolable is Component poolableComponent)
                 {
-                    HideObject(poolableComponent, duration, delay, onComplete);
+                    ReturnToPool(poolableComponent, duration, delay, onComplete);
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace UnityBase.Manager
 
             if (!_poolableGroupsWithType.TryGetValue(key, out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
+                DebugLogger.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace UnityBase.Manager
 
             if (!_poolableGroupsWithType.TryGetValue(key, out var poolableObjectGroup))
             {
-                Debug.LogError($"You can not get pool count because {key} does not exist in the list of prefabs.");
+                DebugLogger.LogError($"You can not get pool count because {key} does not exist in the list of prefabs.");
                 return 0;
             }
 
@@ -195,7 +195,7 @@ namespace UnityBase.Manager
             {
                 if (!poolableAsset.poolObject)
                 {
-                    Debug.LogError("There is missing prefab in pool object list!");
+                    DebugLogger.LogError("There is missing prefab in pool object list!");
                     continue;
                 }
 

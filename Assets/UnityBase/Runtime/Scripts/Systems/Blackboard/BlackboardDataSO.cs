@@ -46,7 +46,7 @@ namespace UnityBase.BlackboardCore
             }
             else
             {
-                Debug.LogError($"Unsupported value type: {value.type}");
+                DebugLogger.LogError($"Unsupported value type: {value.type}");
             }
         }
         

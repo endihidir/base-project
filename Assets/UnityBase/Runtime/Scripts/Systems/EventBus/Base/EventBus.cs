@@ -59,7 +59,7 @@ namespace UnityBase.EventBus
 
         private static void Clear()
         {
-            Debug.LogError($"Clearing {typeof(T).Name} bindings");
+            //DebugLogger.LogError($"Clearing {typeof(T).Name} bindings");
 
             foreach (var bindings in _bindingDictionary)
             {

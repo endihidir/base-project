@@ -6,13 +6,16 @@ namespace UnityBase.Tag
 {
     public class StateMachineTest : MonoBehaviour
     {
-        private ITreeState _test1 = new TreeState("Test1");
+        private ITreeState _test1 = new TreeState();
         
-        private ITreeState _subTest1 = new TreeState("SubTest1");
-        private ITreeState _subTest2 = new TreeState("SubState2"); 
+        private ITreeState _subTest1 = new TreeState();
+        private ITreeState _subTest2 = new TreeState(); 
         
-        private ITreeState _newSubTest1 = new TreeState("NewSubTest1");
-        private ITreeState _newSubTest2 = new TreeState("NewSubTest2");
+        private ITreeState _subTest1_2 = new TreeState();
+        private ITreeState _subTest2_2 = new TreeState(); 
+        
+        private ITreeState _subTest1_3 = new TreeState();
+        private ITreeState _subTest2_3 = new TreeState();
 
         private ITransition _transition;
 
@@ -31,28 +34,40 @@ namespace UnityBase.Tag
         [Button]
         private void Test1()
         {
-            _test1.Init();
-            _test1.AddSubState(_subTest1)?.AddSubState(_newSubTest1);
-            _test1.AddSubState(_subTest2)?.AddSubState(_newSubTest2);
-            _newSubTest2.Enter();
-            _newSubTest1.Enter();
+            _test1.Init(showLogs: false);
+            
+            _test1.AddSubState(_subTest1)?.AddSubState(_subTest1_2).AddSubState(_subTest1_3);
+            _test1.AddSubState(_subTest2)?.AddSubState(_subTest2_2).AddSubState(_subTest2_3);
+            
+            _subTest1_2.Enter();
+            _subTest2_2.Enter();
             
             Log();
             
             _subTest2.Exit();
+            
+            DebugLogger.LogError("-----------------------------------------");
             
             Log();
         }
 
         private void Log()
         {
-            Debug.LogError($"{_test1.StateID} : {_test1.IsActive}");
+            DebugLogger.LogError($"{_test1.StateID} : {_test1.IsActive}");
 
-            if (_subTest1.GetRootState().TryGetAllStatesInChildren(out var subStateList))
+            if (_subTest1.TryGetAllStatesInChildren(out var subStateList1, true))
             {
-                foreach (var state in subStateList)
+                foreach (var state in subStateList1)
                 {
-                    Debug.LogError($"{state.StateID} : {state.IsActive}");
+                    DebugLogger.LogError($"{state.StateID} : {state.IsActive}");
+                }
+            }
+            
+            if (_subTest2.TryGetAllStatesInChildren(out var subStateList2, true))
+            {
+                foreach (var state in subStateList2)
+                {
+                    DebugLogger.LogError($"{state.StateID} : {state.IsActive}");
                 }
             }
         }
