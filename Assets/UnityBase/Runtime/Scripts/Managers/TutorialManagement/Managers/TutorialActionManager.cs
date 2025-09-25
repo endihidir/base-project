@@ -1,5 +1,4 @@
 using System;
-using UnityBase.BootService;
 using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TutorialActionManager : ITutorialActionManager, IAppBootService
+    public class TutorialActionManager : ITutorialActionManager
     {
         private Transform _tutorialsParent;
 
@@ -25,10 +24,7 @@ namespace UnityBase.Manager
 
             _tutorialsParent = _tutorialActionManagerSo.tutorialsParent;
         }
-
-        public void Initialize() { }
-        public void Dispose() { }
-
+        
         public T GetTutorial<T>(PositionSpace spawnSpace, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default) where T : Tutorial
         {
             var selectedTutorial = _poolManager.GetObject<T>(show,duration, delay, onComplete);

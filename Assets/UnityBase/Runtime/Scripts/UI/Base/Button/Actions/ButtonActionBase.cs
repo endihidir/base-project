@@ -1,4 +1,4 @@
-﻿using UnityBase.Runtime.Behaviours;
+﻿using UnityBase.Runtime.Factories;
 
 namespace UnityBase.UI.ButtonCore
 {

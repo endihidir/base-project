@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityBase.BootService;
 using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityBase.Pool;
@@ -14,7 +13,7 @@ using CancellationTokenExtensions = UnityBase.Extensions.CancellationTokenExtens
 
 namespace UnityBase.Manager
 {
-    public class TutorialMaskManager : ITutorialMaskManager, IAppBootService
+    public class TutorialMaskManager : ITutorialMaskManager
     {
         private GameObject _maskRoot;
 
@@ -45,9 +44,8 @@ namespace UnityBase.Manager
         
         public void Initialize() { }
         public void Dispose() => DisposeToken();
-
-        // Note : If masks spawn on the same position, they don't appear !!!
-        public MaskUI GetMask(Vector3 position, MaskUIData maskUIData, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default)
+        
+        public MaskUI GetMask(Vector3 position, MaskUIData maskUIData, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null)
         {
             var selectedMask = _poolManager.GetObject<MaskUI>(show, duration, delay, onComplete);
 
@@ -60,7 +58,7 @@ namespace UnityBase.Manager
 
         public bool TryGetMask(Vector3 position, MaskUIData maskUIData, out MaskUI maskUI, bool show = true, float duration = 0f, float delay = 0f, Action onComplete = default)
         {
-            maskUI = default;
+            maskUI = null;
 
             var poolCount = _poolManager.GetPoolCount<MaskUI>();
 

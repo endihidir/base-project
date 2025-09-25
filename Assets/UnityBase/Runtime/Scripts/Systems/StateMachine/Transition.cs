@@ -8,7 +8,7 @@ namespace UnityBase.StateMachineCore
         IState To { get; }
         int Priority { get; }
         bool OneShot { get; }
-        bool TryInvokeTransition();
+        bool RequestTransition();
     }
 
     public sealed class Transition : ITransition
@@ -24,14 +24,14 @@ namespace UnityBase.StateMachineCore
         {
             From = from;
             To = to;
-            _condition = condition;
+            _condition =  condition ?? (() => false);
             Priority = priority;
             OneShot = oneShot;
 
-            if (from is ITreeState f && to is ITreeState t && f.GetRootState() != t.GetRootState())
+            if (from is IStateNode f && to is IStateNode t && f.GetRootState() != t.GetRootState())
                 DebugLogger.LogError($"Invalid transition: '{(f.StateID ?? "null")}' and '{(t.StateID ?? "null")}' are in different roots.");
         }
 
-        public bool TryInvokeTransition() => _condition();
+        public bool RequestTransition() => _condition();
     }
 }

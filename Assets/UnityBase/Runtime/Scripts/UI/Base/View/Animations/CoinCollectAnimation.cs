@@ -3,7 +3,7 @@ using DG.Tweening;
 using UnityBase.Service;
 using UnityEngine;
 
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
     public class CoinCollectAnimation : ICoinCollectAnimation
     {
@@ -34,7 +34,7 @@ namespace UnityBase.Runtime.Behaviours
             if (_pool == null || !_prefab || !_parent || !_target) return;
 
             _icon = _pool.GetObject(_prefab, false);
-            _icon.Bind(_pool);
+            _icon.BindReturner(_pool);
             _icon.Show(0f, 0f, null);
             _icon.transform.SetParent(_parent, worldPositionStays: false);
             _icon.transform.position = _startPos;

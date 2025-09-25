@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using UnityBase.BootService;
 using UnityBase.Service;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TaskManager : ITaskManager, IAppBootService
+    public class TaskManager : ITaskManager
     {
         private readonly IDictionary<string, bool> _tasks;
         public static Action<string> OnTaskComplete { get; }

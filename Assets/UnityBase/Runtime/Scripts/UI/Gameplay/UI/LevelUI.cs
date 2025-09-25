@@ -1,6 +1,6 @@
 using TMPro;
 using UnityBase.UI.Config.SO;
-using UnityBase.Runtime.Behaviours;
+using UnityBase.Runtime.Factories;
 using UnityEngine;
 
 namespace UnityBase.UI.Dynamic
@@ -17,12 +17,9 @@ namespace UnityBase.UI.Dynamic
 
         protected override void Initialize()
         {
-            var context = _ownerFactory.RegisterAndGetContext(this);
-            
-            _levelModel = context.CreateModel<LevelModel>()
-                .Initialize(_levelTxt);
+            _levelModel = OwnerContext.ResolveModel<LevelModel>();
 
-            _moveInOutAnim = _ownerFactory.CreateLocalAnimation<MoveInOutAnimation>()
+            _moveInOutAnim = OwnerContext.ResolveAnimation<MoveInOutAnimation>()
                 .Initialize(_rectTransform)
                 .Configure(_moveInOutViewConfigSo);
         }
@@ -49,9 +46,9 @@ namespace UnityBase.UI.Dynamic
 
         protected override void OnDestroy()
         {
+            base.OnDestroy();
             _moveInOutAnim?.Dispose();
             _levelModel?.Dispose();
-            _ownerFactory?.Release(this);
         }
     }
 }

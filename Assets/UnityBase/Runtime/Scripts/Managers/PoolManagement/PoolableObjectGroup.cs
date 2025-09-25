@@ -173,7 +173,7 @@ namespace UnityBase.Pool
             {
                 _poolable ??= poolable;
                 
-                poolable.Hide(0f, 0f, default);
+                poolable.Hide();
             }
 
             _pool.Enqueue(poolable);

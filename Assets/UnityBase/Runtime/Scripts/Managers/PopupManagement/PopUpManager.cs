@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.PopUpCore;
 using UnityBase.Service;
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class PopUpManager : IPopUpManager, IAppBootService
+    public class PopUpManager : IPopUpManager
     {
         private Transform _popUpParent, _settingsPopUpParent;
 

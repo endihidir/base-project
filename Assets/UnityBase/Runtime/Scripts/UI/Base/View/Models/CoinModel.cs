@@ -2,7 +2,7 @@
 using UnityBase.Observable;
 using UnityBase.SaveSystem;
 
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
     public class CoinModel : ICoinModel
     {
@@ -24,22 +24,10 @@ namespace UnityBase.Runtime.Behaviours
             return this;
         }
         
-        public CoinData Deserialize()
-        {
-            return _saveManager.LoadFromPrefs<CoinData>("CoinData");
-        }
-
-        public void Serialize(CoinData savedData)
-        {
-            _saveManager.SaveToPrefs("CoinData", savedData);
-        }
-
+        public CoinData Deserialize() => _saveManager.LoadFromPrefs<CoinData>("CoinData");
+        public void Serialize(CoinData savedData) => _saveManager.SaveToPrefs("CoinData", savedData);
         public void Add(int value) => Coins.Set(Coins.Value + value);
-        
-        public void Save()
-        {
-            Serialize(new CoinData { coins = Coins.Value });
-        }
+        public void Save() => Serialize(new CoinData { coins = Coins.Value });
 
         public void Dispose()
         {

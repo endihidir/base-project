@@ -1,18 +1,18 @@
 using UnityEngine;
 
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
-    public class CoinController : ICoinController
+    public class CoinPresenter : ICoinPresenter
     {
         private ICoinModel _model;
         private ICoinView _view;
         private ICoinCollectAnimation _animation;
         
-        public ICoinController Initialize(IOwnerContext ctx)
+        public ICoinPresenter Initialize(ICoinModel model, ICoinView view, ICoinCollectAnimation animation)
         {
-            ctx.TryGetModel(out _model);
-            ctx.TryGetView(out _view);
-            ctx.TryGetAnimation(out _animation);
+            _model = model;
+            _view = view;
+            _animation = animation;
             _view.UpdateView(_model.Coins.Value);
             return this;
         }
@@ -34,9 +34,9 @@ namespace UnityBase.Runtime.Behaviours
         }
     }
 
-    public interface ICoinController : IController
+    public interface ICoinPresenter : IPresenter
     {
-        public ICoinController Initialize(IOwnerContext ctx);
+        public ICoinPresenter Initialize(ICoinModel model, ICoinView view, ICoinCollectAnimation animation);
         void PlayCollect(int amount, CoinIconTest prefab, Transform parent, Vector3 startScreenPos);
     }
 }

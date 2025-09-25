@@ -1,5 +1,5 @@
 using UnityBase.Manager;
-using UnityBase.Presenter;
+using UnityBase.Presenters;
 using VContainer;
 using VContainer.Unity;
 
@@ -9,11 +9,11 @@ namespace UnityBase.BaseLifetimeScope
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<GameplayBootstarpper>();
+            builder.RegisterEntryPoint<GameplayPresenter>();
             
-            builder.Register<GameplayManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameplayManager>(Lifetime.Singleton).As<IGameplayManager>();
             
-            builder.Register<CinemachineManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<CinemachineManager>(Lifetime.Singleton).As<ICinemachineManager>();
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
     public interface IModel
     {
@@ -21,7 +21,7 @@ namespace UnityBase.Runtime.Behaviours
         public void Dispose();
     }
     
-    public interface IController
+    public interface IPresenter
     {
         public void Dispose();
     }

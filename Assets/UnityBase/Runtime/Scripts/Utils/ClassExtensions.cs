@@ -3,31 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.Extensions
 {
     public static class ClassExtensions
     {
-        public static T CreateInstance<T>(IObjectResolver container, params object[] args) where T : class
-        {
-            var constructor = typeof(T).GetConstructors()[0];
-            
-            var parameters = constructor.GetParameters();
-            
-            var finalArgs = new List<object>();
-
-            foreach (var parameter in parameters)
-            {
-                var matchingArg = args.FirstOrDefault(arg => parameter.ParameterType.IsInstanceOfType(arg));
-                
-                finalArgs.Add(matchingArg ?? container.Resolve(parameter.ParameterType));
-            }
-
-            return (T)Activator.CreateInstance(typeof(T), finalArgs.ToArray());
-        }
-        
-        public static T CreateInstance<T>( params object[] args) where T : class
+        public static T CreateInstance<T>(params object[] args) where T : class
         {
             var constructor = typeof(T).GetConstructors()[0];
             

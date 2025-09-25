@@ -1,12 +1,22 @@
 using Cinemachine;
-using UnityBase.BootService;
 using UnityBase.GameDataHolder;
-using UnityBase.Service;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CinemachineManager : ICinemachineManager, IGameplayBootService
+    public interface ICinemachineManager
+    {
+        public void ChangeCamera(CameraState cameraState);
+        public CinemachineVirtualCamera GetVirtualCam(CameraState cameraState);
+        public void SetGameplayTargetParent(Transform parent);
+        public void SetGameplayTargetPosition(Vector3 position);
+        public void SetGameplayTargetLocalPosition(Vector3 position);
+        public void SetGameplayTargetRotation(Quaternion rotation);
+        public void SetGameplayTargetLocalRotation(Quaternion rotation);
+        public void RotateGameplayTarget(float speed, float deltaTime);
+        public void ResetGameplayTarget(bool resetInLocal);
+    }
+    public class CinemachineManager : ICinemachineManager
     {
         private CinemachineStateDrivenCamera _stateDrivenCameras;
 

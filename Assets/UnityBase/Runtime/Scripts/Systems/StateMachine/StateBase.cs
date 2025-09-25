@@ -115,10 +115,7 @@ namespace UnityBase.StateMachineCore
             OnExit();
         }
 
-        public virtual void RequestExit()
-        {
-            IsExitReady = true;
-        }
+        public virtual void RequestExit() => IsExitReady = true;
 
         protected abstract void OnInit();
         protected abstract bool OnBeforeEnter();

@@ -1,9 +1,7 @@
 using TMPro;
-using UnityBase.Service;
 using UnityBase.UI.Config.SO;
-using UnityBase.Runtime.Behaviours;
+using UnityBase.Runtime.Factories;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.UI.Dynamic
 {
@@ -15,27 +13,17 @@ namespace UnityBase.UI.Dynamic
         [SerializeField] private BounceViewConfigSO _bounceViewConfigSo;
 
         private IMoveInOutAnimation _moveInOutAnim;
-        private ICoinCollectAnimation _coinCollectAnimation;
-        private ICoinModel _coinModel;
-        private ICoinView _coinView;
-        private ICoinController _coinController;
-        private IOwnerContext _coinOwnerContext;
-
-        [Inject] 
-        private ICurrencyManager _currencyManager;
 
         protected override void Initialize()
         {
-            _coinOwnerContext = _ownerFactory.RegisterAndGetContext(this);
-
-            _coinModel = _coinOwnerContext.CreateModel<CoinModel>().Initialize();
-            _coinView  = _coinOwnerContext.CreateView<CoinView>().Initialize(_coinIconT, _coinTxt);
-            _coinCollectAnimation = _coinOwnerContext.CreateAnimation<CoinCollectAnimation>();
-            _moveInOutAnim = _coinOwnerContext.CreateAnimation<MoveInOutAnimation>()
+            var coinModel = OwnerContext.ResolveModel<CoinModel>().Initialize();
+            var coinView  = OwnerContext.ResolveView<CoinView>().Initialize(_coinIconT, _coinTxt);
+            var coinCollectAnimation = OwnerContext.ResolveAnimation<CoinCollectAnimation>();
+            OwnerContext.ResolvePresenter<CoinPresenter>().Initialize(coinModel, coinView, coinCollectAnimation);
+            
+            _moveInOutAnim = OwnerContext.ResolveAnimation<MoveInOutAnimation>()
                                           .Initialize(_rectTransform)
                                           .Configure(_moveInOutViewConfigSo);
-            
-            _currencyManager.BindCoinContext(_coinOwnerContext);
         }
 
         public override void OpenView() => _moveInOutAnim?.MoveIn();
@@ -45,17 +33,8 @@ namespace UnityBase.UI.Dynamic
 
         protected override void OnDestroy()
         {
+            base.OnDestroy();
             _moveInOutAnim?.Dispose();
-            _coinModel?.Dispose();
-            _coinView?.Dispose();
-            _coinCollectAnimation?.Dispose();
-
-            _currencyManager?.UnbindCoinContext(_coinOwnerContext);
-            
-            _ownerFactory?.Release(this);
-
-            _coinOwnerContext = null;
-            _ownerFactory = null;
         }
     }
 }

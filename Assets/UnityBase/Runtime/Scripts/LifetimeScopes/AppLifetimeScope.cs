@@ -1,11 +1,11 @@
 using UnityBase.BlackboardCore;
 using UnityBase.GameDataHolder;
 using UnityBase.Manager;
-using UnityBase.Presenter;
-using UnityBase.SceneManagement;
+using UnityBase.Presenters;
 using UnityBase.StateMachineCore;
-using UnityBase.Runtime.Behaviours;
+using UnityBase.Runtime.Factories;
 using UnityBase.SaveSystem;
+using UnityBase.Service;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -27,36 +27,34 @@ namespace UnityBase.BaseLifetimeScope
             }
             
             builder.RegisterInstance(gameDataHolderSo);
-
-            RegisterEntryPoints(builder);
+            
+            builder.RegisterEntryPoint<GamePresenter>();
 
             RegisterSingletonServices(builder);
         }
         
-        private void RegisterEntryPoints(IContainerBuilder builder)
-        {
-            builder.RegisterEntryPoint<AppBootstrapper>();
-        }
-        
         private void RegisterSingletonServices(IContainerBuilder builder)
         {
-            builder.Register<GameManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<SceneManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<LevelManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameManager>(Lifetime.Singleton).As<IGameManager>();
+            builder.Register<SceneManager>(Lifetime.Singleton).As<ISceneManager>();
+            builder.Register<LevelManager>(Lifetime.Singleton).As<ILevelManager>();
             
-            builder.Register<PoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<PopUpManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TutorialActionManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TutorialMaskManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TutorialProcessManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<PoolManager>(Lifetime.Singleton).As<IPoolManager>();
+            builder.Register<PopUpManager>(Lifetime.Singleton).As<IPopUpManager>();
+            builder.Register<TutorialActionManager>(Lifetime.Singleton).As<ITutorialActionManager>();
+            builder.Register<TutorialMaskManager>(Lifetime.Singleton).As<ITutorialMaskManager>();
+            builder.Register<TutorialProcessManager>(Lifetime.Singleton).As<ITutorialProcessManager>();
 
-            builder.Register<CommandManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<CurrencyManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<SaveManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<StateMachineManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<CommandManager>(Lifetime.Singleton).As<ICommandManager>();
+            builder.Register<CurrencyManager>(Lifetime.Singleton).As<ICurrencyManager>();
+            builder.Register<SaveManager>(Lifetime.Singleton).As<ISaveManager>();
+            builder.Register<StateMachineManager>(Lifetime.Singleton).As<IStateMachineManager>();
             
-            builder.Register<OwnerBehaviourFactory>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<BlackboardRegistry>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<OwnerContextFactory>(Lifetime.Singleton).As<IOwnerContextFactory>();
+            builder.Register<ModelFactory>(Lifetime.Singleton).As<IModelFactory>();
+            builder.Register<ActionFactory>(Lifetime.Singleton).As<IActionFactory>();
+            
+            builder.Register<BlackboardContainer>(Lifetime.Singleton).As<IBlackboardContainer>();
         }
     }   
 }

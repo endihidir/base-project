@@ -2,17 +2,24 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
-using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
-using UnityBase.Service;
+using UnityBase.SceneManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
-namespace UnityBase.SceneManagement
+namespace UnityBase.Manager
 {
-    public class SceneManager : ISceneManager, IAppBootService
+    public interface ISceneManager
+    {
+        public event Action<SceneType> OnBeforeSceneLoad;
+        public event Action<SceneType> OnSceneReady; 
+        public event Action<SceneType> OnSceneReadyToPlay;
+        public LoadingProgress LoadingProgress { get; }
+        public UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, float delayMultiplier = 10f);
+    }
+    public class SceneManager : ISceneManager
     { 
         private bool _sceneLoadInProgress;
         private readonly SceneGroupManagerSO _sceneGroupManagerSo;

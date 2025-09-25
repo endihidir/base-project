@@ -14,11 +14,8 @@ public class CoinIconTest : MonoBehaviour, IPoolable
     
     private IReturnToPool _returner;
 
-    public void Bind(IReturnToPool returner)
-    {
-        _returner ??= returner;
-    }
-    
+    public void BindReturner(IReturnToPool returner) => _returner ??= returner;
+
     public void Show(float duration, float delay, Action onComplete)
     {
         gameObject.SetActive(true);

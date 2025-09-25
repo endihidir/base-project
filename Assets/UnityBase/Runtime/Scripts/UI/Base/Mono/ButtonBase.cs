@@ -1,6 +1,6 @@
 using NaughtyAttributes;
 using Unity.VisualScripting;
-using UnityBase.Runtime.Behaviours;
+using UnityBase.Runtime.Factories;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -38,13 +38,13 @@ namespace UnityBase.UI.ButtonCore
 #endif
 
         [Inject]
-        public void Construct(IOwnerBehaviourFactory ownerBehaviourFactory)
+        public void Construct(IOwnerContextFactory ownerContextFactory)
         {
-            Initialize(ownerBehaviourFactory);
+            Initialize(ownerContextFactory);
             
             CreateEventTriggers();
         }
-        protected abstract void Initialize(IOwnerBehaviourFactory ownerBehaviourFactory);
+        protected abstract void Initialize(IOwnerContextFactory ownerContextFactory);
 
         private void OnEnable() => _button.onClick.AddListener(OnClickButton);
         private void OnDisable() => _button.onClick.RemoveListener(OnClickButton);

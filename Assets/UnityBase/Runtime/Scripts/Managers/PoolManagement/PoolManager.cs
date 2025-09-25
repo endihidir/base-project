@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.Pool;
@@ -10,7 +9,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class PoolManager : IPoolManager, IAppBootService
+    public class PoolManager : IPoolManager
     {
         private readonly PoolManagerSO _poolManagerSo;
         

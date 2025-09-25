@@ -1,5 +1,4 @@
 using System;
-using UnityBase.BootService;
 using UnityBase.EventBus;
 using UnityBase.GameDataHolder;
 using UnityBase.Manager.Data;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class LevelManager : ILevelManager, IAppBootService
+    public class LevelManager : ILevelManager
     {
         public static Func<int, bool> OnSelectChapter;
         public static Func<int, bool> OnSelectLevel;
@@ -77,6 +76,8 @@ namespace UnityBase.Manager
             _chapterData = levelManagerData.chapterData;
             _defaultUnlockedChapterIndex = levelManagerData.defaultUnlockedChapterIndex;
             _defaultUnlockedLevelIndex = levelManagerData.defaultUnlockedLevelIndex;
+            
+            Initialize();
         }
 
         ~LevelManager() => Dispose();

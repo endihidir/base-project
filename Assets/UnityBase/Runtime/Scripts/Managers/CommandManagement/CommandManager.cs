@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using UnityBase.BootService;
 using UnityBase.Command;
 using UnityBase.Service;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class CommandManager : ICommandManager, IAppBootService
+    public class CommandManager : ICommandManager
     {
         private IDictionary<string, CommandRecorderGroup> _commandRecorders = new Dictionary<string, CommandRecorderGroup>();
 
@@ -17,8 +16,7 @@ namespace UnityBase.Manager
         }
         
         ~CommandManager() => Dispose();
-
-        public void Initialize() { }
+        
 
         public void Dispose()
         {

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
-using UnityBase.Service;
+using UnityBase.Manager;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;

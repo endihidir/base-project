@@ -2,7 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
     public class CoinView : ICoinView
     {

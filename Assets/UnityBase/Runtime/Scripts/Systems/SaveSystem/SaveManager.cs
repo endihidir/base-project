@@ -1,7 +1,5 @@
 using System.IO;
 using System.Linq;
-using UnityBase.BootService;
-using UnityBase.Runtime.Behaviours;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -19,12 +17,12 @@ namespace UnityBase.SaveSystem
         public void SaveToPrefs<T>(string key, T data);
         public T LoadFromPrefs<T>(string key, T defaultData = default);
     }
-    public class SaveManager : ISaveManager, IAppBootService
+    public class SaveManager : ISaveManager
     {
-        private const string DirectoryName = "JsonData";
+        private const string DIRECTORY_NAME = "JsonData";
 
 #if UNITY_EDITOR
-        private static string DirectoryPath => $"{Application.dataPath}/{DirectoryName}";
+        private static string DirectoryPath => $"{Application.dataPath}/{DIRECTORY_NAME}";
 #else
         private static string DirectoryPath => $"{Application.persistentDataPath}/{DirectoryName}";
 #endif

@@ -1,5 +1,4 @@
-using NaughtyAttributes;
-using UnityBase.Runtime.Behaviours;
+using UnityBase.Runtime.Factories;
 using UnityEngine;
 using VContainer;
 
@@ -7,33 +6,32 @@ namespace UnityBase.UI.Dynamic
 {
     public abstract class DynamicUI : MonoBehaviour, IDynamicUI
     {
-        [ReadOnly] [SerializeField] protected RectTransform _rectTransform;
-        
-#if UNITY_EDITOR
-        protected void OnValidate() => _rectTransform = GetComponent<RectTransform>();
-#endif
+        [SerializeField] protected RectTransform _rectTransform;
         protected void Awake() => _rectTransform ??= GetComponent<RectTransform>();
-        
-        protected IOwnerBehaviourFactory _ownerFactory;
+
+        private IOwnerContextFactory _ownerContextFactory;
+        public IOwnerContext OwnerContext { get; private set; }
 
         [Inject]
-        private void Construct(IOwnerBehaviourFactory ownerBehaviourFactory)
+        private void Construct(IOwnerContextFactory ownerContextFactory)
         {
-            _ownerFactory = ownerBehaviourFactory;
+            _ownerContextFactory = ownerContextFactory;
+            
+            OwnerContext = _ownerContextFactory.GetContext(this);
             
             Initialize();
         }
         
         protected abstract void Initialize();
-
         public abstract void OpenView();
         public abstract void CloseView();
         public abstract void OpenViewInstantly();
         public abstract void CloseViewInstantly();
-        protected abstract void OnDestroy();
+        protected virtual void OnDestroy() => _ownerContextFactory?.Release(this);
     }
     public interface IDynamicUI
     {
+        public IOwnerContext OwnerContext { get; }
         public void OpenView();
         public void CloseView();
         public void OpenViewInstantly();

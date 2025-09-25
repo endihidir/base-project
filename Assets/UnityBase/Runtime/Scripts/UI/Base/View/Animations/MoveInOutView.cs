@@ -2,7 +2,7 @@
 using UnityBase.UI.Config.SO;
 using UnityEngine;
 
-namespace UnityBase.Runtime.Behaviours
+namespace UnityBase.Runtime.Factories
 {
     public class MoveInOutAnimation : IMoveInOutAnimation
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace UnityBase.BlackboardCore
 {
-    public interface IBlackboardRegistry
+    public interface IBlackboardContainer
     {
         IBlackboard GetOrCreate(int id);
         bool TryGet(int id, out IBlackboard blackboard);
@@ -11,7 +11,7 @@ namespace UnityBase.BlackboardCore
         int Count { get; }
     }
     
-    public class BlackboardRegistry : IBlackboardRegistry
+    public class BlackboardContainer : IBlackboardContainer
     {
         private readonly Dictionary<int, IBlackboard> _map = new();
 

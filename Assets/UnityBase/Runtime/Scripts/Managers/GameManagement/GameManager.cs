@@ -1,15 +1,17 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityBase.BootService;
-using UnityBase.EventBus;
 using UnityBase.GameDataHolder;
-using UnityBase.Manager.Data;
-using UnityBase.Service;
 using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class GameManager : IGameManager, IAppBootService
+    public interface IGameManager
+    {
+        void Initialize();
+        void Dispose();
+    }
+    
+    public class GameManager : IGameManager
     {
         private CanvasGroup _splashScreen;
         
@@ -18,8 +20,6 @@ namespace UnityBase.Manager
         private bool _passSplashScreen;
         
         private Tween _splashTween;
-        
-        private EventBinding<GameStateData> _gameStateBinding = new EventBinding<GameStateData>();
 
         public GameManager(GameDataHolderSO gameDataHolderSo, ISceneManager sceneManager)
         {
@@ -34,13 +34,13 @@ namespace UnityBase.Manager
 
         ~GameManager() => Dispose();
         
-        public void Initialize() => LoadGame();
+        public void Initialize() => LoadGame().Forget();
         public void Dispose() => _splashTween.Kill();
 
-        private async void LoadGame()
+        private async UniTask LoadGame()
         {
             if (!_passSplashScreen) await StartSplashScreen();
-
+            
             await _sceneManager.LoadSceneAsync(SceneType.MainMenu);
         }
 

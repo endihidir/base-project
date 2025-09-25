@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityBase.BootService;
 using UnityBase.EventBus;
-using UnityBase.Extensions;
 using UnityBase.Manager.Data;
 using UnityBase.Service;
 using UnityEngine;
@@ -11,7 +9,14 @@ using CancellationTokenExtensions = UnityBase.Extensions.CancellationTokenExtens
 
 namespace UnityBase.Manager
 {
-    public class GameplayManager : IGameplayManager, IGameplayBootService
+    public interface IGameplayManager
+    {
+        public void Initialize();
+        public GameState CurrentGameState { get; }
+        public UniTask ChangeGameState(GameState nextGameState, float transitionDuration, float startDelay = 0f);
+    }
+    
+    public class GameplayManager : IGameplayManager
     {
         private readonly ISceneManager _sceneManager;
         private readonly ITutorialProcessManager _tutorialProcessManager;
@@ -21,7 +26,7 @@ namespace UnityBase.Manager
         
         private bool _isTransitionStarted;
 
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _cancellationTokenSource = new ();
 
         public GameplayManager(ISceneManager sceneManager, ITutorialProcessManager tutorialProcessManager)
         {
@@ -44,7 +49,7 @@ namespace UnityBase.Manager
             }
         }
 
-        public void Dispose()
+        private void Dispose()
         {
             _sceneManager.OnSceneReadyToPlay -= OnSceneLoadComplete;
             
@@ -62,10 +67,10 @@ namespace UnityBase.Manager
             
             var gameState = _tutorialProcessManager.IsSelectedLevelTutorialEnabled ? GameState.GameTutorialState : GameState.GamePlayState;
 
-            ChangeGameState(gameState, 1f);
+            ChangeGameState(gameState, 1f).Forget();
         }
 
-        public async void ChangeGameState(GameState nextGameState, float transitionDuration = 0f, float startDelay = 0f)
+        public async UniTask ChangeGameState(GameState nextGameState, float transitionDuration = 0f, float startDelay = 0f)
         {
             if (IsStateNotChangeable(nextGameState)) return;
 

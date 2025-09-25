@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityBase.BootService;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.SaveSystem;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace UnityBase.Manager
 {
-    public class TutorialProcessManager : ITutorialProcessManager, IAppBootService
+    public class TutorialProcessManager : ITutorialProcessManager
     {
         private readonly ILevelManager _levelManager;
         private readonly ITutorialActionManager _tutorialActionManager;
