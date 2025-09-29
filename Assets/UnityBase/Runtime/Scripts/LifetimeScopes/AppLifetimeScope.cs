@@ -35,6 +35,7 @@ namespace UnityBase.BaseLifetimeScope
         
         private void RegisterSingletonServices(IContainerBuilder builder)
         {
+            builder.Register<AmbientResolverProvider>(Lifetime.Singleton).As<IAmbientResolverProvider>().AsSelf();
             builder.Register<GameManager>(Lifetime.Singleton).As<IGameManager>();
             builder.Register<SceneManager>(Lifetime.Singleton).As<ISceneManager>();
             builder.Register<LevelManager>(Lifetime.Singleton).As<ILevelManager>();

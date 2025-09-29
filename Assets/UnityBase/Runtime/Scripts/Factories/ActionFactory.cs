@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityBase.Extensions;
-using VContainer;
 
 namespace UnityBase.Runtime.Factories
 {
@@ -15,9 +14,9 @@ namespace UnityBase.Runtime.Factories
     {
         private readonly Dictionary<Type, IAction> _actions = new();
         
-        private readonly IObjectResolver _resolver;
+        private readonly IAmbientResolverProvider _ambientResolverProvider;
 
-        public ActionFactory(IObjectResolver resolver) => _resolver = resolver;
+        public ActionFactory(IAmbientResolverProvider ambientResolverProvider) => _ambientResolverProvider = ambientResolverProvider;
 
         public TAct Resolve<TAct>() where TAct : class, IAction
         {
@@ -25,7 +24,8 @@ namespace UnityBase.Runtime.Factories
 
             if (!_actions.TryGetValue(t, out var a))
             {
-                a = _resolver.CreateInstance<TAct>();
+                var resolver = _ambientResolverProvider.CurrentObjectResolver;
+                a = resolver.CreateInstance<TAct>();
                 _actions[t] = a;
             }
 

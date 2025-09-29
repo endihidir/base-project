@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using VContainer;
 
 namespace UnityBase.Runtime.Factories
 {
@@ -28,13 +27,13 @@ namespace UnityBase.Runtime.Factories
     public class OwnerContextFactory : IOwnerContextFactory
     {
         private readonly Dictionary<int, IOwnerContext> _contexts = new();
-        private readonly IObjectResolver _resolver;
+        private readonly IAmbientResolverProvider _ambientResolverProvider;
         private readonly IModelFactory _modelFactory;
         private readonly IActionFactory _actionFactory;
 
-        public OwnerContextFactory(IObjectResolver resolver, IModelFactory modelFactory, IActionFactory actionFactory)
+        public OwnerContextFactory(IAmbientResolverProvider ambientResolverProvider, IModelFactory modelFactory, IActionFactory actionFactory)
         {
-            _resolver = resolver;
+            _ambientResolverProvider = ambientResolverProvider;
             _modelFactory = modelFactory;
             _actionFactory = actionFactory;
         }
@@ -65,7 +64,7 @@ namespace UnityBase.Runtime.Factories
         {
             if (!_contexts.TryGetValue(ownerID, out var context))
             {
-                context = new OwnerContext(_resolver, _modelFactory, _actionFactory);
+                context = new OwnerContext(_ambientResolverProvider, _modelFactory, _actionFactory);
                 _contexts[ownerID] = context;
             }
 
@@ -110,9 +109,9 @@ namespace UnityBase.Runtime.Factories
             private readonly IModelFactory _modelFactory;
             private readonly IActionFactory _actionFactory;
 
-            public OwnerContext(IObjectResolver resolver, IModelFactory modelFactory, IActionFactory actionFactory)
+            public OwnerContext(IAmbientResolverProvider ambientResolverProvider, IModelFactory modelFactory, IActionFactory actionFactory)
             {
-                _ownerContextGroup = new OwnerContextGroup(resolver);
+                _ownerContextGroup = new OwnerContextGroup(ambientResolverProvider);
                 _modelFactory = modelFactory;
                 _actionFactory = actionFactory;
             }

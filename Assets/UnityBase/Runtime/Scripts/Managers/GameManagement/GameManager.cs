@@ -1,7 +1,10 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using UnityBase.BaseLifetimeScope;
 using UnityBase.GameDataHolder;
 using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace UnityBase.Manager
 {
@@ -20,6 +23,8 @@ namespace UnityBase.Manager
         private bool _passSplashScreen;
         
         private Tween _splashTween;
+        
+        public IObjectResolver ObjectResolver { get; }
 
         public GameManager(GameDataHolderSO gameDataHolderSo, ISceneManager sceneManager)
         {
@@ -33,7 +38,7 @@ namespace UnityBase.Manager
         }
 
         ~GameManager() => Dispose();
-        
+
         public void Initialize() => LoadGame().Forget();
         public void Dispose() => _splashTween.Kill();
 

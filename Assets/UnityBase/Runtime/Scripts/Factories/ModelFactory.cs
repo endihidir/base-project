@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityBase.Extensions;
 using UnityBase.SaveSystem;
-using VContainer;
 
 namespace UnityBase.Runtime.Factories
 {
@@ -15,11 +14,11 @@ namespace UnityBase.Runtime.Factories
     {
         private readonly Dictionary<Type, IModel> _models = new();
         
-        private readonly IObjectResolver _resolver;
+        private readonly IAmbientResolverProvider _ambientResolverProvider;
         
         private static readonly HashSet<ISaveData> SaveData = new();
 
-        public ModelFactory(IObjectResolver resolver) => _resolver = resolver;
+        public ModelFactory(IAmbientResolverProvider ambientResolverProvider) => _ambientResolverProvider = ambientResolverProvider;
 
         public TModel Resolve<TModel>() where TModel : class, IModel
         {
@@ -27,7 +26,9 @@ namespace UnityBase.Runtime.Factories
             
             if (!_models.TryGetValue(t, out var m))
             {
-                m = _resolver.CreateInstance<TModel>();
+                var resolver = _ambientResolverProvider.CurrentObjectResolver;
+                
+                m = resolver.CreateInstance<TModel>();
                 
                 _models[t] = m;
                 

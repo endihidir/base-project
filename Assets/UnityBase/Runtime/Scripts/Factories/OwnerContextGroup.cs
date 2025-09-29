@@ -20,9 +20,9 @@ namespace UnityBase.Runtime.Factories
         private readonly IDictionary<Type, IAnimation> _animations = new Dictionary<Type, IAnimation>();
         private readonly IDictionary<Type, IPresenter> _presenters = new Dictionary<Type, IPresenter>();
 
-        private readonly IObjectResolver _resolver;
+        private readonly IAmbientResolverProvider _ambientResolverProvider;
 
-        public OwnerContextGroup(IObjectResolver resolver) => _resolver = resolver;
+        public OwnerContextGroup(IAmbientResolverProvider ambientResolverProvider) => _ambientResolverProvider = ambientResolverProvider;
         
         public TView ResolveView<TView>() where TView : class, IView => GetOrCreate<IView, TView>(_views);
         public TAnim ResolveAnimation<TAnim>() where TAnim : class, IAnimation => GetOrCreate<IAnimation, TAnim>(_animations);
@@ -35,7 +35,8 @@ namespace UnityBase.Runtime.Factories
             
             if (!map.TryGetValue(key, out var obj))
             {
-                obj = _resolver.CreateInstance<TImpl>(_resolver);
+                var resolver = _ambientResolverProvider.CurrentObjectResolver;
+                obj = resolver.CreateInstance<TImpl>();
                 map[key] = obj;
                 IndexAssignableInterfaces(map, obj);
               

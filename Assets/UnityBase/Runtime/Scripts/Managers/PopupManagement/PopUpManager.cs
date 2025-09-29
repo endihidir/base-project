@@ -39,12 +39,12 @@ namespace UnityBase.Manager
             return popUp;
         }
 
-        public void HidePopUp(PopUp popUp, float duration = 0.2f, float delay = 0f, Action onComplete = default)
+        public void HidePopUp(PopUp popUp, float duration = 0.2f, float delay = 0f, Action onComplete = null)
         {
             _poolManager.ReturnToPool(popUp, duration, delay, onComplete);
         }
         
-        public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = default) where T : PopUp
+        public void HideAllPopUpOfType<T>(float duration = 0.2f, float delay = 0f, Action onComplete = null) where T : PopUp
         {
             _poolManager.HideAllObjectsOfType<T>(duration, delay, onComplete);
         }

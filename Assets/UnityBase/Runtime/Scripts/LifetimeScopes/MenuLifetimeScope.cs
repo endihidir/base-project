@@ -1,3 +1,4 @@
+using UnityBase.Presenters;
 using VContainer;
 using VContainer.Unity;
 
@@ -7,7 +8,7 @@ namespace UnityBase.BaseLifetimeScope
     {
         protected override void Configure(IContainerBuilder builder)
         {
-           
+            builder.RegisterEntryPoint<MenuPresenter>();
         }
     }
 }

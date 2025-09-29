@@ -56,14 +56,13 @@ namespace UnityBase.StateMachineCore
         public event Action<float> OnFixedUpdateState;
         public event Action<float> OnLateUpdateState;
         public event Action OnExitState;
+        public event Action<IStateNode, Action> HandleExitRequest;
+        public Func<IStateNode, bool> ResolveNeedsExitTime { get; set; }
 
         private static int _rootCounter;
+        
         private static readonly Dictionary<string, int> PerRootChildCounters = new();
         
-        public Func<IStateNode, bool> ResolveNeedsExitTime { get; set; }
-        
-        public event Action<IStateNode, Action> HandleExitRequest;
-
         public StateNode(string stateID = null)
         {
             StateID = stateID;
@@ -205,22 +204,26 @@ namespace UnityBase.StateMachineCore
         public IStateNode GetRootState()
         {
             IStateNode current = this;
+            
             while (current.GetParentState() != null)
             {
                 current = current.GetParentState();
             }
+            
             return current;
         }
 
         public bool TryGetStatesInChildren(out List<IStateNode> subStateList)
         {
             subStateList = new List<IStateNode>(_subStates);
+            
             return subStateList.Count > 0;
         }
 
         public bool TryGetAllStatesInChildren(out List<IStateNode> allStates, bool addSelf = false)
         {
             var visited = new HashSet<IStateNode>();
+            
             if (addSelf) visited.Add(this);
 
             var queue = new Queue<IStateNode>(_subStates);
@@ -240,29 +243,36 @@ namespace UnityBase.StateMachineCore
             }
 
             allStates = visited.ToList();
+            
             return true;
         }
 
         public List<IStateNode> GetParentChain(IStateNode stateNode)
         {
             var list = new List<IStateNode>();
+            
             while (stateNode != null)
             {
                 list.Add(stateNode);
+                
                 stateNode = stateNode.GetParentState();
             }
+            
             return list;
         }
 
         public List<IStateNode> GetPathToAncestor(IStateNode from, IStateNode ancestor)
         {
             var list = new List<IStateNode>();
+            
             var current = from;
 
             while (current != null)
             {
                 list.Add(current);
+                
                 if (current == ancestor) break;
+                
                 current = current.GetParentState();
             }
 
@@ -331,6 +341,7 @@ namespace UnityBase.StateMachineCore
         protected override bool OnBeforeEnter()
         {
             var chain = GetParentChain(this).OrderBy(x => x.GetDepthLevel()).Where(x => !x.IsActive).ToList();
+            
             chain.Remove(this);
 
             foreach (var node in chain)
@@ -339,6 +350,7 @@ namespace UnityBase.StateMachineCore
             }
 
             OnBeforeEnterState?.Invoke();
+            
             return true;
         }
 
@@ -347,7 +359,6 @@ namespace UnityBase.StateMachineCore
         protected override void OnFixedUpdate(float dt) => OnFixedUpdateState?.Invoke(dt);
         protected override void OnLateUpdate(float dt) => OnLateUpdateState?.Invoke(dt);
         protected override void OnExit() => OnExitState?.Invoke();
-
         public override bool Exit() => IsActive && TryExitChain();
 
         public override void ClearAll()
