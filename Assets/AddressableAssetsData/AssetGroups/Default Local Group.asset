@@ -18,22 +18,22 @@ MonoBehaviour:
   m_GUID: 157d59a329343bd4c91985a73df614f9
   m_SerializeEntries:
   - m_GUID: 2a759520d04d51f4d8e8b3c0d83688ac
-    m_Address: Assets/UnityBase/Scenes/GamplayGroupScenes/GameArenaPart 1.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/GamplayGroupScenes/GameArenaPart 1.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7ab23c49c80baac43a42ff2a5d43ba0d
-    m_Address: Assets/UnityBase/Scenes/GamplayGroupScenes/GameArenaPart 2.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/GamplayGroupScenes/GameArenaPart 2.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fc94776a9afd0847bacf8ee78c64298
-    m_Address: Assets/UnityBase/Scenes/GamplayGroupScenes/GameArenaPart 3.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/GamplayGroupScenes/GameArenaPart 3.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 10aa95bdc8b3e2349ae8fdfedcdab838
-    m_Address: Assets/UnityBase/Scenes/GamplayGroupScenes/GameArenaPart 4.unity
+    m_Address: Assets/UnityBase/Runtime/Scenes/GamplayGroupScenes/GameArenaPart 4.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

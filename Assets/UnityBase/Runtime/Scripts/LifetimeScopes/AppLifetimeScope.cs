@@ -24,6 +24,7 @@ namespace UnityBase.BaseLifetimeScope
             {
                 var go = new GameObject("SaveDispatcher");
                 go.AddComponent<SaveDispatcher>();
+                go.transform.SetParent(transform);
             }
             
             builder.RegisterInstance(gameDataHolderSo);
@@ -37,7 +38,7 @@ namespace UnityBase.BaseLifetimeScope
         {
             builder.Register<AmbientResolverProvider>(Lifetime.Singleton).As<IAmbientResolverProvider>().AsSelf();
             builder.Register<GameManager>(Lifetime.Singleton).As<IGameManager>();
-            builder.Register<SceneManager>(Lifetime.Singleton).As<ISceneManager>();
+            builder.Register<SceneLoader>(Lifetime.Singleton).As<ISceneLoader>();
             builder.Register<LevelManager>(Lifetime.Singleton).As<ILevelManager>();
             
             builder.Register<PoolManager>(Lifetime.Singleton).As<IPoolManager>();

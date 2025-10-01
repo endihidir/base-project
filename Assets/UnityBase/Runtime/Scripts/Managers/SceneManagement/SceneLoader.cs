@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
+using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityBase.Managers.SO;
 using UnityBase.SceneManagement;
@@ -11,15 +12,16 @@ using UnityEngine.SceneManagement;
 
 namespace UnityBase.Manager
 {
-    public interface ISceneManager
+    public interface ISceneLoader
     {
         public event Action<SceneType> OnBeforeSceneLoad;
         public event Action<SceneType> OnSceneReady; 
         public event Action<SceneType> OnSceneReadyToPlay;
         public LoadingProgress LoadingProgress { get; }
+        public UniTask EnsureBootSceneAsync();
         public UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, float delayMultiplier = 10f);
     }
-    public class SceneManager : ISceneManager
+    public class SceneLoader : ISceneLoader
     { 
         private bool _sceneLoadInProgress;
         private readonly SceneGroupManagerSO _sceneGroupManagerSo;
@@ -30,15 +32,17 @@ namespace UnityBase.Manager
         public event Action<SceneType> OnBeforeSceneLoad;
         public event Action<SceneType> OnSceneReady;
         public event Action<SceneType> OnSceneReadyToPlay;
+
         public LoadingProgress LoadingProgress { get; }
         public void Initialize() { }
         public void Dispose() { }
         
-        public SceneManager(GameDataHolderSO gameDataHolderSo)
+        public SceneLoader(GameDataHolderSO gameDataHolderSo)
         {
             _sceneGroupManagerSo = gameDataHolderSo.sceneGroupManagerSo;
             
             _loadingMenuController = _sceneGroupManagerSo.LoadingMenuController;
+            
             _loadingMenuController.SetActive(false);
             
             _handleGroup = new AsyncOperationHandleGroup(10);
@@ -46,8 +50,20 @@ namespace UnityBase.Manager
             
             LoadingProgress = new LoadingProgress();
         }
+        
+        public async UniTask EnsureBootSceneAsync()
+        {
+            var current = SceneManager.GetActiveScene().name;
+            
+            var boot = BuildSettingsUtil.GetFirstBuildSceneName();
+            
+            if (!string.IsNullOrEmpty(boot) && current != boot)
+            {
+                await SceneManager.LoadSceneAsync(boot, LoadSceneMode.Single);
+            }
+        }
 
-        public async UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene, float delayMultiplier = 10f)
+        public async UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, float delayMultiplier = 10f)
         {
             if (_sceneLoadInProgress) return;
             
@@ -73,7 +89,7 @@ namespace UnityBase.Manager
                 
                 if (sceneData.reference.State == SceneReferenceState.Regular)
                 {
-                    var operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneData.reference.Path, LoadSceneMode.Additive);
+                    var operation = SceneManager.LoadSceneAsync(sceneData.reference.Path, LoadSceneMode.Additive);
                     
                     _operationGroup.Operations.Add(operation);
                 }
@@ -87,7 +103,11 @@ namespace UnityBase.Manager
 
             while (!_operationGroup.IsDone || !_handleGroup.IsDone)
             {
-                LoadingProgress?.Report((_operationGroup.Progress + _handleGroup.Progress) / 1f);
+                if (useLoadingScene)
+                {
+                    var realProgress = (_operationGroup.Progress + _handleGroup.Progress) / 1f;
+                    LoadingProgress?.Report(realProgress <= 0f ? 1f : realProgress);
+                }
                 
                 await UniTask.WaitForSeconds(0.1f * delayMultiplier);
             }
@@ -123,7 +143,7 @@ namespace UnityBase.Manager
                 {
                     if(scene == null) continue;
 
-                    await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene);
+                    await SceneManager.UnloadSceneAsync(scene);
                 }
 
                 _operationGroup.Operations.Clear();
@@ -135,13 +155,13 @@ namespace UnityBase.Manager
         private List<string> GetScenes()
         {
             var scenes = new List<string>();
-            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            var activeScene = SceneManager.GetActiveScene().name;
 
-            int sceneCount = UnityEngine.SceneManagement.SceneManager.sceneCount;
+            int sceneCount = SceneManager.sceneCount;
 
             for (var i = sceneCount - 1; i > 0; i--) 
             {
-                var sceneAt = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+                var sceneAt = SceneManager.GetSceneAt(i);
                 if (!sceneAt.isLoaded) continue;
                 
                 var sceneName = sceneAt.name;

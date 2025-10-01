@@ -1,10 +1,10 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityBase.BaseLifetimeScope;
+using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using VContainer;
-using VContainer.Unity;
 
 namespace UnityBase.Manager
 {
@@ -18,7 +18,7 @@ namespace UnityBase.Manager
     {
         private CanvasGroup _splashScreen;
         
-        private readonly ISceneManager _sceneManager;
+        private readonly ISceneLoader _sceneLoader;
 
         private bool _passSplashScreen;
         
@@ -26,11 +26,11 @@ namespace UnityBase.Manager
         
         public IObjectResolver ObjectResolver { get; }
 
-        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneManager sceneManager)
+        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneLoader sceneLoader)
         {
             var gameManagerData = gameDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
-            _sceneManager = sceneManager;
+            _sceneLoader = sceneLoader;
             _passSplashScreen = gameManagerData.passSplashScreen;
             
             Application.targetFrameRate = gameManagerData.targetFrameRate;
@@ -45,8 +45,10 @@ namespace UnityBase.Manager
         private async UniTask LoadGame()
         {
             if (!_passSplashScreen) await StartSplashScreen();
+
+            await _sceneLoader.EnsureBootSceneAsync();
             
-            await _sceneManager.LoadSceneAsync(SceneType.MainMenu);
+            await _sceneLoader.LoadSceneAsync(SceneType.MainMenu);
         }
 
         private async UniTask StartSplashScreen()

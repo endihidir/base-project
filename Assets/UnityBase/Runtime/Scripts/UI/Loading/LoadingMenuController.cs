@@ -8,7 +8,7 @@ using VContainer;
 
 public class LoadingMenuController : MonoBehaviour, ILoadingMenuController
 {
-    [Inject] private readonly ISceneManager _sceneManager;
+    [Inject] private readonly ISceneLoader _sceneLoader;
 
     [SerializeField] private CanvasGroup _loadingCanvasGroup;
     
@@ -20,8 +20,8 @@ public class LoadingMenuController : MonoBehaviour, ILoadingMenuController
     
     private float _targetProgress;
     
-    protected void OnEnable() => _sceneManager.LoadingProgress.Progressed += OnProgress;
-    protected void OnDisable() => _sceneManager.LoadingProgress.Progressed -= OnProgress;
+    protected void OnEnable() => _sceneLoader.LoadingProgress.Progressed += OnProgress;
+    protected void OnDisable() => _sceneLoader.LoadingProgress.Progressed -= OnProgress;
     private void OnProgress(float val) => _targetProgress = val;
     private void Update()
     {

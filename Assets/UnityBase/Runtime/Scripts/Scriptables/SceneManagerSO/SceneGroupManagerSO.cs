@@ -16,6 +16,7 @@ namespace UnityBase.Managers.SO
         {
             _loadingMenuController = FindObjectOfType<LoadingMenuController>();
         }
+        
         public List<SceneData> GetSceneData(SceneType sceneType)
         {
             var scene = _sceneAssets.FirstOrDefault(x => x.sceneType == sceneType);
@@ -45,6 +46,7 @@ namespace UnityBase.Managers.SO
 
 public enum SceneType
 {
-    MainMenu,
-    Gameplay
+    App = 0,
+    MainMenu = 1,
+    Gameplay = 2
 }
