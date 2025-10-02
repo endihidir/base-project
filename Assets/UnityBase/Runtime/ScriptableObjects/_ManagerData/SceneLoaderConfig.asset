@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: SceneLoaderConfig
   m_EditorClassIdentifier: 
   _sceneAssets:
-  - {fileID: 11400000, guid: 07e68e6d56d763c48a28369d93178f43, type: 2}
   - {fileID: 11400000, guid: f6bb9c272e232b944a4ad6f29746521f, type: 2}
   - {fileID: 11400000, guid: 4e8650d98eb73d1459a49a688db9703e, type: 2}
   _loadingMenuController: {fileID: 0}

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityBase.UI.Dynamic
 {
-    public class CoinViewUI : DynamicUI
+    public class CoinViewUI : DynamicMonoView
     {
         [SerializeField] private TextMeshProUGUI _coinTxt;
         [SerializeField] private Transform _coinIconT;

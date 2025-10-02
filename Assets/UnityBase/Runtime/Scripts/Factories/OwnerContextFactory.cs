@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace UnityBase.Runtime.Factories
 {
@@ -21,15 +22,16 @@ namespace UnityBase.Runtime.Factories
         TAct ResolveAction<TAct>() where TAct : class, IAction;
         TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter;
         bool TryGetPresenter<TPresenter>(out TPresenter presenter) where TPresenter : class, IPresenter;
+        void UpdatePresenters();
         void Dispose();
     }
 
-    public class OwnerContextFactory : IOwnerContextFactory
+    public class OwnerContextFactory : IOwnerContextFactory, ITickable
     {
         private readonly Dictionary<int, IOwnerContext> _contexts = new();
-        private readonly IAmbientResolverProvider _ambientResolverProvider;
         private readonly IModelFactory _modelFactory;
         private readonly IActionFactory _actionFactory;
+        private readonly IAmbientResolverProvider _ambientResolverProvider;
 
         public OwnerContextFactory(IAmbientResolverProvider ambientResolverProvider, IModelFactory modelFactory, IActionFactory actionFactory)
         {
@@ -102,6 +104,13 @@ namespace UnityBase.Runtime.Factories
             
             return _contexts.Remove(ownerID);
         }
+        public void Tick()
+        {
+            foreach (var ownerContext in _contexts.Values)
+            {
+                ownerContext.UpdatePresenters();
+            }
+        }
 
         private sealed class OwnerContext : IOwnerContext
         {
@@ -122,6 +131,7 @@ namespace UnityBase.Runtime.Factories
             public TAnim ResolveAnimation<TAnim>() where TAnim : class, IAnimation => _ownerContextGroup.ResolveAnimation<TAnim>();
             public TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter => _ownerContextGroup.ResolvePresenter<TPresenter>();
             public bool TryGetPresenter<TPresenter>(out TPresenter presenter) where TPresenter : class, IPresenter => _ownerContextGroup.TryGetPresenter(out presenter);
+            public void UpdatePresenters() => _ownerContextGroup.UpdatePresenters();
             public void Dispose() => _ownerContextGroup?.Dispose();
         }
     }

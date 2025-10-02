@@ -38,7 +38,7 @@ namespace UnityBase.BaseLifetimeScope
         {
             builder.Register<AmbientResolverProvider>(Lifetime.Singleton).As<IAmbientResolverProvider>().AsSelf();
             builder.Register<GameManager>(Lifetime.Singleton).As<IGameManager>();
-            builder.Register<SceneLoader>(Lifetime.Singleton).As<ISceneLoader>();
+            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService>();
             builder.Register<LevelManager>(Lifetime.Singleton).As<ILevelManager>();
             
             builder.Register<PoolManager>(Lifetime.Singleton).As<IPoolManager>();
@@ -52,7 +52,7 @@ namespace UnityBase.BaseLifetimeScope
             builder.Register<SaveManager>(Lifetime.Singleton).As<ISaveManager>();
             builder.Register<StateMachineManager>(Lifetime.Singleton).As<IStateMachineManager>();
             
-            builder.Register<OwnerContextFactory>(Lifetime.Singleton).As<IOwnerContextFactory>();
+            builder.Register<OwnerContextFactory>(Lifetime.Singleton).As<IOwnerContextFactory, ITickable>();
             builder.Register<ModelFactory>(Lifetime.Singleton).As<IModelFactory>();
             builder.Register<ActionFactory>(Lifetime.Singleton).As<IActionFactory>();
             

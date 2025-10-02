@@ -1,5 +1,6 @@
 ﻿using System;
 using Eflatun.SceneReference;
+using UnityEngine.SceneManagement;
 
 namespace UnityBase.Managers.SO
 {

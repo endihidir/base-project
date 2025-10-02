@@ -1,6 +1,5 @@
 using NaughtyAttributes;
 using Unity.VisualScripting;
-using UnityBase.Runtime.Factories;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,12 +8,11 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using VContainer;
 
 namespace UnityBase.UI.ButtonCore
 {
     [DisallowMultipleComponent]
-    public abstract class ButtonBase : MonoBehaviour
+    public abstract class ButtonBase : MonoView
     {
         [SerializeField, ReadOnly] private Button _button;
         [SerializeField, ReadOnly] private EventTrigger _eventTrigger;
@@ -36,15 +34,10 @@ namespace UnityBase.UI.ButtonCore
             }
         }
 #endif
-
-        [Inject]
-        public void Construct(IOwnerContextFactory ownerContextFactory)
+        protected override void Initialize()
         {
-            Initialize(ownerContextFactory);
-            
             CreateEventTriggers();
         }
-        protected abstract void Initialize(IOwnerContextFactory ownerContextFactory);
 
         private void OnEnable() => _button.onClick.AddListener(OnClickButton);
         private void OnDisable() => _button.onClick.RemoveListener(OnClickButton);
@@ -62,6 +55,7 @@ namespace UnityBase.UI.ButtonCore
                 _buttonAction?.OnClick();
             }
         }
+        
         private void CreateEventTriggers()
         {
             var isThereEventTrigger = _eventTrigger ?? TryGetComponent(out _eventTrigger);

@@ -18,7 +18,7 @@ namespace UnityBase.Manager
     
     public class GameplayManager : IGameplayManager
     {
-        private readonly ISceneLoader _sceneLoader;
+        private readonly ISceneLoadService _sceneLoadService;
         private readonly ITutorialProcessManager _tutorialProcessManager;
         
         private GameState _currentGameState = GameState.GameLoadingState;
@@ -28,9 +28,9 @@ namespace UnityBase.Manager
 
         private CancellationTokenSource _cancellationTokenSource = new ();
 
-        public GameplayManager(ISceneLoader sceneLoader, ITutorialProcessManager tutorialProcessManager)
+        public GameplayManager(ISceneLoadService sceneLoadService, ITutorialProcessManager tutorialProcessManager)
         {
-            _sceneLoader = sceneLoader;
+            _sceneLoadService = sceneLoadService;
             _tutorialProcessManager = tutorialProcessManager;
         }
 
@@ -38,12 +38,12 @@ namespace UnityBase.Manager
 
         public void Initialize()
         {
-            _sceneLoader.OnSceneReadyToPlay += OnSceneLoadComplete;
+            _sceneLoadService.OnScenesReady += OnSceneLoadComplete;
         }
 
-        private void OnSceneLoadComplete(SceneType sceneType)
+        private void OnSceneLoadComplete(string sceneName)
         {
-            if (sceneType == SceneType.Gameplay)
+            if (sceneName.Equals("Gameplay"))
             {
                 InitializeGameState();
             }
@@ -51,7 +51,7 @@ namespace UnityBase.Manager
 
         private void Dispose()
         {
-            _sceneLoader.OnSceneReadyToPlay -= OnSceneLoadComplete;
+            _sceneLoadService.OnScenesReady -= OnSceneLoadComplete;
             
             DisposeToken();
             

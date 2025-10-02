@@ -4,22 +4,22 @@ using UnityEngine;
 
 namespace UnityBase.Managers.SO
 {
-    [CreateAssetMenu(menuName = "Game/ManagerData/SceneManagerData")]
-    public class SceneGroupManagerSO : ScriptableObject
+    [CreateAssetMenu(menuName = "Game/ManagerData/SceneLoaderConfig")]
+    public class SceneLoaderSO : ScriptableObject
     {
         [SerializeField] private List<SceneAssetSO> _sceneAssets;
 
         [SerializeField] private LoadingMenuController _loadingMenuController;
-
+        
         public LoadingMenuController LoadingMenuController => _loadingMenuController;
         public void Initialize()
         {
             _loadingMenuController = FindObjectOfType<LoadingMenuController>();
         }
         
-        public List<SceneData> GetSceneData(SceneType sceneType)
+        public List<SceneData> GetSceneData(string sceneName)
         {
-            var scene = _sceneAssets.FirstOrDefault(x => x.sceneType == sceneType);
+            var scene = _sceneAssets.FirstOrDefault(x => x.sceneName == sceneName);
 
             var sceneGroup = new List<SceneData>();
             
@@ -42,11 +42,4 @@ namespace UnityBase.Managers.SO
 
     }
     
-}
-
-public enum SceneType
-{
-    App = 0,
-    MainMenu = 1,
-    Gameplay = 2
 }

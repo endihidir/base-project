@@ -9,7 +9,7 @@ namespace UnityBase.GameDataHolder
     {
         [Header("Manager SO")]
         public GameManagerSO gameManagerSo;
-        public SceneGroupManagerSO sceneGroupManagerSo;
+        [FormerlySerializedAs("sceneGroupManagerSo")] public SceneLoaderSO sceneLoaderSo;
         public LevelManagerSO levelManagerSo;
         public CinemachineManagerSO cinemachineManagerSo;
         public PoolManagerSO poolManagerSo;
@@ -21,7 +21,7 @@ namespace UnityBase.GameDataHolder
         public void Initialize()
         {
             gameManagerSo.Initialize();
-            sceneGroupManagerSo.Initialize();
+            sceneLoaderSo.Initialize();
             levelManagerSo.Initialize();
             cinemachineManagerSo.Initialize();
             poolManagerSo.Initialize();

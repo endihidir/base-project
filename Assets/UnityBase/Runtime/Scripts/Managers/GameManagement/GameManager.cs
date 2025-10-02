@@ -1,10 +1,8 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityBase.Extensions;
 using UnityBase.GameDataHolder;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using VContainer;
+using VContainer.Unity;
 
 namespace UnityBase.Manager
 {
@@ -18,19 +16,17 @@ namespace UnityBase.Manager
     {
         private CanvasGroup _splashScreen;
         
-        private readonly ISceneLoader _sceneLoader;
+        private readonly ISceneLoadService _sceneLoadService;
 
         private bool _passSplashScreen;
         
         private Tween _splashTween;
-        
-        public IObjectResolver ObjectResolver { get; }
 
-        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneLoader sceneLoader)
+        public GameManager(GameDataHolderSO gameDataHolderSo, ISceneLoadService sceneLoadService)
         {
             var gameManagerData = gameDataHolderSo.gameManagerSo;
             _splashScreen = gameManagerData.splashScreen;
-            _sceneLoader = sceneLoader;
+            _sceneLoadService = sceneLoadService;
             _passSplashScreen = gameManagerData.passSplashScreen;
             
             Application.targetFrameRate = gameManagerData.targetFrameRate;
@@ -45,10 +41,14 @@ namespace UnityBase.Manager
         private async UniTask LoadGame()
         {
             if (!_passSplashScreen) await StartSplashScreen();
-
-            await _sceneLoader.EnsureBootSceneAsync();
             
-            await _sceneLoader.LoadSceneAsync(SceneType.MainMenu);
+            var scopes = Object.FindObjectsOfType<LifetimeScope>();
+            
+            if (!_sceneLoadService.IsInStartScene && scopes.Length < 2) return;
+            
+            await _sceneLoadService.EnsureBootSceneAsync();
+            
+            await _sceneLoadService.LoadSceneAsync("MainMenu");
         }
 
         private async UniTask StartSplashScreen()

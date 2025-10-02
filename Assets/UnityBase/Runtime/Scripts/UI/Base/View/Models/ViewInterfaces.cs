@@ -1,33 +1,40 @@
 ﻿
+using System;
+
 namespace UnityBase.Runtime.Factories
 {
-    public interface IModel
+    public interface IModel : IDisposable
     {
-        public void Dispose();
+       
     }
 
-    public interface IView
+    public interface IView : IDisposable
     {
-        public void Dispose();
+      
     }
     
-    public interface IAnimation
+    public interface IAnimation : IDisposable
     {
-        public void Dispose();
+      
     }
     
-    public interface IAction
+    public interface IAction : IDisposable
     {
-        public void Dispose();
+       
     }
     
-    public interface IPresenter
+    public interface IPresenter : IDisposable
     {
-        public void Dispose();
+       
     }
 
     public interface ISaveData
     {
         public void Save();
+    }
+
+    public interface IUpdater
+    {
+        public void Update();
     }
 }

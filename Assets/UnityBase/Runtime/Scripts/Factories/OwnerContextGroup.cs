@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityBase.Extensions;
-using VContainer;
 
 namespace UnityBase.Runtime.Factories
 {
@@ -11,6 +10,7 @@ namespace UnityBase.Runtime.Factories
         TAnim ResolveAnimation<TAnim>() where TAnim : class, IAnimation;
         TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter;
         bool TryGetPresenter<TPresenter>(out TPresenter value) where TPresenter : class, IPresenter;
+        void UpdatePresenters();
         void Dispose();
     }
 
@@ -27,7 +27,6 @@ namespace UnityBase.Runtime.Factories
         public TView ResolveView<TView>() where TView : class, IView => GetOrCreate<IView, TView>(_views);
         public TAnim ResolveAnimation<TAnim>() where TAnim : class, IAnimation => GetOrCreate<IAnimation, TAnim>(_animations);
         public TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter => GetOrCreate<IPresenter, TPresenter>(_presenters);
-        
 
         private TImpl GetOrCreate<TIFace, TImpl>(IDictionary<Type, TIFace> map) where TIFace : class where TImpl : class, TIFace
         {
@@ -59,6 +58,16 @@ namespace UnityBase.Runtime.Factories
         }
         
         public bool TryGetPresenter<TPresenter>(out TPresenter value) where TPresenter : class, IPresenter => TryGet(_presenters, out value);
+        public void UpdatePresenters()
+        {
+            foreach (var presentersValue in _presenters.Values)
+            {
+                if (presentersValue is IUpdater updater)
+                {
+                    updater.Update();
+                }
+            }
+        }
 
         private static bool TryGet<TIFace, TImpl>(IDictionary<Type, TIFace> map, out TImpl typed) where TIFace : class where TImpl : class, TIFace
         {

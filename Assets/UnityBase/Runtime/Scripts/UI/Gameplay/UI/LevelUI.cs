@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityBase.UI.Dynamic
 {
-    public class LevelUI : DynamicUI
+    public class LevelUI : DynamicMonoView
     {
         [SerializeField] private TextMeshProUGUI _levelTxt;
 

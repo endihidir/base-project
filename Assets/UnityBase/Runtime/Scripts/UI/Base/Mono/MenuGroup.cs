@@ -16,7 +16,7 @@ namespace UnityBase.UI.Menu
         private Tween _canvasFadeTween;
         
         private CanvasGroup _canvasGroup;
-        private IDynamicUI[] _dynamicViews;
+        private IDynamicView[] _dynamicViews;
         
         private EventBinding<GameStateData> _gameStateStartBinding = new();
         private EventBinding<GameStateData> _gameStateCompleteBinding = new();
@@ -26,7 +26,7 @@ namespace UnityBase.UI.Menu
         protected void Awake()
         {
             _canvasGroup = GetComponent<CanvasGroup>();
-            _dynamicViews = GetComponentsInChildren<IDynamicUI>(true);
+            _dynamicViews = GetComponentsInChildren<IDynamicView>(true);
             CloseMenuGroupInstantly();
         }
 
