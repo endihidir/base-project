@@ -253,9 +253,9 @@ MonoBehaviour:
   _allowDiagonalCornerCutting: 0
   _width: 9
   _height: 11
-  _screenSidePaddingRatio: 2.25
+  _screenSidePaddingRatio: 3
   _cellSpacingRatio: 0
-  _originOffset: {x: 0, y: 16.65, z: 0}
+  _originOffset: {x: 0, y: 16, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 0.98878634, g: 1, b: 0, a: 1}
   _meshFilter: {fileID: 181437503}
@@ -342,13 +342,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _useJobSystem: 0
   _meshFilter: {fileID: 181437503}
-  _gridWidth: 10
-  _gridHeight: 5
-  _gridDepth: 3
+  _gridWidth: 5
+  _gridHeight: 3
+  _gridDepth: 1
   _cellSize: {x: 7, y: 7, z: 7}
-  _cellOffset: {x: 2, y: 2, z: 0}
+  _cellOffset: {x: 4, y: 4, z: 0}
   _gridOffset: {x: 0, y: 0, z: 0}
-  _activeDepth: 1
+  _activeDepth: 0
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _direction2Ds: 010000000200000003000000040000000500000008000000090000000600000007000000
@@ -599,12 +599,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _useJobSystem: 1
-  _allowDiagonalCornerCutting: 1
+  _allowDiagonalCornerCutting: 0
   _width: 9
   _height: 11
-  _screenSidePaddingRatio: 0
+  _screenSidePaddingRatio: 3
   _cellSpacingRatio: 0
-  _originOffset: {x: 0, y: 16.65, z: 0}
+  _originOffset: {x: 0, y: 16, z: 0}
   _drawGizmos: 1
   _gizmosColor: {r: 1, g: 0.96566105, b: 0, a: 1}
   _meshFilter: {fileID: 181437503}

@@ -176,48 +176,57 @@ namespace UnityBase.GridSystem
         public virtual Vector3 GridToWorld(Vector3Int pos)
         {
             if (!IsInRange(pos)) return Vector3.zero;
-            
+
             var screenWidth = GetScreenWidth();
-            var gridOffset = CalculateGridOffset(screenWidth);
-            var totalGridWidth = (Width * _cellSize) + ((Width - 1) * gridOffset);
-            
-            var xOffset = (screenWidth - totalGridWidth) / 2 + pos.x * (_cellSize + gridOffset);
-            var yOffset = pos.y * (_cellSize + gridOffset);
-    
-            var position = new Vector3(GetLeftX() + xOffset + (_cellSize / 2), GetTopY() - yOffset - (_cellSize / 2), 0);
-            
-            return position;
+            var screenHeight = GetScreenHeight();
+
+            var gridOffsetX = CalculateGridOffset(screenWidth);
+            var gridOffsetY = screenHeight * (_cellSpacingRatio / 100f);
+
+            var totalGridWidth = (Width * _cellSize) + ((Width - 1) * gridOffsetX);
+            var leftStartX = GetLeftX() + ((screenWidth - totalGridWidth) * 0.5f);
+
+            var x = leftStartX + (pos.x * (_cellSize + gridOffsetX)) + (_cellSize * 0.5f);
+            var y = GetTopY()   - (pos.y * (_cellSize + gridOffsetY)) - (_cellSize * 0.5f);
+
+            return new Vector3(x, y, 0f);
         }
         
         public virtual Vector3Int WorldToGrid(Vector3 worldPos, bool clamp = true)
         {
             var position = new Vector3Int(-1, -1);
             
-            var absoluteXPos = worldPos.x - GetOriginPos(Vector3.up).x;
-            var absoluteYPos = GetOriginPos(Vector3.up).y - worldPos.y;
-
             var screenWidth = GetScreenWidth();
-            var borderOffset = CalculateBorderOffset(screenWidth);
-            var gridOffset = CalculateGridOffset(screenWidth);
-            var divider = _cellSize + gridOffset;
+            var screenHeight = GetScreenHeight();
 
-            var xRaw = (absoluteXPos - (borderOffset / 2)) / divider;
-            var yRaw = (absoluteYPos) / divider;
+            var gridOffsetX = CalculateGridOffset(screenWidth);
+            var gridOffsetY = screenHeight * (_cellSpacingRatio / 100f);
+
+            var totalGridWidth = (Width * _cellSize) + ((Width - 1) * gridOffsetX);
+            var leftStartX = GetLeftX() + ((screenWidth - totalGridWidth) * 0.5f);
             
-            if (IsInHorizontalPaddingArea(absoluteXPos, borderOffset, gridOffset) || IsInVerticalPaddingArea(absoluteYPos, gridOffset))
+            var absXFromGrid = worldPos.x - leftStartX;
+            var absYFromTop  = GetTopY() - worldPos.y;
+
+            var dividerX = _cellSize + gridOffsetX;
+            var dividerY = _cellSize + gridOffsetY;
+            
+            if ((absXFromGrid % dividerX) > _cellSize || (absYFromTop % dividerY) > _cellSize)
             {
                 return new Vector3Int(-1, -1);
             }
-            
-            position.x = Mathf.FloorToInt(xRaw);
-            position.y = Mathf.FloorToInt(yRaw);
-            
+
+            var gx = Mathf.FloorToInt(absXFromGrid / dividerX);
+            var gy = Mathf.FloorToInt(absYFromTop / dividerY);
+
             if (clamp)
             {
-                position.x = Mathf.Clamp(position.x, 0, Width - 1);
-                position.y = Mathf.Clamp(position.y, 0, Height - 1);
+                gx = Mathf.Clamp(gx, 0, Width - 1);
+                gy = Mathf.Clamp(gy, 0, Height - 1);
             }
 
+            position.x = gx;
+            position.y = gy;
             return position;
         }
 
