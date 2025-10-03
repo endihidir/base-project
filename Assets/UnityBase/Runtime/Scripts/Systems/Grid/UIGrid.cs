@@ -518,17 +518,5 @@ namespace UnityBase.GridSystem
         
         protected float CalculateBorderOffset(float screenWidth) => screenWidth * (_screenSidePaddingRatio / 100f);
         protected float CalculateGridOffset(float screenWidth) => screenWidth * (_cellSpacingRatio / 100f);
-        protected bool IsInHorizontalPaddingArea(float absoluteXPos, float borderOffset, float gridOffset)
-        {
-            var adjustedXPos = absoluteXPos - (borderOffset / 2);
-            var totalCellWidth = _cellSize + gridOffset;
-            return adjustedXPos % totalCellWidth > _cellSize;
-        }
-
-        protected bool IsInVerticalPaddingArea(float absoluteYPos, float gridOffset)
-        {
-            var totalCellHeight = _cellSize + gridOffset;
-            return absoluteYPos % totalCellHeight > _cellSize;
-        }
     }
 }
